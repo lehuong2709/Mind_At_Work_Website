@@ -6,13 +6,13 @@ import plotly.express as px
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
-import utils
+import scripts.utils as utils
 from pathlib import Path
-from constants import *
+from scripts.constants import *
 import os
 
 
-boundary_data_path = os.path.abspath('../data/usa_state_boundaries.json')
+boundary_data_path = './data/usa_state_boundaries.json'
 
 
 def plot_state_map(state_name='Georgia'):

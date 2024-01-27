@@ -11,12 +11,13 @@ import re
 import math
 import os
 from pathlib import Path
-from constants import *
+from scripts.constants import *
 
 
-state_abbreviations_path = os.path.abspath('../data/usa_state_abbreviations.csv')
-pharmacies_data_path = os.path.abspath('../data/usa_pharmacies.csv')
-census_data_path = os.path.abspath('../data/usa_census_data_by_state/')
+state_abbreviations_path = './data/usa_state_abbreviations.csv'
+pharmacies_data_path = './data/usa_pharmacies.csv'
+census_data_path = './data/usa_census_data_by_state/'
+geographic_data_path = './data/usa_geographic_data.csv'
 
 
 def get_state_abbreviation(state_name='Georgia'):
@@ -277,7 +278,7 @@ def get_dataframe(current_state, current_county=None):
         current_tr_df = dataframe
 
     # Load raw geographic data
-    gaz_tracts_df = pd.read_csv("../data/usa_geographic_data.csv", encoding=default_encoding)
+    gaz_tracts_df = pd.read_csv(geographic_data_path, encoding=default_encoding)
     gaz_tracts_df = gaz_tracts_df.drop(columns="Column1") # drops an empty column from bad csv formatting
 
     # Append latitude and longitudes
