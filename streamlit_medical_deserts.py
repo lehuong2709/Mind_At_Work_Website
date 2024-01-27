@@ -11,8 +11,8 @@ state_names = pd.read_csv(utils.state_abbreviations_path, index_col=0).index.to_
 
 st.set_page_config(layout="wide")
 
-st.sidebar.write('A medical desert is defined as a census tract that is more than $n$ miles away from the'
-                 'nearest pharmacy with $p$ percent of the population below the poverty level.')
+st.sidebar.write('A medical desert is defined as a census tract that is more than $n$ miles away from the '
+                 'nearest CVS/Walgreens/Walmart pharmacy with $p$ percent of the population below the poverty level.')
 st.sidebar.text_input('Enter the state name:', key='state_name', value='Georgia')
 state_name = st.session_state['state_name']
 if state_name not in state_names:
