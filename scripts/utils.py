@@ -266,8 +266,9 @@ def load_zipcode_data(income_current_tr_df, county_state_string, load_cached):
 
 
 def get_dataframe(current_state=None, current_county=None):
-    if not current_county.endswith('County') and current_county is not None:
-        current_county += ' County'
+    if current_county is not None:
+        if not current_county.endswith('County'):
+            current_county += ' County'
 
     default_encoding = "ISO-8859-1"
 
