@@ -265,13 +265,17 @@ def load_zipcode_data(income_current_tr_df, county_state_string, load_cached):
     return (zipcode_map, zipcode_list)
 
 
-def get_dataframe(current_state, current_county=None):
+def get_dataframe(current_state=None, current_county=None):
+    if not current_county.endswith('County') and current_county is not None:
+        current_county += ' County'
+
     default_encoding = "ISO-8859-1"
 
     # Load raw data
     dataframe = pd.read_csv(Path(census_data_path + current_state + '.csv'), encoding='cp1252')
 
     # Filter for specified County
+    # current_county = current_county.upper()
     if current_county is not None:
         current_tr_df = df_for_county(current_county, dataframe)
     else:
