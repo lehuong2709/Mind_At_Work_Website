@@ -14,9 +14,9 @@ from pathlib import Path
 from constants import *
 
 
-state_abbreviations_path = Path('../data/usa_state_abbreviations.csv')
-pharmacies_data_path = Path('../data/usa_pharmacies.csv')
-census_data_path = '../data/usa_census_data_by_state/'
+state_abbreviations_path = os.path.abspath('../data/usa_state_abbreviations.csv')
+pharmacies_data_path = os.path.abspath('../data/usa_pharmacies.csv')
+census_data_path = os.path.abspath('../data/usa_census_data_by_state/')
 
 
 def get_state_abbreviation(state_name='Georgia'):
