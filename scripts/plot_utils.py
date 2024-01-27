@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 import utils
 from pathlib import Path
 from constants import *
+import os
 
 
-boundary_data_path = Path('../data/usa_state_boundaries.json')
+boundary_data_path = os.path.abspath('../data/usa_state_boundaries.json')
 
 
 def plot_state_map(state_name='Georgia'):
