@@ -7,7 +7,6 @@ bleach
 blinker==1.4
 boltons
 boto==2.49.0
-Bottlenec
 cvxgraphalgs==0.1.2
 cvxpy
 geopandas==0.14.1
