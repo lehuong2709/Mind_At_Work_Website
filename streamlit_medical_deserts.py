@@ -9,7 +9,7 @@ import scripts.constants as constants
 
 state_names = pd.read_csv(utils.state_abbreviations_path, index_col=0).index.to_list()
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
 st.sidebar.write('A medical desert is defined as a census tract that is more than $n$ miles away from the '
                  'nearest CVS/Walgreens/Walmart pharmacy with $p$ percent of the population below the poverty level.')
