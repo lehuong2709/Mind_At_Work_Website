@@ -156,7 +156,7 @@ with right_column:
 
         return medical_deserts, medical_deserts_by_race
 
-
+    plot_utils.plot_state_map(state_name)
     races = ['White', 'Black', 'Hispanic', 'Asian', 'AIAN', 'NHPI', 'Other']
     n_miles = st.session_state['n_miles']
     poverty_threshold = st.session_state['pov_threshold']
@@ -169,8 +169,7 @@ with right_column:
                         marker=markers[races.index(race)], s=7, label='Majority ' + race,
                         color=colors[races.index(race)])
 
-    plt.legend()
-    plot_utils.plot_state_map(state_name)
+    plt.legend(loc='best')
     plt.axis('off')
     plt.title('Medical deserts in ' + state_name + ', USA \n colored by racial majority')
 
