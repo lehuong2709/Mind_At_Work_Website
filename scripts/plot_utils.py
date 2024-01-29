@@ -69,7 +69,7 @@ def plot_pharmacies(state_name='Georgia', which='all', county_name=None, loc='be
     if which == 'all':
         k, pharmacy_coordinates = utils.get_pharmacy_coordinates(state_name=state_name, which='all', county_name=county_name)
 
-        plt.scatter(*zip(*pharmacy_coordinates), color='black', marker='x', s=5, label='Pharmacy')
+        plt.scatter(*zip(*pharmacy_coordinates), marker='x', s=5, label='Pharmacy')
         ax = plt.gca()
 
         plt.xlabel('Longitude')
@@ -78,9 +78,10 @@ def plot_pharmacies(state_name='Georgia', which='all', county_name=None, loc='be
     elif which == 'top3':
         k, cvs_pharmacy_coordinates, walgreens_pharmacies_coordinates, walmart_pharmacies_coordinates =(
             utils.get_pharmacy_coordinates(state_name=state_name, which='top3', county_name=county_name))
-        plt.scatter(*zip(*cvs_pharmacy_coordinates), color='red', marker='x', s=5, label='CVS')
-        plt.scatter(*zip(*walgreens_pharmacies_coordinates), color='green', marker='x', s=5, label='Walgreens')
-        plt.scatter(*zip(*walmart_pharmacies_coordinates), color='orange', marker='x', s=5, label='Walmart')
+        plt.scatter(*zip(*walmart_pharmacies_coordinates), color='orange', marker='x', s=7, label='Walmart', alpha=0.9)
+        plt.scatter(*zip(*cvs_pharmacy_coordinates), color='red', marker='x', s=7, label='CVS', alpha=0.85)
+        plt.scatter(*zip(*walgreens_pharmacies_coordinates), color='green', marker='x', s=7, label='Walgreens', alpha=0.8)
+
         ax = plt.gca()
 
         # plt.legend(['CVS', 'Walgreens', 'Walmart'], loc=loc)

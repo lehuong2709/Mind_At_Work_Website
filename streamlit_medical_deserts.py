@@ -9,12 +9,12 @@ import scripts.constants as constants
 
 state_names = pd.read_csv(utils.state_abbreviations_path, index_col=0).index.to_list()
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
-st.sidebar.write('A medical desert is defined as a census tract that is more than $n$ miles away from the'
-                 'nearest pharmacy with $p$ percent of the population below the poverty level.')
-st.sidebar.text_input('Enter the state name:', key='state_name', value='Georgia')
-state_name = st.session_state['state_name']
+st.sidebar.write('A medical desert is defined as a US Census tract that is more than $n$ miles away from the '
+                 'nearest CVS/Walgreens/Walmart pharmacy with $p$ percent of the population below the poverty level.')
+state_name = st.sidebar.text_input('Enter US state name:', key='state_name', value='Georgia')
+state_name.capitalize()
 if state_name not in state_names:
     st.sidebar.write(":red[State name not found]")
     st.stop()
@@ -22,10 +22,13 @@ if state_name not in state_names:
 st.title('Medical deserts in :orange[' + state_name + '], United States')
 
 st.sidebar.slider("Enter $n$, the number of miles", key="n_miles", min_value=1, max_value=10, value=5, step=1)
-st.sidebar.slider('Enter $p$, the percentage threshold for population below poverty level', key="pov_threshold", min_value=0, max_value=100, value=30, step=1)
+st.sidebar.slider('Enter $p$, the percentage threshold for population below poverty level', key="pov_threshold",
+                  min_value=0, max_value=100, value=30, step=1)
 
 st.sidebar.write(':orange[Currently unoptimized and may take a few seconds to load. '
-                 'Preliminary results only.]')
+                 'Preliminary and indicative results only.]')
+st.sidebar.write('Data for pharmacies is from 2005-10 and taken from ' + r'https://data.world/dhs/pharmacies')
+st.sidebar.write('Data for Census tracts is from 2020 and taken from https://data.census.gov/')
 
 st.sidebar.write('''This model makes the following assumptions:
 - Population in each Census tract is assumed to be at the center of the tract.
@@ -34,6 +37,15 @@ st.sidebar.write('''This model makes the following assumptions:
 - All distances are straight-line distances.
 ''')
 
+st.sidebar.markdown('''
+Based on _Which $L_p$ norm is the fairest? Approximations for fair facility location across all \"$p$\"_ by Swati Gupta, Jai Moondra, Mohit Singh.
+Created by :blue[Jai Moondra], :blue[Swati Gupta], and :blue[Mohit Singh].
+Part of the code was written by :blue[Michael Wang] and :blue[Hassan Mortagy].
+''')
+
+st.sidebar.markdown('''
+This work is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+''')
 
 left_column, middle_column, right_column = st.columns(3)
 fig, ax = plt.subplots()
@@ -48,8 +60,8 @@ with left_column:
         st.pyplot(fig, dpi=600, transparent=True, bbox_inches='tight', clear_figure=True)
         return
 
-    plot_top3_pharmacies(state_name)
 
+    plot_top3_pharmacies(state_name)
 
 with middle_column:
     @st.cache_data
@@ -77,10 +89,13 @@ with middle_column:
         plot_utils.plot_state_map(state_name)
 
         for race in races:
+            markers = ['H', 's', 'X', 'v', 'd', 'P', '^']
+            colors = constants.color_cycle[0:5] + constants.color_cycle[-2:]
             if len(all_tracts[race]) > 0:
                 longitudes_group = [df.iloc[j].Longitude for j in all_tracts[race]]
                 latitudes_group = [df.iloc[j].Latitude for j in all_tracts[race]]
-                plt.scatter(longitudes_group, latitudes_group, marker='o', s=5, label='Majority ' + race)
+                plt.scatter(longitudes_group, latitudes_group, s=7, label='Majority ' + race,
+                            marker=markers[races.index(race)], color=colors[races.index(race)])
 
         plt.legend(loc='best')
         plt.axis('off')
@@ -88,8 +103,8 @@ with middle_column:
         st.pyplot(fig, dpi=600, transparent=True, bbox_inches='tight', clear_figure=True)
         return n, all_tracts
 
-    n, all_tracts = plot_census_tracts(state_name)
 
+    n, all_tracts = plot_census_tracts(state_name)
 
 with right_column:
     def get_medical_deserts(state_name, n_miles, poverty_threshold=30):
@@ -145,9 +160,12 @@ with right_column:
     poverty_threshold = st.session_state['pov_threshold']
     medical_deserts, medical_deserts_by_race = get_medical_deserts(state_name, n_miles, poverty_threshold)
     for race in races:
+        markers = ['H', 's', 'X', 'v', 'd', 'P', '^']
+        colors = constants.color_cycle[0:5] + constants.color_cycle[-2:]
         if len(medical_deserts_by_race[race]) > 0:
             plt.scatter([x[0] for x in medical_deserts_by_race[race]], [x[1] for x in medical_deserts_by_race[race]],
-                    marker='o', s=5, label='Majority ' + race)
+                        marker=markers[races.index(race)], s=7, label='Majority ' + race,
+                        color=colors[races.index(race)])
 
     plt.legend()
     plot_utils.plot_state_map(state_name)
@@ -156,7 +174,6 @@ with right_column:
 
     st.pyplot(fig, dpi=600, transparent=True, bbox_inches='tight', clear_figure=True)
 
-
 fractional_medical_desert_groups = {race: [] for race in races}
 fractional_census_tracts = {race: [] for race in races}
 
@@ -164,12 +181,13 @@ deserts = sum([len(medical_deserts_by_race[race]) for race in races])
 st.write('There are :red[' + str(deserts) + '] medical deserts in ' + state_name + ', USA.')
 if deserts != 0:
     for race in races:
-        fractional_medical_desert_groups[race] = len(medical_deserts_by_race[race])/deserts
-        fractional_census_tracts[race] = len(all_tracts[race])/n
-        percent_deserts = math.floor(100*fractional_medical_desert_groups[race])
-        percent_census_tracts = math.floor(100*fractional_census_tracts[race])
+        fractional_medical_desert_groups[race] = len(medical_deserts_by_race[race]) / deserts
+        fractional_census_tracts[race] = len(all_tracts[race]) / n
+        percent_deserts = math.floor(100 * fractional_medical_desert_groups[race])
+        percent_census_tracts = math.floor(100 * fractional_census_tracts[race])
         race = race[0].upper() + race[1:]
         if fractional_medical_desert_groups[race] - fractional_census_tracts[race] >= 0.10 and race != 'Other':
-            st.write(race + ' population may be disproportionately affected by medical deserts in ' + state_name + ', USA. ' +
-                     'About :red[' + str(percent_deserts) + '%] of medical deserts are majority ' + race + '. ' +
-                     'Only about :blue[' + str(percent_census_tracts) + '%] of Census tracts are majority ' + race + '.')
+            st.write(
+                race + ' population may be disproportionately affected by medical deserts in ' + state_name + ', USA. ' +
+                'About :red[' + str(percent_deserts) + '%] of medical deserts are majority ' + race + '. ' +
+                'Only about :blue[' + str(percent_census_tracts) + '%] of Census tracts are majority ' + race + '.')
