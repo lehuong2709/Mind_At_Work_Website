@@ -11,10 +11,12 @@ state_names = pd.read_csv(utils.state_abbreviations_path, index_col=0).index.to_
 
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
+
 st.sidebar.write('A medical desert is defined as a US Census tract that is more than $n$ miles away from the '
                  'nearest CVS/Walgreens/Walmart pharmacy with $p$ percent of the population below the poverty level.')
 state_name = st.sidebar.text_input('Enter US state name:', key='state_name', value='Georgia')
 state_name.capitalize()
+
 if state_name not in state_names:
     st.sidebar.write(":red[State name not found]")
     st.stop()
