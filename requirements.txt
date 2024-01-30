@@ -3,6 +3,7 @@ aiosqlite
 altair
 Babel
 beautifulsoup4
+bidict
 bleach
 blinker==1.4
 boltons

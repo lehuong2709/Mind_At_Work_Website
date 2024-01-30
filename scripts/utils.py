@@ -1,4 +1,3 @@
-# Imports
 """
 Author: Michael Wang, mzywang
 Author: Jai Moondra
@@ -6,7 +5,6 @@ Author: Jai Moondra
 from geopy.geocoders import Nominatim
 import numpy as np
 import pandas as pd
-# import warnings
 import re
 import math
 import os

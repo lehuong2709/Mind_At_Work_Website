@@ -1,14 +1,15 @@
+import bidict
+
 # Constants
 latitude_to_km = 111.32
 longitude_to_km = 92.18
 aspect_ratio = latitude_to_km/longitude_to_km
 miles_to_km = 1.602
 
-color_cycle = ["#0072B2", "#D53E00", "#249e24", "#E69F00", "#b66dff", "#999999", "#F0E442", "#924900", "#009292"]
-# color:          red,      blue,      green,     orange,    purple,    gray,      yellow,   brown,     teal
-# CB_color_cycle = ['#377eb8', '#e41a1c', '#f781bf', '#ff7f00', '#a65628', '#999999', '#dede00','#4daf4a', '#984ea3']
-#                   blue,     red,      pink,      orange,    brown,     gray,      yellow,   green,     purple
+color_cycle = ["#0072B2", "#D53E00", "#249e24", "#924900", "#b66dff", "#999999", "#F0E442", "#920000", "#009292"]
+# color:       blue,      red,      green,     brown,     purple,    gray,      yellow,    orange,    teal
 
+boundary_data_path = './data/usa_state_boundaries.json'
 
 
 state_data = {
@@ -66,6 +67,24 @@ state_data = {
     "Wisconsin": {"Postal Abbr.": "WI", "FIPS Code": "55"},
     "Wyoming": {"Postal Abbr.": "WY", "FIPS Code": "56"}
 }
+
+
+def get_state_abbreviation_and_fips_by_name(state_name):
+    """Get state abbreviation and FIPS code from state name."""
+    if state_name in state_data:
+        data = state_data[state_name]
+        return data["Postal Abbr."], data["FIPS Code"]
+    else:
+        return None, None
+
+
+def get_state_name_and_abbreviation_by_fips(fips_code):
+    """Get state name and abbreviation from state FIPS code."""
+    for state_name, data in state_data.items():
+        if data["FIPS Code"] == fips_code:
+            return state_name
+    return None
+
 
 races = ['White', 'Black', 'Hispanic', 'Asian', 'AIAN', 'NHPI', 'Other']
 

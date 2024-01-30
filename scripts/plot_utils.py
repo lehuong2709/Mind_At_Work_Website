@@ -70,7 +70,7 @@ def plot_pharmacies(state_name='Georgia', which='all', county_name=None, loc='be
         k, pharmacy_coordinates = utils.get_pharmacy_coordinates(state_name=state_name, which='all', county_name=county_name)
 
         plt.scatter(*zip(*pharmacy_coordinates), marker='x', s=5, label='Pharmacy')
-        ax = plt.gca()
+        # ax = plt.gca()
 
         plt.xlabel('Longitude')
         plt.ylabel('Latitude')
@@ -82,13 +82,13 @@ def plot_pharmacies(state_name='Georgia', which='all', county_name=None, loc='be
         plt.scatter(*zip(*cvs_pharmacy_coordinates), color='red', marker='x', s=7, label='CVS', alpha=0.85)
         plt.scatter(*zip(*walgreens_pharmacies_coordinates), color='green', marker='x', s=7, label='Walgreens', alpha=0.8)
 
-        ax = plt.gca()
 
         # plt.legend(['CVS', 'Walgreens', 'Walmart'], loc=loc)
         plt.legend(loc=loc)
-        plt.xlabel('Longitude')
-        plt.ylabel('Latitude')
-        ax.set_aspect(aspect_ratio)
+        # plt.xlabel('Longitude')
+        # plt.ylabel('Latitude')
+        # ax.set_aspect(aspect_ratio)
+        return
 
     else:
         raise ValueError('which must be either "all" or "top3"')
