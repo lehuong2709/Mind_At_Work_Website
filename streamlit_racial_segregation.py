@@ -233,7 +233,7 @@ with left_column:
         df['size'] = sizes
         return
 
-    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
     get_sizes(df)
@@ -248,7 +248,7 @@ with left_column:
 
         if len(df_race) > 0:
             plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-                linewidths=0.8, marker=marker, label=race)
+                linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title(tracts_by_racial_majority_title)
@@ -285,13 +285,13 @@ with middle_column:
     sizes = df_not_below_threshold['size'].values
     if len(df_not_below_threshold) > 0:
         plt.scatter(df_not_below_threshold['Longitude'], df_not_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-            linewidths=0.8, marker='$\circ$', label='Below ' + str(poverty_threshold) + '\%')
+            linewidths=1.0, marker='$\circ$', label='Below ' + str(poverty_threshold) + '\%')
     df_below_threshold = df[df['Below Poverty Threshold'] == True]
     color = constants.color_cycle[8]
     sizes = df_below_threshold['size'].values
     if len(df_below_threshold) > 0:
         plt.scatter(df_below_threshold['Longitude'], df_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-            linewidths=0.8, marker='$\diamond$', label='Above ' + str(poverty_threshold) + '\%')
+            linewidths=1.0, marker='$\diamond$', label='Above ' + str(poverty_threshold) + '\%')
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title(tracts_by_poverty_level_title)

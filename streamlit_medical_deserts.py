@@ -184,7 +184,7 @@ with middle_column:
         df['size'] = sizes
         return
 
-    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
     get_sizes(df)
@@ -197,7 +197,7 @@ with middle_column:
 
         if len(df_race) > 0:
             plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-                linewidths=0.8, marker=marker, label=race)
+                linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title('Census tracts in ' + state_name + ', \n colored by racial majority')
@@ -242,7 +242,7 @@ with right_column:
 
     df = get_medical_deserts(df, n_miles, poverty_threshold)
 
-    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
 
@@ -253,7 +253,7 @@ with right_column:
         if len(df_race) > 0:
             sizes = df_race['size'].values
             plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-                linewidths=0.8, marker=marker, label=race)
+                linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title('Medical deserts in ' + state_name + ', \n colored by racial majority')
