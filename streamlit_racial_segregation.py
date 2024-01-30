@@ -10,6 +10,8 @@ import requests
 import shapely
 import os
 import importlib
+import pylatex
+
 import scripts.utils as utils
 import scripts.plot_utils as plot_utils
 import scripts.constants as constants

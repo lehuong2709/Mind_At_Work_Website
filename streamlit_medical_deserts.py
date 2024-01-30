@@ -8,6 +8,7 @@ import scripts.plot_utils as plot_utils
 import scripts.constants as constants
 import seaborn as sns
 import importlib
+import pylatex
 
 importlib.reload(utils)
 importlib.reload(plot_utils)

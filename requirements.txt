@@ -24,6 +24,7 @@ numpy
 pandas
 Pillow==9.4.0
 plotly
+pylatex
 requests
 scipy==1.10.1
 seaborn
