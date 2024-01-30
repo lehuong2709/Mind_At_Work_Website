@@ -204,8 +204,10 @@ def get_census_tracts_by_poverty_levels(df, poverty_threshold):
 
 
 left_column, middle_column = st.columns(2)
-plt.rc('text', usetex=True)
-plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
+# plt.rc('text', usetex=True)
+# plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['cmss']
 
 with left_column:
     # st.write(boundary_longitudes)
@@ -233,7 +235,7 @@ with left_column:
         df['size'] = sizes
         return
 
-    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', 'P']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
     get_sizes(df)
@@ -285,13 +287,13 @@ with middle_column:
     sizes = df_not_below_threshold['size'].values
     if len(df_not_below_threshold) > 0:
         plt.scatter(df_not_below_threshold['Longitude'], df_not_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-            linewidths=1.0, marker='$\circ$', label='Below ' + str(poverty_threshold) + '\%')
+            linewidths=1.0, marker='$\circ$', label='Below ' + str(poverty_threshold) + '%')
     df_below_threshold = df[df['Below Poverty Threshold'] == True]
     color = constants.color_cycle[8]
     sizes = df_below_threshold['size'].values
     if len(df_below_threshold) > 0:
         plt.scatter(df_below_threshold['Longitude'], df_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
-            linewidths=1.0, marker='$\diamond$', label='Above ' + str(poverty_threshold) + '\%')
+            linewidths=1.0, marker='$\diamond$', label='Above ' + str(poverty_threshold) + '%')
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title(tracts_by_poverty_level_title)

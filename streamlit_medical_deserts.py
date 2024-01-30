@@ -128,8 +128,10 @@ This work is licensed under Creative Commons Attribution-NonCommercial-ShareAlik
 
 left_column, middle_column, right_column = st.columns(3)
 
-plt.rc('text', usetex=True)
+# plt.rc('text', usetex=True)
 # plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['cmss']
 
 
 with left_column:
@@ -184,7 +186,7 @@ with middle_column:
         df['size'] = sizes
         return
 
-    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', 'P']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
     get_sizes(df)
@@ -242,7 +244,7 @@ with right_column:
 
     df = get_medical_deserts(df, n_miles, poverty_threshold)
 
-    markers = [r'^', 'o', 's', 'D', 'X', '*', '+']
+    markers = [r'^', 'o', 's', 'D', 'X', '*', 'P']
     racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
              'Majority NHPI', 'Other']
 
