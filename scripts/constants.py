@@ -6,8 +6,8 @@ longitude_to_km = 92.18
 aspect_ratio = latitude_to_km/longitude_to_km
 miles_to_km = 1.602
 
-color_cycle = ["#0072B2", "#D53E00", "#249e24", "#924900", "#b66dff", "#999999", "#F0E442", "#920000", "#009292"]
-# color:       blue,      red,      green,     brown,     purple,    gray,      yellow,    orange,    teal
+color_cycle = ["#0072B2", "#249e24", "#924900", "#F0E442", "#999999", "#b66dff", "#D53E00", "#920000", "#009292"]
+# color:       blue,      green,     orange,    yellow,    gray,      purple,    red,       brown,     cyan
 
 boundary_data_path = './data/usa_state_boundaries.json'
 

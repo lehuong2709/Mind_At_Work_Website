@@ -55,30 +55,38 @@ def get_state_boundaries(state_name='Georgia'):
     if len(coordinates) == 1:
         coordinates = coordinates[0]
 
+        component_longitudes = []
+        component_latitudes = []
         for i in range(len(coordinates)):
-            boundary_longitudes.append(coordinates[i][0])
-            boundary_latitudes.append(coordinates[i][1])
+            component_longitudes.append(coordinates[i][0])
+            component_latitudes.append(coordinates[i][1])
+        boundary_longitudes.append(component_longitudes)
+        boundary_latitudes.append(component_latitudes)
     else:
         for i in range(len(coordinates)):
+            component_longitudes = []
+            component_latitudes = []
             for j in range(len(coordinates[i][0])):
-                boundary_longitudes.append(coordinates[i][0][j][0])
-                boundary_latitudes.append(coordinates[i][0][j][1])
+                component_longitudes.append(coordinates[i][0][j][0])
+                component_latitudes.append(coordinates[i][0][j][1])
+            boundary_longitudes.append(component_longitudes)
+            boundary_latitudes.append(component_latitudes)
 
     return boundary_longitudes, boundary_latitudes
 
 
-@st.cache_data
-def get_county_boundaries(county_df):
+
+def get_county_boundaries(_county_df):
     boundary_longitudes = []
     boundary_latitudes = []
-    if type(county_df.geometry.iloc[0]) == shapely.geometry.multipolygon.MultiPolygon:
+    if type(_county_df.geometry.iloc[0]) == shapely.geometry.multipolygon.MultiPolygon:
         for polygon in county_df.geometry.iloc[0].geoms:
-            boundary_longitudes = boundary_longitudes + list(polygon.exterior.coords.xy[0])
-            boundary_latitudes = boundary_latitudes + list(polygon.exterior.coords.xy[1])
+            boundary_longitudes.append(list(polygon.exterior.coords.xy[0]))
+            boundary_latitudes.append(list(polygon.exterior.coords.xy[1]))
             # boundary_coordinates = boundary_coordinates + [polygon.exterior.coords.xy]
     else:
-        boundary_longitudes = county_df.geometry.iloc[0].exterior.coords.xy[0]
-        boundary_latitudes = county_df.geometry.iloc[0].exterior.coords.xy[1]
+        boundary_longitudes = [_county_df.geometry.iloc[0].exterior.coords.xy[0]]
+        boundary_latitudes = [_county_df.geometry.iloc[0].exterior.coords.xy[1]]
         # boundary_coordinates = county_df.geometry.iloc[0].exterior.coords.xy
 
     return boundary_longitudes, boundary_latitudes
@@ -108,7 +116,7 @@ if option == 'By State':
     tracts_by_poverty_level_title = 'Census tracts in ' + state_name + ', USA \n colored by poverty level'
 
 else:
-    county_name = st.sidebar.text_input('Enter US county name:', key='county_name', value='Queens').capitalize()
+    county_name = st.sidebar.text_input('Enter US county name:', key='county_name', value='Queens')
     if not county_name.endswith(' County'):
         county_name += ' County'
 
@@ -128,7 +136,7 @@ else:
     df = utils.get_dataframe(state_name, county_name)
 
     if len(df) == 0:
-        st.subheader('Sorry, data unavailable for ' + county_name + ', ' + state_name + ' .]')
+        st.subheader('Sorry, data unavailable for ' + county_name + ', ' + state_name)
         st.stop()
 
     tracts_by_racial_majority_title = ('Census tracts in ' + county_name + ', '
@@ -177,7 +185,7 @@ def get_census_tracts_by_race(df):
         else:
             racial_majority.append('Other')
 
-    df.insert(0, 'Racial Majority', racial_majority)
+    df['Racial Majority'] = racial_majority
     return df
 
 
@@ -191,7 +199,7 @@ def get_census_tracts_by_poverty_levels(df, poverty_threshold):
         else:
             below_poverty_threshold.append(True)
 
-    df.insert(0, 'Below Poverty Threshold', below_poverty_threshold)
+    df['Below Poverty Threshold'] = below_poverty_threshold
     return df
 
 
@@ -200,75 +208,94 @@ plt.rc('text', usetex=True)
 plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
 
 with left_column:
+    # st.write(boundary_longitudes)
     fig, ax = plt.subplots()
     ax.set_aspect(constants.aspect_ratio)
-    plt.plot(boundary_longitudes, boundary_latitudes, linewidth=1, color='gray')
+    for i in range(len(boundary_longitudes)):
+        plt.plot(boundary_longitudes[i], boundary_latitudes[i], linewidth=1, color='gray')
     plt.axis('off')
 
     df = get_census_tracts_by_race(df)
     n = len(df)
 
-    max_size = max(1/math.sqrt(n)*1200, 20)
-    max_size = min(max_size, 60)
-    min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
-    min_size = max(min_size, max_size / 2)
-    markers = [r'$\triangle$', '$\circ$', '$\small\square$', '$\diamond$', r'$\times$', '$\star$', '$+$']
-    # markers = ['H', 's', 'X', 'v', '^', 'P', 'd']
-    sns.scatterplot(df, x='Longitude', y='Latitude',
-                    hue='Racial Majority', palette=constants.color_cycle,
-                    size='Tot_Population_ACS_10_14', sizes=(min_size, max_size),
-                    style='Racial Majority', markers=markers, alpha=0.9,
-                    edgecolor=None)
-    ax.set_title(tracts_by_racial_majority_title)
-    markers, labels = ax.get_legend_handles_labels()
-    if 'Tot_Population_ACS_10_14' in labels:
-        # Find index where 'Tot_Population_ACS_10_14' is located
-        index = labels.index('Tot_Population_ACS_10_14')
-        labels = labels[1:index]
-        markers = markers[1:index]
-    if 'Other' in labels:
-        index = labels.index('Other')
-        # Move 'Other' to the end of the list
-        labels.append(labels.pop(index))
-        markers.append(markers.pop(index))
-    ax.legend(markers, labels, loc='best', fontsize='small')
-    plt.axis('off')
+    def get_sizes(df):
+        n = len(df)
+        max_size = max((1/math.sqrt(n))*1200, 20)
+        max_size = min(max_size, 60)
+        min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
+        min_size = max(min_size, max_size / 3)
+        sizes = []
+        max_population = max(df['Tot_Population_ACS_10_14'])
+        min_population = min(df['Tot_Population_ACS_10_14'])
+        for j in range(len(df)):
+            sizes.append(((df.iloc[j]['Tot_Population_ACS_10_14'] - min_population)/(max_population - min_population)) * (max_size - min_size) + min_size)
 
+        df['size'] = sizes
+        return
+
+    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
+             'Majority NHPI', 'Other']
+    get_sizes(df)
+    # st.write(df['size'])
+
+    for race in racial_groups:
+        df_race = df[df['Racial Majority'] == race]
+        color = constants.color_cycle[racial_groups.index(race)]
+        marker = markers[racial_groups.index(race)]
+        sizes = df_race['size'].values
+        # st.write(sizes)
+
+        if len(df_race) > 0:
+            plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+                linewidths=0.8, marker=marker, label=race)
+
+    plt.legend(loc='best', fontsize='small')
+    ax.set_title(tracts_by_racial_majority_title)
     st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 with middle_column:
     fig, ax = plt.subplots()
     ax.set_aspect(constants.aspect_ratio)
-    plt.plot(boundary_longitudes, boundary_latitudes, linewidth=1, color='gray')
+    for i in range(len(boundary_longitudes)):
+        plt.plot(boundary_longitudes[i], boundary_latitudes[i], linewidth=1, color='gray')
     plt.axis('off')
 
     df = get_census_tracts_by_poverty_levels(df, poverty_threshold)
     n = len(df)
-    max_size = max(1/math.sqrt(n) * 1200, 20)
-    max_size = min(max_size, 60)
-    min_size = min(df['Tot_Population_ACS_10_14'])/max(df['Tot_Population_ACS_10_14']) * max_size
-    min_size = max(min_size, max_size/2)
-    sns.scatterplot(df, x='Longitude', y='Latitude',
-                    hue='Below Poverty Threshold', palette=constants.color_cycle[-2:],
-                    size='Tot_Population_ACS_10_14', sizes=(min_size, max_size),
-                    style='Below Poverty Threshold', markers=['$\circ$', '$\diamond$'], alpha=0.9, ec="face")
+
+    # def get_sizes(df):
+    #     n = len(df)
+    #     max_size = max((1/math.sqrt(n))*1200, 20)
+    #     max_size = min(max_size, 60)
+    #     min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
+    #     min_size = max(min_size, max_size / 2)
+    #     sizes = []
+    #     max_population = max(df['Tot_Population_ACS_10_14'])
+    #     min_population = min(df['Tot_Population_ACS_10_14'])
+    #     for j in range(len(df)):
+    #         sizes.append((df.iloc[j]['Tot_Population_ACS_10_14'] - min_population)/(max_population - min_population) * (max_size - min_size) + min_size)
+    #
+    #     df['size'] = sizes
+    #     return
+
+    # get_sizes(df)
+    df_not_below_threshold = df[df['Below Poverty Threshold'] == False]
+    color = constants.color_cycle[7]
+    sizes = df_not_below_threshold['size'].values
+    if len(df_not_below_threshold) > 0:
+        plt.scatter(df_not_below_threshold['Longitude'], df_not_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+            linewidths=0.8, marker='$\circ$', label='Below ' + str(poverty_threshold) + '\%')
+    df_below_threshold = df[df['Below Poverty Threshold'] == True]
+    color = constants.color_cycle[8]
+    sizes = df_below_threshold['size'].values
+    if len(df_below_threshold) > 0:
+        plt.scatter(df_below_threshold['Longitude'], df_below_threshold['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+            linewidths=0.8, marker='$\diamond$', label='Above ' + str(poverty_threshold) + '\%')
+
+    plt.legend(loc='best', fontsize='small')
     ax.set_title(tracts_by_poverty_level_title)
-
-    # Get the handles and labels
-    markers, labels = ax.get_legend_handles_labels()
-    if labels[1] == 'True':
-        labels[1] = 'Above ' + str(poverty_threshold) + '%'
-        labels[2] = 'Below ' + str(poverty_threshold) + '%'
-    else:
-        labels[1] = 'Below ' + str(poverty_threshold) + '%'
-        labels[2] = 'Above ' + str(poverty_threshold) + '%'
-
-    # slice the appropriate section of markers and labels to include in the legend
-    ax.legend(markers[1:3], labels[1:3], loc='best')
-
-    plt.axis('off')
-    st.pyplot(plt, dpi=600, transparent=True, bbox_inches='tight', clear_figure=True)
-
+    st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 def write_disproportionate_poverty(race, percentage_race_poor, percentage_race, state_name, county_name=None):
     if county_name is not None:

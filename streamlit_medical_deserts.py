@@ -8,6 +8,7 @@ import scripts.plot_utils as plot_utils
 import scripts.constants as constants
 import seaborn as sns
 import importlib
+import matplotlib as mpl
 import pylatex
 
 importlib.reload(utils)
@@ -89,7 +90,7 @@ def get_census_tracts_by_race(df):
         else:
             racial_majority.append('Other')
 
-    df.insert(0, 'Racial Majority', racial_majority)
+    df['Racial Majority'] = racial_majority
     return df
 
 
@@ -128,7 +129,7 @@ This work is licensed under Creative Commons Attribution-NonCommercial-ShareAlik
 left_column, middle_column, right_column = st.columns(3)
 
 plt.rc('text', usetex=True)
-plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
+# plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
 
 
 with left_column:
@@ -168,46 +169,45 @@ with middle_column:
     df = get_census_tracts_by_race(df)
     n = len(df)
 
-    max_size = max(1/math.sqrt(n)*1200, 20)
-    max_size = min(max_size, 60)
-    min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
-    min_size = max(min_size, max_size / 2)
-    markers = [r'$\triangle$', '$\circ$', '$\small\square$', '$\diamond$', r'$\times$', '$\star$', '$+$']
-    sns.scatterplot(df, x='Longitude', y='Latitude',
-                    hue='Racial Majority', palette=constants.color_cycle,
-                    size='Tot_Population_ACS_10_14', sizes=(min_size, max_size),
-                    style='Racial Majority', markers=markers, alpha=0.9,
-                    edgecolor=None)
-    ax.set_title('Census tracts in ' + state_name + ', \n colored by racial majority')
-    markers, labels = ax.get_legend_handles_labels()
-    if 'Tot_Population_ACS_10_14' in labels:
-        # Find index where 'Tot_Population_ACS_10_14' is located
-        index = labels.index('Tot_Population_ACS_10_14')
-        labels = labels[1:index]
-        markers = markers[1:index]
-    if 'Other' in labels:
-        index = labels.index('Other')
-        # Move 'Other' to the end of the list
-        labels.append(labels.pop(index))
-        markers.append(markers.pop(index))
-    ax.legend(markers, labels, loc='best', fontsize='small')
-    plt.axis('off')
+    def get_sizes(df):
+        n = len(df)
+        max_size = max((1/math.sqrt(n))*1200, 20)
+        max_size = min(max_size, 60)
+        min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
+        min_size = max(min_size, max_size / 2)
+        sizes = []
+        max_population = max(df['Tot_Population_ACS_10_14'])
+        min_population = min(df['Tot_Population_ACS_10_14'])
+        for j in range(len(df)):
+            sizes.append((df.iloc[j]['Tot_Population_ACS_10_14'] - min_population)/(max_population - min_population) * (max_size - min_size) + min_size)
 
+        df['size'] = sizes
+        return
+
+    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
+             'Majority NHPI', 'Other']
+    get_sizes(df)
+
+    for race in racial_groups:
+        df_race = df[df['Racial Majority'] == race]
+        color = constants.color_cycle[racial_groups.index(race)]
+        marker = markers[racial_groups.index(race)]
+        sizes = df_race['size'].values
+
+        if len(df_race) > 0:
+            plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+                linewidths=0.8, marker=marker, label=race)
+
+    plt.legend(loc='best', fontsize='small')
+    ax.set_title('Census tracts in ' + state_name + ', \n colored by racial majority')
     st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 with right_column:
-    ax, fig = plt.subplots()
+    fig, ax = plt.subplots()
     def get_medical_deserts(df, n_miles, poverty_threshold=30):
-        df = utils.get_dataframe(state_name)
-        n = len(df)
-        print(n)
-
         latitudes = df['Latitude'].values
         longitudes = df['Longitude'].values
-
-        medical_deserts = []
-        races = ['White', 'Black', 'Hispanic', 'Asian', 'AIAN', 'NHPI', 'Other']
-        medical_deserts_by_race = {race: [] for race in races}
 
         k, cvs_pharmacies, walgreens_pharmacies, walmart_pharmacies = utils.get_pharmacy_coordinates(state_name,
                                                                                                      which='top3')
@@ -232,47 +232,31 @@ with right_column:
             else:
                 is_medical_desert.append(False)
 
-        df.insert(1, 'Is Medical Desert', is_medical_desert)
+        df['Is Medical Desert'] = is_medical_desert
         return df
 
-
-    fig, ax = plt.subplots()
     ax.set_aspect(constants.aspect_ratio)
     for i in range(len(boundary_longitudes)):
         plt.plot(boundary_longitudes[i], boundary_latitudes[i], linewidth=1, color='gray')
     plt.axis('off')
 
-    # df = get_census_tracts_by_race(df)
     df = get_medical_deserts(df, n_miles, poverty_threshold)
-    max_size = max(1 / math.sqrt(n) * 1200, 20)
-    max_size = min(max_size, 60)
-    min_size = min(df['Tot_Population_ACS_10_14']) / max(df['Tot_Population_ACS_10_14']) * max_size
-    min_size = max(min_size, max_size / 2)
-    markers = [r'$\triangle$', '$\circ$', '$\small\square$', '$\diamond$', r'$\times$', '$\star$', '$+$']
-    # markers = ['H', 's', 'X', 'v', '^', 'P', 'd']
-    df = get_census_tracts_by_race(df)
-    df2 = df[df['Is Medical Desert'] == True]
-    # df2 = get_census_tracts_by_race(df2)
-    sns.scatterplot(df2, x='Longitude', y='Latitude',
-                    hue='Racial Majority', palette=constants.color_cycle,
-                    size='Tot_Population_ACS_10_14', sizes=(min_size, max_size),
-                    style='Racial Majority', markers=markers, alpha=0.9,
-                    edgecolor=None)
-    ax.set_title('Medical deserts in ' + state_name + ', \n colored by racial majority')
-    markers, labels = ax.get_legend_handles_labels()
-    if 'Tot_Population_ACS_10_14' in labels:
-        # Find index where 'Tot_Population_ACS_10_14' is located
-        index = labels.index('Tot_Population_ACS_10_14')
-        labels = labels[1:index]
-        markers = markers[1:index]
-    if 'Other' in labels:
-        index = labels.index('Other')
-        # Move 'Other' to the end of the list
-        labels.append(labels.pop(index))
-        markers.append(markers.pop(index))
-    ax.legend(markers, labels, loc='best', fontsize='small')
-    plt.axis('off')
 
+    markers = [r'$\triangle$', '$\circ$', 's', '$\diamond$', 'X', '*', '$+$']
+    racial_groups = ['Majority White', 'Majority Black', 'Majority Hispanic', 'Majority Asian', 'Majority AIAN',
+             'Majority NHPI', 'Other']
+
+    for race in racial_groups:
+        df_race = df[(df['Racial Majority'] == race) & (df['Is Medical Desert'] == True)]
+        color = constants.color_cycle[racial_groups.index(race)]
+        marker = markers[racial_groups.index(race)]
+        if len(df_race) > 0:
+            sizes = df_race['size'].values
+            plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+                linewidths=0.8, marker=marker, label=race)
+
+    plt.legend(loc='best', fontsize='small')
+    ax.set_title('Medical deserts in ' + state_name + ', \n colored by racial majority')
     st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 
