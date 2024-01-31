@@ -140,7 +140,7 @@ with left_column:
     ax.set_aspect(constants.aspect_ratio)
     for i in range(len(boundary_longitudes)):
         plt.plot(boundary_longitudes[i], boundary_latitudes[i], linewidth=1, color='gray')
-    ax.set_title('Pharmacy locations in ' + state_name + '\n')
+    ax.set_title('Pharmacy locations in ' + state_name + '\n', fontsize='medium')
     k, cvs_pharmacy_coordinates, walgreens_pharmacies_coordinates, walmart_pharmacies_coordinates = (
         utils.get_pharmacy_coordinates(state_name=state_name, which='top3', county_name=county_name))
     df_pharm = pd.DataFrame({'Longitude': [x[0] for x in
@@ -202,7 +202,7 @@ with middle_column:
                 linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
-    ax.set_title('Census tracts in ' + state_name + ', \n colored by racial majority')
+    ax.set_title('Census tracts in ' + state_name + ', \n colored by racial majority', fontsize='medium')
     st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 with right_column:
@@ -258,7 +258,7 @@ with right_column:
                 linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
-    ax.set_title('Medical deserts in ' + state_name + ', \n colored by racial majority')
+    ax.set_title('Medical deserts in ' + state_name + ', \n colored by racial majority', fontsize='medium')
     st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 
