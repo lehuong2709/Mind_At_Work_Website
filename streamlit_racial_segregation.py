@@ -11,6 +11,8 @@ import shapely
 import os
 import importlib
 import pylatex
+import mpld3
+import streamlit.components.v1 as components
 
 import scripts.utils as utils
 import scripts.plot_utils as plot_utils
@@ -29,7 +31,7 @@ st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 def get_county_states_and_dataframe(county_name):
     if not county_name.endswith(' County'):
         county_name += ' County'
-    county_data_file = 'data/tl_2020_us_county.zip'
+    county_data_file = 'data/test/tl_2020_us_county.zip'
     counties_df = gpd.read_file(county_data_file)
 
     county_df = counties_df[(counties_df["NAMELSAD"] == county_name)]
@@ -210,7 +212,6 @@ plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['cmss']
 
 with left_column:
-    # st.write(boundary_longitudes)
     fig, ax = plt.subplots()
     ax.set_aspect(constants.aspect_ratio)
     for i in range(len(boundary_longitudes)):
@@ -251,10 +252,14 @@ with left_column:
         if len(df_race) > 0:
             plt.scatter(df_race['Longitude'], df_race['Latitude'], s=sizes, edgecolor=color, alpha=0.8, facecolors='none',
                 linewidths=1, marker=marker, label=race)
+            # st.scatter_chart(df_race['Longitude'], df_race['Latitude'], size=sizes, edgecolor=color, alpha=0.8, facecolors='none',
+            #     linewidths=1, marker=marker, label=race)
 
     plt.legend(loc='best', fontsize='small')
     ax.set_title(tracts_by_racial_majority_title)
-    st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
+    fig_html = mpld3.fig_to_html(fig)
+    plt.axis('off')
+    # st.pyplot(fig, dpi=1000, transparent=True, bbox_inches='tight', clear_figure=True)
 
 with middle_column:
     fig, ax = plt.subplots()
