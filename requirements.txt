@@ -1,5 +1,6 @@
 geopandas
 geoplot
+haversine
 matplotlib
 numpy
 pandas
