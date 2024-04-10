@@ -7,4 +7,5 @@ seaborn
 shapely
 plotly
 pillow
+topojson
 altair
