@@ -1,0 +1,10 @@
+geopandas
+geoplot
+matplotlib
+numpy
+pandas
+seaborn
+shapely
+plotly
+pillow
+altair
