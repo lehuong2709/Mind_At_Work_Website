@@ -48,7 +48,7 @@ state_fips = State.fips
 state_abbr = State.abbreviation
 
 st.markdown("""
-    <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; line-height: 0.2;">
+    <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; line-height: 1.0;">
         Medical deserts in
         <span style="color: #c41636">
             """ + state_name + """
