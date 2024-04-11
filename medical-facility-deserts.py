@@ -4,7 +4,8 @@ import plotly.graph_objects as go
 import random
 from src.usa.constants import state_names, racial_label_dict
 from src.usa.states import USAState
-from src.usa.facilities_data_handler import CVS, Walgreens, Walmart, UrgentCare, Hospitals
+from src.usa.facilities_data_handler import (
+    CVS, Walgreens, Walmart, UrgentCare, Hospitals, DialysisCenters, NursingHomes)
 import streamlit as st
 
 
@@ -26,13 +27,13 @@ scatter_palette = [
 ]
 populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Louisiana', 'Indiana',
                    'Maryland', 'Colorado', 'North Carolina', 'South Carolina', 'Arizona', 'Florida',
-                   'Utah', 'California', 'Wisconsin', 'Texas', 'Missouri', 'Virginia',
+                   'California', 'Wisconsin', 'Texas', 'Missouri', 'Virginia',
                    'Mississippi', 'New York', 'Kentucky', 'Michigan', 'Illinois', 'Georgia',
                    'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
 
 st.set_page_config(initial_sidebar_state='expanded')
 
-facilities = ['Pharmacy chains', 'Urgent care centers', 'Hospitals']
+facilities = ['Pharmacy chains', 'Urgent care centers', 'Hospitals', 'Nursing homes']
 facility = st.sidebar.selectbox('Choose a facility type', facilities)
 
 # Get the current day of the year
@@ -78,9 +79,21 @@ elif facility == 'Hospitals':
         that is more than n miles away from a hospital and with over p% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
+# elif facility == 'Dialysis centers':
+#     st.markdown("""
+#         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group)
+#         that is more than n miles away from a dialysis center and with over p% of the population living
+#         below the poverty line.
+#     """, unsafe_allow_html=True)
+elif facility == 'Nursing homes':
+    st.markdown("""
+        Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
+        that is more than n miles away from a nursing home and with over p% of the population living 
+        below the poverty line.
+    """, unsafe_allow_html=True)
 
 poverty_threshold = st.sidebar.slider(r'Choose poverty threshold p%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
-distance_threshold = st.sidebar.slider(r'Distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=4.0, step=0.5, key='distance_threshold')
+distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=4.0, step=0.5, key='distance_threshold')
 
 show_deserts = st.sidebar.checkbox('Show medical deserts', value=True)
 if facility == 'Pharmacy chains':
@@ -88,8 +101,14 @@ if facility == 'Pharmacy chains':
     show_voronoi_cells = st.sidebar.checkbox('Show pharamcy Voronoi cells', value=False)
 elif facility == 'Urgent care centers':
     show_urgent_care = st.sidebar.checkbox('Show urgent care locations', value=False)
+    show_voronoi_cells = st.sidebar.checkbox('Show urgent care Voronoi cells', value=False)
 elif facility == 'Hospitals':
     show_hospitals = st.sidebar.checkbox('Show hospital locations', value=False)
+    show_voronoi_cells = st.sidebar.checkbox('Show hospital Voronoi cells', value=False)
+# elif facility == 'Dialysis centers':
+#     show_dialysis_centers = st.sidebar.checkbox('Show dialysis center locations', value=False)
+elif facility == 'Nursing homes':
+    show_nursing_homes = st.sidebar.checkbox('Show nursing home locations', value=False)
 
 col1, col2 = st.columns([3, 2], gap='medium')
 
@@ -110,6 +129,10 @@ with col1:
         desert_df = desert_df[desert_df['Closest_Distance_Urgent_Care_Centers'] >= distance_threshold]
     elif facility == 'Hospitals':
         desert_df = desert_df[desert_df['Closest_Distance_Hospitals'] >= distance_threshold]
+    # elif facility == 'Dialysis centers':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Dialysis_Centers'] >= distance_threshold]
+    elif facility == 'Nursing homes':
+        desert_df = desert_df[desert_df['Closest_Distance_Nursing_Homes'] >= distance_threshold]
 
     randomly_shuffled_indices = list(range(1, 8))
     random.shuffle(randomly_shuffled_indices)
@@ -117,7 +140,7 @@ with col1:
         census_df_i = census_df[census_df['racial_majority'] == str(i)]
         racial_fractions_overall[str(i)] = len(census_df_i)/len(census_df)
 
-        desert_df_i = desert_df[census_df['racial_majority'] == str(i)]
+        desert_df_i = desert_df[desert_df['racial_majority'] == str(i)]
         if len(desert_df_i) > 0:
             racial_fractions_deserts[str(i)] = len(desert_df_i)/len(desert_df)
             if show_deserts:
@@ -169,6 +192,15 @@ with col1:
             fig.add_trace(go.Scattergeo(lon=urgent_care_centers.geometry.x, lat=urgent_care_centers.geometry.y, mode='markers',
                                         marker=dict(size=4, color='black', opacity=0.8, symbol='x'),
                                         name='Urgent care center', showlegend=True))
+        if show_voronoi_cells:
+            voronoi_df = gpd.read_file('data/usa/facilities/urgentcare_centers/voronoi_state_shapefiles/' + state_fips + '_voronoi.shp', index=False)
+            for geom in voronoi_df.geometry:
+                if geom.geom_type == 'LineString':
+                    x, y = geom.xy
+                    x = list(x)
+                    y = list(y)
+                    fig.add_trace(go.Scattergeo(lon=x, lat=y, mode='lines', line=dict(width=0.2, color='chocolate'),
+                                                name=None, showlegend=False))
     elif facility == 'Hospitals':
         if show_hospitals:
             hospitals = Hospitals.read_abridged_facilities()
@@ -176,12 +208,41 @@ with col1:
             fig.add_trace(go.Scattergeo(lon=hospitals.geometry.x, lat=hospitals.geometry.y, mode='markers',
                                         marker=dict(size=4, color='black', opacity=0.8, symbol='x'),
                                         name='Urgent care center', showlegend=True))
+        if show_voronoi_cells:
+            voronoi_df = gpd.read_file('data/usa/facilities/hospitals/voronoi_state_shapefiles/' + state_fips + '_voronoi.shp', index=False)
+            for geom in voronoi_df.geometry:
+                if geom.geom_type == 'LineString':
+                    x, y = geom.xy
+                    x = list(x)
+                    y = list(y)
+                    fig.add_trace(go.Scattergeo(lon=x, lat=y, mode='lines', line=dict(width=0.2, color='chocolate'),
+                                                name=None, showlegend=False))
+    # elif facility == 'Dialysis centers':
+    #     if show_dialysis_centers:
+    #         dialysis_centers = DialysisCenters.read_abridged_facilities()
+    #         dialysis_centers = gpd.clip(dialysis_centers, mask=bounds)
+    #         fig.add_trace(go.Scattergeo(lon=dialysis_centers.geometry.x, lat=dialysis_centers.geometry.y, mode='markers',
+    #                                     marker=dict(size=4, color='black', opacity=0.8, symbol='x'),
+    #                                     name='Dialysis center', showlegend=True))
+    elif facility == 'Nursing homes':
+        if show_nursing_homes:
+            nursing_homes = NursingHomes.read_abridged_facilities()
+            nursing_homes = gpd.clip(nursing_homes, mask=bounds)
+            fig.add_trace(go.Scattergeo(lon=nursing_homes.geometry.x, lat=nursing_homes.geometry.y, mode='markers',
+                                        marker=dict(size=4, color='black', opacity=0.8, symbol='x'),
+                                        name='Nursing home', showlegend=True))
 
     # Define the configuration dictionary to customize the toolbar
+    facility_name_with_underscore = (facility.lower()).replace(' ', '_')
     config = {
         'modeBarButtonsToRemove': ['zoomOut'],
         'staticPlot': False,
         'scrollZoom': True,
+        'toImageButtonOptions': {
+            'format': 'png',
+            'scale': 1.5,
+            'filename': 'medical_deserts_' + state_abbr + '_' + str(facility_name_with_underscore) + '.png',
+        }
     }
 
     fig.update_geos(
@@ -232,11 +293,25 @@ with col2:
                      '%] of all blockgroups.')
 st.sidebar.write('\n')
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh. '
-                   'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in infrastructure planning.')
-st.sidebar.caption('Released under Creative Commons BY-NC license.')
-st.sidebar.caption('Data for pharmacies is from the HIFLD Open Data database from 2005-10. '
-                   'Data for census blockgroups is from the US Census Bureau, 2022.')
-st.sidebar.caption('Distances are approximate and based on straight-line computations. '
-                   'Many other factors affect access to facilities. '
-                   'The results are indicative only and meant for educational purposes.')
+                   'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.')
+
+with st.sidebar.expander('About this app', expanded=False):
+    st.markdown('Released under Creative Commons BY-NC license, 2024.')
+    # st.sidebar.caption('Data for pharmacies is from the HIFLD Open Data database from 2005-10. '
+    #                    'Data for census blockgroups is from the US Census Bureau, 2022.')
+    st.markdown('Distances are approximate and based on straight-line computations. '
+                       'Many other factors affect access to facilities. '
+                       'The results are indicative only and meant for educational purposes.')
+
+with st.sidebar.expander('Data sources', expanded=False):
+    st.markdown(
+        """
+        All facility datasets are from [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database. \n
+        Data for [pharmacies](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::pharmacies-/about) is from 2010. \n
+        Data for [urgent care centers](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::urgent-care-facilities/about) is from 2009. \n
+        Data for [hospitals](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals/about) is from 2023. \n
+        Data for [nursing homes](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::nursing-homes/about) is from 2017. \n
+        [Census](https://data.census.gov/) data is from 2022. \n 
+        """
+    )
 

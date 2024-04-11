@@ -199,3 +199,13 @@ DialysisCenters = FacilitiesDataHandler(name='DialysisCenters', type='medical',
 
 NursingHomes = FacilitiesDataHandler(name='NursingHomes', type='medical',
                 abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_Nursing_Homes.csv'))
+
+ChildCare = FacilitiesDataHandler(name='ChildCare', type='child_care',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_Child_Care_Centers.csv'))
+
+FedEx = FacilitiesDataHandler(name='FedEx', type='logistics',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_FedEx_Facilities.csv'))
+UPS = FacilitiesDataHandler(name='UPS', type='logistics',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_UPS_Facilities.csv'))
+DHL = FacilitiesDataHandler(name='DHL', type='logistics',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_DHL.csv'))

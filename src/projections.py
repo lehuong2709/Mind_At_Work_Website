@@ -11,7 +11,8 @@ from typing import List, Tuple
 import warnings
 
 
-def closest_geographical_distance(point_longitude: float, point_latitude: float, points: List[Tuple[float, float]]):
+def closest_geographical_distance(point_longitude: float, point_latitude: float, points: List[Tuple[float, float]],
+                                  starting_point=None):
     """
     This function computes the closest geographical distance between a point p = (point_latitude, point_longitude) and a
     list of points given as (latitude, longitude) pairs.
@@ -42,7 +43,12 @@ def closest_geographical_distance(point_longitude: float, point_latitude: float,
     # Sort points by latitude
     points = sorted(points, key=lambda x: x[0])
 
-    q_star = points[0]                              # Initialize q_star to be an arbitrary point in points
+    # Initialize q_star and minimum_distance
+    if starting_point is not None:
+        q_star = starting_point                         # Initialize q_star with the starting index
+    else:
+        q_star = points[0]                              # Initialize q_star to be an arbitrary point in points
+
     minimum_distance = haversine(p, q_star, unit=Unit.KILOMETERS)           # Initialize minimum distance to be infinity
 
     # The latitude difference between q^* and p is upper bounded by the minimum distance per latitude difference
@@ -126,9 +132,9 @@ def closest_distance(df1, df2, distance_label='Closest_Distance'):
 
     points = get_longitudes_and_latitudes_list(df2)
 
-    def closest_geographical_distance_to_df2(point_longitude, point_latitude):
+    def closest_geographical_distance_to_df2(point_longitude, point_latitude, starting_point=None):
         """Compute the closest geographical distance between a point and the points in the second dataframe"""
-        distance, _ = closest_geographical_distance(point_longitude, point_latitude, points)
+        distance, _ = closest_geographical_distance(point_longitude, point_latitude, points, starting_point)
         return distance
 
     if distance_label in df1.columns:
@@ -145,9 +151,12 @@ def closest_distance(df1, df2, distance_label='Closest_Distance'):
             else:
                 crs = df1.crs
 
+            _, starting_point = closest_geographical_distance(point_longitude=df1.geometry.x[0], point_latitude=df1.geometry.y[0], points=points,
+                                                              starting_point=None)
+
             df1.to_crs(projection_wgs84, inplace=True)                  # Convert the geometry to longitudes, latitudes
             # Compute the closest distance to the second dataframe
-            df1[distance_label] = df1.progress_apply(lambda row: closest_geographical_distance_to_df2(row.geometry.x, row.geometry.y), axis=1)
+            df1[distance_label] = df1.progress_apply(lambda row: closest_geographical_distance_to_df2(row.geometry.x, row.geometry.y, starting_point), axis=1)
             df1.to_crs(crs, inplace=True)                               # Convert the geometry back to the original CRS
     else:
         # Compute the closest distance to the second dataframe
