@@ -209,3 +209,12 @@ UPS = FacilitiesDataHandler(name='UPS', type='logistics',
                 abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_UPS_Facilities.csv'))
 DHL = FacilitiesDataHandler(name='DHL', type='logistics',
                 abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_DHL.csv'))
+
+PrivateSchools = FacilitiesDataHandler(name='PrivateSchools', type='educational',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_Private_Schools.csv'))
+
+PublicRefrigeratedWarehouses = FacilitiesDataHandler(name='PublicRefrigeratedWarehouses', type='food_related',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_Public_Refrigerated_Warehouses.csv'))
+
+FDICInsuredBanks = FacilitiesDataHandler(name='FDICInsuredBanks', type='financial',
+                abridged_data_file_path=os.path.join(FACILITIES_PATH, 'abridged_FDIC_Insured_Banks.csv'))
