@@ -24,7 +24,7 @@ scatter_palette = [
 ]
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(layout='wide')
 
 show_pages(
     [
@@ -43,6 +43,11 @@ st.markdown("""
 col1, col2 = st.columns([1, 1])
 
 with col1:
+    with st.container(border=True):
+        page_name = 'pages/explore-medical-facility-deserts.py'
+        page_label = """:blue[**Click here to explore**]"""
+        st.page_link(page=page_name, label=page_label, use_container_width=True)
+
     with st.expander('What is this?', expanded=True):
         st.markdown("""
             Access to critical infrastructure is considered one of three dimensions of
@@ -67,91 +72,44 @@ with col1:
             8. Logistics chains FedEx/UPS/USPS. """
     )
 
-    with st.expander('Who made this?', expanded=True):
+    with st.expander('Tell me about racial/ethnic categories', expanded=True):
+        st.markdown("""
+            The racial/ethnic majority in a blockgroup is one of the following seven categories:
+            1. White alone
+            2. Black or African American alone
+            3. American Indian or Alaska Native (AIAN) alone
+            4. Asian alone
+            5. Native Hawaiian or Other Pacific Islander (NHOPI) alone
+            6. Hispanic
+            7. Other or no racial majority"""
+                    )
+
+    with st.expander('Created by', expanded=True):
         st.markdown("""Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), and Mohit Singh. Based on 
         our [paper](https://arxiv.org/abs/2211.14873) on fair facility location. Please submit any feedback or 
         questions to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu)."""
-        )
+                    )
 
-    with st.expander('Where does the data come from?', expanded=True):
+    with st.expander('Data sources', expanded=True):
         st.markdown("""
             The data used in this project is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/) and
             [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database."""
         )
 
-    with st.expander('What are Voronoi cells?', expanded=True):
+    with st.expander('Limitations', expanded=True):
         st.markdown("""
-            [Voronoi cells](https://en.wikipedia.org/wiki/Voronoi_diagram) are polygons that partition a plane into regions based on the distance to facilities. Each
-            Voronoi cell contains points that are closer to a particular facility than any other. They provide a way to
-            visualize the density of facilities in a region. \n
-            
-            As an example, consider the Voronoi cells for hospitals in Colorado:
-            """
-        )
-        state = 'Colorado'
-        State = USAState(state)
-        state_fips = State.fips
+            The results are indicative only and meant for educational purposes. Distances are approximate and based on 
+            straight-line computations, and all people in a census blockgroup are assumed to be at its geometric center.
+             Many other factors affect access to facilities, for example, public transportation,
+            road networks, rural-urban divide, and so on. \n
+        """
+                    )
 
-        census_df = State.get_census_data(level='blockgroup')
-        census_df['racial_majority'] = census_df['racial_majority'].astype(str)
-
-        fig = go.Figure()
-        fig, bounds = State.plot_state_boundary(fig)
-
-        hospitals = Hospitals.read_abridged_facilities()
-        hospitals = gpd.clip(hospitals, mask=bounds)
-        fig.add_trace(go.Scattergeo(lon=hospitals.geometry.x, lat=hospitals.geometry.y, mode='markers',
-                                    marker=dict(size=2, color='black', opacity=0.8, symbol='x'),
-                                    name='Hospital', showlegend=True))
-
-        voronoi_df = gpd.read_file('data/usa/facilities/hospitals/voronoi_state_shapefiles/' + state_fips + '_voronoi.shp', index=False)
-        for geom in voronoi_df.geometry:
-            if geom.geom_type == 'LineString':
-                x, y = geom.xy
-                x = list(x)
-                y = list(y)
-                fig.add_trace(go.Scattergeo(lon=x, lat=y, mode='lines', line=dict(width=0.2, color='chocolate'),
-                                            name=None, showlegend=False))
-
-        config = {
-            'modeBarButtonsToRemove': ['zoomOut', 'select2d'],
-            'displayModeBar': False,
-            'staticPlot': False,
-            'scrollZoom': True,
-            'toImageButtonOptions': {
-                'format': 'png',
-                'scale': 1.5,
-            }
-        }
-
-        fig.update_geos(
-            showland=False,
-            showcoastlines=False,
-            showframe=False,
-            showocean=False,
-            showcountries=False,
-            lonaxis_range=[bounds[0], bounds[2]],
-            lataxis_range=[bounds[1], bounds[3]],
-            projection_type='mercator',
-            bgcolor='#a1b8b7',
-        )
-
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=0, b=0),
-            autosize=True,
-            xaxis=dict(range=[bounds[0], bounds[2]], autorange=False),
-            yaxis=dict(range=[bounds[1], bounds[3]], autorange=False),
-            showlegend=False,
-        )
-        st.plotly_chart(fig, use_container_width=True, config=config)
+    with st.expander('License', expanded=True):
+        st.write('Released under Creative Commons BY-NC license, 2024.')
 
 
 with col2:
-    with st.container(border=True):
-        page_name = 'pages/explore-medical-facility-deserts.py'
-        page_label = """**Click here to explore**"""
-        st.page_link(page=page_name, label=page_label, use_container_width=True)
-
     with st.expander('How are facility deserts identified?', expanded=True):
         st.markdown("""
             Our basic unit of analysis is the [US census blockgroup](https://en.wikipedia.org/wiki/Census_block_group)
@@ -245,27 +203,69 @@ with col2:
             """
         )
 
-    with st.expander('Tell me about racial/ethnic categories', expanded=True):
+    with st.expander('What are Voronoi cells?', expanded=True):
         st.markdown("""
-            The racial/ethnic majority in a blockgroup is one of the following seven categories:
-            1. White alone
-            2. Black or African American alone
-            3. American Indian or Alaska Native (AIAN) alone
-            4. Asian alone
-            5. Native Hawaiian or Other Pacific Islander (NHOPI) alone
-            6. Hispanic
-            7. Other or no racial majority"""
+            [Voronoi cells](https://en.wikipedia.org/wiki/Voronoi_diagram) are polygons that partition a plane into regions based on the distance to facilities. Each
+            Voronoi cell contains points that are closer to a particular facility than any other. They provide a way to
+            visualize the density of facilities in a region. \n
+            
+            As an example, consider the Voronoi cells for hospitals in Colorado:
+            """
+                    )
+        state = 'Colorado'
+        State = USAState(state)
+        state_fips = State.fips
+
+        census_df = State.get_census_data(level='blockgroup')
+        census_df['racial_majority'] = census_df['racial_majority'].astype(str)
+
+        fig = go.Figure()
+        fig, bounds = State.plot_state_boundary(fig)
+
+        hospitals = Hospitals.read_abridged_facilities()
+        hospitals = gpd.clip(hospitals, mask=bounds)
+        fig.add_trace(go.Scattergeo(lon=hospitals.geometry.x, lat=hospitals.geometry.y, mode='markers',
+                                    marker=dict(size=2, color='black', opacity=0.8, symbol='x'),
+                                    name='Hospital', showlegend=True))
+
+        voronoi_df = gpd.read_file('data/usa/facilities/hospitals/voronoi_state_shapefiles/' + state_fips + '_voronoi.shp', index=False)
+        for geom in voronoi_df.geometry:
+            if geom.geom_type == 'LineString':
+                x, y = geom.xy
+                x = list(x)
+                y = list(y)
+                fig.add_trace(go.Scattergeo(lon=x, lat=y, mode='lines', line=dict(width=0.2, color='chocolate'),
+                                            name=None, showlegend=False))
+
+        config = {
+            'modeBarButtonsToRemove': ['zoomOut', 'select2d'],
+            'displayModeBar': False,
+            'staticPlot': False,
+            'scrollZoom': True,
+            'toImageButtonOptions': {
+                'format': 'png',
+                'scale': 1.5,
+            }
+        }
+
+        fig.update_geos(
+            showland=False,
+            showcoastlines=False,
+            showframe=False,
+            showocean=False,
+            showcountries=False,
+            lonaxis_range=[bounds[0], bounds[2]],
+            lataxis_range=[bounds[1], bounds[3]],
+            projection_type='mercator',
+            bgcolor='#a1b8b7',
         )
 
-    with st.expander('What are the limitations of this app?', expanded=True):
-        st.markdown("""
-            The results are indicative only and meant for educational purposes. Distances are approximate and based on 
-            straight-line computations, and all people in a census blockgroup are assumed to be at its geometric center.
-             Many other factors affect access to facilities, for example, public transportation,
-            road networks, rural-urban divide, and so on. \n
-        """
+        fig.update_layout(
+            margin=dict(l=0, r=0, t=0, b=0),
+            autosize=True,
+            xaxis=dict(range=[bounds[0], bounds[2]], autorange=False),
+            yaxis=dict(range=[bounds[1], bounds[3]], autorange=False),
+            showlegend=False,
         )
-
-    with st.expander('License', expanded=True):
-        st.write('Released under Creative Commons BY-NC license, 2024.')
+        st.plotly_chart(fig, use_container_width=True, config=config)
 
