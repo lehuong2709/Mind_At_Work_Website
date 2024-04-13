@@ -34,7 +34,7 @@ healthcare_variables = ['pct_No_Health_Ins_ACS_16_20',
                         'pct_TwoPHealthIns_ACS_16_20']
 geography_variables = ['State', 'County', 'Tract', 'Block_group']
 racial_label_dict = {1: 'White only',
-                     2: 'Black/African American only',
+                     2: 'Black only',
                      3: 'AIAN only',
                      4: 'Asian only',
                      5: 'NHOPI only',

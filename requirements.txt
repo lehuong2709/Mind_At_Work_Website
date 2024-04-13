@@ -8,6 +8,7 @@ seaborn
 shapely
 plotly
 pillow
+st-pages
 topojson
 tqdm
 altair

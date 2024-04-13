@@ -11,6 +11,48 @@ from typing import List, Tuple
 import warnings
 
 
+def long_lat_to_spherical(long, lat):
+    """
+    This function converts longitude and latitude to spherical coordinates (with radius 1)
+    :param long: longitude, between -180 and 180
+    :param lat: latitude, between -90 and 90
+    :return: [x, y, z] coordinates of the point on the unit sphere as np array
+    """
+    long0 = (long/180)*np.pi
+    lat0 = (lat/180)*np.pi
+
+    x = np.cos(lat0) * np.cos(long0)
+    y = np.cos(lat0) * np.sin(long0)
+    z = np.sin(lat0)
+    return np.array([x, y, z])
+
+
+def spherical_to_long_lat(x, y, z):
+    """
+    This function converts spherical coordinates (with radius 1) to longitude and latitude,
+    inverse of long_lat_to_spherical
+    :param x: x coordinate on unit sphere
+    :param y: y coordinate on unit sphere
+    :param z: z coordinate on unit sphere
+    :return: longitude, latitude
+    """
+    lat = (np.arcsin(z)*180)/np.pi
+    long = (np.arctan2(y, x)*180)/np.pi
+    return long, lat
+
+
+def normalize(v):
+    """
+    This function normalizes a vector v to be of unit length, unless v = 0
+    :param v: vector v
+    :return: unit vector in the direction of v or 0 if v = 0
+    """
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v
+    return v / norm
+
+
 def closest_geographical_distance(point_longitude: float, point_latitude: float, points: List[Tuple[float, float]],
                                   starting_point=None):
     """
