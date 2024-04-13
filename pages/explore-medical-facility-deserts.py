@@ -78,53 +78,53 @@ st.markdown("""
 if facility == 'Pharmacy chains':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a CVS/Walgreeens/Walmart pharmacy and with over p% of the population living 
+        that is more than $n$ miles away from a CVS/Walgreeens/Walmart pharmacy and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Urgent care centers':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from an urgent care center and with over p% of the population living 
+        that is more than $n$ miles away from an urgent care center and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Hospitals':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a hospital and with over p% of the population living 
+        that is more than $n$ miles away from a hospital and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Nursing homes':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a nursing home and with over p% of the population living 
+        that is more than $n$ miles away from a nursing home and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Private schools':
     st.markdown("""
         Let's define an **education desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a private school and with over p% of the population living 
+        that is more than $n$ miles away from a private school and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Banks':
     st.markdown("""
         Let's define a **banking desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation#:~:text=The%20Federal%20Deposit%20Insurance%20Corporation,in%20the%20American%20banking%20system.) and with over p% of the population living 
+        that is more than $n$ miles away from an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation#:~:text=The%20Federal%20Deposit%20Insurance%20Corporation,in%20the%20American%20banking%20system.) and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Child care centers':
     st.markdown("""
         Let's define a **facility desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a child care center and with over p% of the population living 
+        that is more than $n$ miles away from a child care center and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 elif facility == 'Logistics chains':
     st.markdown("""
         Let's define a **logistics desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
-        that is more than n miles away from a FedEx/UPS/DHL facility and with over p% of the population living 
+        that is more than $n$ miles away from a FedEx/UPS/DHL facility and with over $p$% of the population living 
         below the poverty line.
     """, unsafe_allow_html=True)
 
-poverty_threshold = st.sidebar.slider(r'Choose poverty threshold p%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
+poverty_threshold = st.sidebar.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
 distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=4.0, step=0.5, key='distance_threshold')
 
 show_deserts = st.sidebar.checkbox('Show ' + desert_type.lower() + ' deserts', value=True)
@@ -407,8 +407,8 @@ with col1:
     st.plotly_chart(fig, use_container_width=True, config=config)
 
 with col2:
-    st.caption(f'**Figure**: Census blockgroups classified as ' + str(desert_type.lower()) + ' deserts in ' + state_name + '. '
-                                                                                                                           f'Colored by racial majority.')
+    st.caption(f'**Figure**: Census blockgroups classified as ' + str(desert_type.lower()) + ' deserts in ' + state_name
+               + '. Colored by racial/ethnic majority.')
 
     st.write('**' + str(len(desert_df)) + '** of the **' + str(len(census_df)) + '** blockgroups in ' + state_name +
              ' are ' + str(desert_type.lower()) + ' deserts.')
@@ -429,8 +429,8 @@ with col2:
 
 # st.markdown("""
 #     This app visualizes **facility deserts** in the US.
-#     A medical desert is a US census blockgroup that is more than n miles away from a facility and
-#     with over p% of the population living below the poverty line.
+#     A medical desert is a US census blockgroup that is more than $n$ miles away from a facility and
+#     with over $p$% of the population living below the poverty line.
 # """)
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'

@@ -40,7 +40,6 @@ st.markdown("""
     <br>
     """, unsafe_allow_html=True)
 
-
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -52,7 +51,7 @@ with col1:
             poverty and other social disparities. The US department of agriculture has identified areas with limited
             access to grocery stores as [food deserts](https://www.ers.usda.gov/data-products/food-access-research-atlas/go-to-the-atlas/).
             \n 
-            This app helps visualize 'deserts' for other critical facilities.
+            This app helps visualize potential 'deserts' for other critical facilities.
             """
         )
 
@@ -82,7 +81,7 @@ with col1:
 
     with st.expander('What are Voronoi cells?', expanded=True):
         st.markdown("""
-            Voronoi cells are polygons that partition a plane into regions based on the distance to facilities. Each
+            [Voronoi cells](https://en.wikipedia.org/wiki/Voronoi_diagram) are polygons that partition a plane into regions based on the distance to facilities. Each
             Voronoi cell contains points that are closer to a particular facility than any other. They provide a way to
             visualize the density of facilities in a region. \n
             
@@ -148,8 +147,10 @@ with col1:
 
 
 with col2:
-    with st.expander('How can I use this?', expanded=True):
-        st.page_link(page='pages/explore-medical-facility-deserts.py', label='Click here to explore', use_container_width=True)
+    with st.container(border=True):
+        page_name = 'pages/explore-medical-facility-deserts.py'
+        page_label = """**Click here to explore**"""
+        st.page_link(page=page_name, label=page_label, use_container_width=True)
 
     with st.expander('How are facility deserts identified?', expanded=True):
         st.markdown("""
@@ -240,18 +241,18 @@ with col2:
         st.plotly_chart(fig, use_container_width=True, config=config)
         st.markdown("""
             Circles represent blockgroups classified as facility deserts and are colored by their racial majority.
+            You can click on the legend to toggle the display of different racial categories.
             """
         )
 
-    with st.expander('Tell me about racial categories', expanded=True):
+    with st.expander('Tell me about racial/ethnic categories', expanded=True):
         st.markdown("""
-            The racial majority in a blockgroup is determined by the population that constitutes the majority of the blockgroup. 
-            The categories are:
+            The racial/ethnic majority in a blockgroup is one of the following seven categories:
             1. White alone
             2. Black or African American alone
-            3. American Indian and Alaska Native alone
+            3. American Indian or Alaska Native (AIAN) alone
             4. Asian alone
-            5. Native Hawaiian and Other Pacific Islander alone
+            5. Native Hawaiian or Other Pacific Islander (NHOPI) alone
             6. Hispanic
             7. Other or no racial majority"""
         )
