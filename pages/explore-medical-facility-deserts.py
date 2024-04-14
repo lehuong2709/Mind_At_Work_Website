@@ -125,7 +125,7 @@ elif facility == 'Logistics chains':
     """, unsafe_allow_html=True)
 
 poverty_threshold = st.sidebar.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
-distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=4.0, step=0.5, key='distance_threshold')
+distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=3.0, step=0.5, key='distance_threshold')
 
 show_deserts = st.sidebar.checkbox('Show ' + desert_type.lower() + ' deserts', value=True)
 if facility == 'Pharmacy chains':
