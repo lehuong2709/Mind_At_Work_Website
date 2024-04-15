@@ -65,7 +65,7 @@ with col1:
         size='sm',
     )
     if mode == 'Explore':
-        switch_page("Explore")
+        switch_page("explore-medical-facility-deserts")
 
     # with st.container(border=True):
     #     page_name = 'pages/explore-medical-facility-deserts.py'
