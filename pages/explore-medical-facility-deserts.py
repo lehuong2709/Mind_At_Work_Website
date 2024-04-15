@@ -189,11 +189,26 @@ with col1:
     census_df = State.get_census_data(level='blockgroup')
     census_df['racial_majority'] = census_df['racial_majority'].astype(str)
 
+    if facility == 'Pharmacy chains':
+        distance_label = 'Closest_Distance_Pharmacies_Top3'
+    elif facility == 'Urgent care centers':
+        distance_label = 'Closest_Distance_Urgent_Care_Centers'
+    elif facility == 'Hospitals':
+        distance_label = 'Closest_Distance_Hospitals'
+    elif facility == 'Nursing homes':
+        distance_label = 'Closest_Distance_Nursing_Homes'
+    elif facility == 'Private schools':
+        distance_label = 'Closest_Distance_Private_Schools'
+    elif facility == 'Banks':
+        distance_label = 'Closest_Distance_Banks'
+    elif facility == 'Child care centers':
+        distance_label = 'Closest_Distance_Childcare'
+
     if not urban_rural:
-        desert_df = census_df[(census_df['below_poverty'] >= poverty_threshold) & (census_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold)]
+        desert_df = census_df[(census_df['below_poverty'] >= poverty_threshold) & (census_df[distance_label] >= distance_threshold)]
     else:
-        desert_df = census_df[((census_df['below_poverty'] >= poverty_threshold) & (census_df['urban']) & (census_df['Closest_Distance_Pharmacies_Top3'] >= urban_distance_threshold)) |
-                              ((census_df['below_poverty'] >= poverty_threshold) & (~census_df['urban']) & (census_df['Closest_Distance_Pharmacies_Top3'] >= rural_distance_threshold))]
+        desert_df = census_df[((census_df['below_poverty'] >= poverty_threshold) & (census_df['urban']) & (census_df[distance_label] >= urban_distance_threshold)) |
+                              ((census_df['below_poverty'] >= poverty_threshold) & (~census_df['urban']) & (census_df[distance_label] >= rural_distance_threshold))]
 
     # if facility == 'Pharmacy chains':
     #     desert_df = desert_df[desert_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold]
