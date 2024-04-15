@@ -10,7 +10,10 @@ from src.usa.facilities_data_handler import (
 import streamlit as st
 import streamlit_antd_components as sac
 from streamlit_extras.switch_page_button import switch_page
+from st_pages import Page
 
+# About = Page("medical-facility-deserts.py", "About", None)
+# Explore = Page("pages/explore-medical-facility-deserts.py", "Explore", None)
 
 scatter_palette = [
     '#007fee',          # Blue
@@ -49,7 +52,7 @@ with st.sidebar:
         size='sm',
     )
     if mode == 'About':
-        switch_page("About")
+        switch_page("medical-facility-deserts")
 
 
 facilities = ['Pharmacy chains', 'Urgent care centers', 'Hospitals', 'Nursing homes', 'Private schools',
