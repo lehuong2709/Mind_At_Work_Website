@@ -147,8 +147,8 @@ poverty_threshold = st.sidebar.slider(r'Choose poverty threshold $p$%', min_valu
 urban_rural = st.sidebar.checkbox('Use separate urban/rural distances', value=False)
 if urban_rural:
     col_side1, col_side2 = st.sidebar.columns(2)
-    urban_distance_threshold = col_side1.slider(r'Choose urban distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=2.0, step=0.5, key='urban_distance_threshold')
-    rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=5.0, step=0.5, key='rural_distance_threshold')
+    urban_distance_threshold = col_side1.slider(r'Choose urban distance threshold $n$ miles', min_value=0.0, max_value=15.0, value=2.0, step=0.5, key='urban_distance_threshold')
+    rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=30.0, value=5.0, step=0.5, key='rural_distance_threshold')
 else:
     distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=3.0, step=0.5, key='distance_threshold')
 
