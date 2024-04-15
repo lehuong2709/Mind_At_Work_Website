@@ -179,4 +179,10 @@ data/test/*
 
 # Secret streamlit file
 .streamlit/secrets.toml
+streamlit-test-buttons.py
+
+# Data
+data/usa/Urban_Areas_7762479760217047401/*
+data/usa/Urban_Areas_7762479760217047401.zip
+
 

@@ -20,22 +20,41 @@ LAND_COLOR_SECONDARY = '#fbfcf9'            # soft white, for other landmass
 BOUNDARY_COLOR = '#818181'                  # gray, for boundaries
 
 # A color cycle for color-blind friendly plots
+# scatter_palette = [
+#     '#609fd5',          # Cornflower Blue
+#     '#7cbd95',          # Sea Green
+#     '#BBF080',          # Light Lime
+#     '#ffbb7f',          # Light Orange
+#     '#89e5b9',          # Light Sea Green
+#     '#bd89e5',          # Lavender Purple
+#     '#ef7476',          # Coral
+#     '#558367',          # Forest Green
+#     '#344b76',          # Dark Slate Blue
+#     '#fff08a',          # Pale Yellow
+#     '#967117',          # Olive
+#     '#f7cad5',          # Pale Pink
+#     '#bbbbbb',          # Gray
+#     '#f79abc',          # Orchid Pink
+# ]
+
+# A color cycle for color-blind friendly plots
 scatter_palette = [
-    '#609fd5',          # Cornflower Blue
-    '#7cbd95',          # Sea Green
-    '#BBF080',          # Light Lime
-    '#ffbb7f',          # Light Orange
-    '#89e5b9',          # Light Sea Green
-    '#bd89e5',          # Lavender Purple
-    '#ef7476',          # Coral
-    '#558367',          # Forest Green
-    '#344b76',          # Dark Slate Blue
-    '#fff08a',          # Pale Yellow
-    '#967117',          # Olive
-    '#f7cad5',          # Pale Pink
-    '#bbbbbb',          # Gray
-    '#f79abc',          # Orchid Pink
+    '#007fee',          # Blue
+    '#21d565',          # Green
+    '#ffe00a',          # Yellow
+    '#ff7700',          # Orange
+    '#8bff08',          # Lime
+    '#9918fe',          # Purple
+    '#ff0004',          # Red
+    '#179c49',          # Dark Green
+    '#00318f',          # Dark Blue
+    '#ff1f70',          # Pink
+    '#af7b00',          # Brown
+    '#ff517c',          # Light Pink
+    '#d36969',          # Light Red
+    '#18fe90'           # Light Green
 ]
+
 
 facility_palette = [
     '#8B0000',           # Dark Red

@@ -8,6 +8,8 @@ from src.usa.facilities_data_handler import (
     CVS, Walgreens, Walmart, UrgentCare, Hospitals, DialysisCenters, NursingHomes,
     ChildCare, PrivateSchools, FDICInsuredBanks, DHL, UPS, FedEx)
 import streamlit as st
+import streamlit_antd_components as sac
+from streamlit_extras.switch_page_button import switch_page
 
 
 scatter_palette = [
@@ -33,6 +35,22 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
                    'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
 
 st.set_page_config(layout='centered', initial_sidebar_state='expanded')
+
+with st.sidebar:
+    mode = None
+    mode = sac.buttons(
+        [sac.ButtonsItem(label='About', color='#c41636')],
+        index=None,
+        align='center',
+        use_container_width=True,
+        color='#c41636',
+        key=None,
+        variant='outline',
+        size='sm',
+    )
+    if mode == 'About':
+        switch_page("About")
+
 
 facilities = ['Pharmacy chains', 'Urgent care centers', 'Hospitals', 'Nursing homes', 'Private schools',
               'Banks', 'Child care centers', 'Logistics chains']
@@ -124,8 +142,27 @@ elif facility == 'Logistics chains':
         below the poverty line.
     """, unsafe_allow_html=True)
 
+# checkbox = sac.checkbox(
+#     items=[
+#         'item1',
+#         'item2',
+#         'item3',
+#     ],
+#     label='',
+#     align='center',
+#     index=[0, 1],
+# )
+# st.write(checkbox)
+
 poverty_threshold = st.sidebar.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
-distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=4.0, step=0.5, key='distance_threshold')
+
+urban_rural = st.sidebar.checkbox('Use separate urban/rural distances', value=False)
+if urban_rural:
+    col_side1, col_side2 = st.sidebar.columns(2)
+    urban_distance_threshold = col_side1.slider(r'Choose urban distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=2.0, step=0.5, key='urban_distance_threshold')
+    rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=5.0, step=0.5, key='rural_distance_threshold')
+else:
+    distance_threshold = st.sidebar.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=3.0, step=0.5, key='distance_threshold')
 
 show_deserts = st.sidebar.checkbox('Show ' + desert_type.lower() + ' deserts', value=True)
 if facility == 'Pharmacy chains':
@@ -164,23 +201,28 @@ with col1:
     census_df = State.get_census_data(level='blockgroup')
     census_df['racial_majority'] = census_df['racial_majority'].astype(str)
 
-    desert_df = census_df[census_df['below_poverty'] >= poverty_threshold]
-    if facility == 'Pharmacy chains':
-        desert_df = desert_df[desert_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold]
-    elif facility == 'Urgent care centers':
-        desert_df = desert_df[desert_df['Closest_Distance_Urgent_Care_Centers'] >= distance_threshold]
-    elif facility == 'Hospitals':
-        desert_df = desert_df[desert_df['Closest_Distance_Hospitals'] >= distance_threshold]
-    elif facility == 'Nursing homes':
-        desert_df = desert_df[desert_df['Closest_Distance_Nursing_Homes'] >= distance_threshold]
-    elif facility == 'Private schools':
-        desert_df = desert_df[desert_df['Closest_Distance_Private_Schools'] >= distance_threshold]
-    elif facility == 'Banks':
-        desert_df = desert_df[desert_df['Closest_Distance_Banks'] >= distance_threshold]
-    elif facility == 'Child care centers':
-        desert_df = desert_df[desert_df['Closest_Distance_Childcare'] >= distance_threshold]
-    elif facility == 'Logistics chains':
-        desert_df = desert_df[desert_df['Closest_Distance_Logistical_Top3'] >= distance_threshold]
+    if not urban_rural:
+        desert_df = census_df[(census_df['below_poverty'] >= poverty_threshold) & (census_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold)]
+    else:
+        desert_df = census_df[((census_df['below_poverty'] >= poverty_threshold) & (census_df['urban']) & (census_df['Closest_Distance_Pharmacies_Top3'] >= urban_distance_threshold)) |
+                              ((census_df['below_poverty'] >= poverty_threshold) & (~census_df['urban']) & (census_df['Closest_Distance_Pharmacies_Top3'] >= rural_distance_threshold))]
+
+    # if facility == 'Pharmacy chains':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold]
+    # elif facility == 'Urgent care centers':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Urgent_Care_Centers'] >= distance_threshold]
+    # elif facility == 'Hospitals':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Hospitals'] >= distance_threshold]
+    # elif facility == 'Nursing homes':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Nursing_Homes'] >= distance_threshold]
+    # elif facility == 'Private schools':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Private_Schools'] >= distance_threshold]
+    # elif facility == 'Banks':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Banks'] >= distance_threshold]
+    # elif facility == 'Child care centers':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Childcare'] >= distance_threshold]
+    # elif facility == 'Logistics chains':
+    #     desert_df = desert_df[desert_df['Closest_Distance_Logistical_Top3'] >= distance_threshold]
 
     randomly_shuffled_indices = list(range(1, 8))
     random.shuffle(randomly_shuffled_indices)
@@ -420,7 +462,7 @@ with col2:
             overall_percent_str = str(round(racial_fractions_overall[str(i)] * 100, 2))
             desert_percent_str = str(round(racial_fractions_deserts[str(i)] * 100, 2))
             st.write('Majority ' + str(racial_label_dict[i]) + ' blockgroups make up :red[' + desert_percent_str + '%] '
-                     'of ' + desert_type.lower() + ' deserts in ' + state_name + ' while being only :blue[' +
+                                                                                                                   'of ' + desert_type.lower() + ' deserts in ' + state_name + ' while being only :blue[' +
                      overall_percent_str + '%] of all blockgroups.')
             # st.write(desert_type + ' deserts in ' + state_name + ' may disproportionately affect the ' +
             #          str(racial_label_dict[i]) + ' population, with :red[' + desert_percent_str + '%] of these deserts '

@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 from src.usa.facilities_data_handler import Hospitals
 import geopandas as gpd
 from st_pages import Page, add_page_title, show_pages
+from streamlit_extras.switch_page_button import switch_page
+import streamlit_antd_components as sac
 
 scatter_palette = [
     '#007fee',          # Blue
@@ -24,14 +26,18 @@ scatter_palette = [
 ]
 
 
-st.set_page_config(layout='wide')
+st.set_page_config(initial_sidebar_state='collapsed')
 
-show_pages(
-    [
-        Page("medical-facility-deserts.py", "About", None),
-        Page("pages/explore-medical-facility-deserts.py", "Explore", None),
-    ]
-)
+
+About = Page("medical-facility-deserts.py", "About", None)
+Explore = Page("pages/explore-medical-facility-deserts.py", "Explore", None)
+
+# show_pages(
+#     [
+#         Page("medical-facility-deserts.py", "About", None),
+#         Page("pages/explore-medical-facility-deserts.py", "Explore", None),
+#     ]
+# )
 
 st.markdown("""
     <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; line-height: 1.0;">
@@ -40,13 +46,31 @@ st.markdown("""
     <br>
     """, unsafe_allow_html=True)
 
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    with st.container(border=True):
-        page_name = 'pages/explore-medical-facility-deserts.py'
-        page_label = """:blue[**Click here to explore**]"""
-        st.page_link(page=page_name, label=page_label, use_container_width=True)
+    mode = None
+    # button = st.button('Explore')
+    # if button:
+    #     switch_page("Explore")
+    mode = sac.buttons(
+        [sac.ButtonsItem(label='Explore', color='#c41636')],
+        index=None,
+        align='center',
+        use_container_width=True,
+        color='#c41636',
+        key=None,
+        variant='filled',
+        size='sm',
+    )
+    if mode == 'Explore':
+        switch_page("Explore")
+
+    # with st.container(border=True):
+    #     page_name = 'pages/explore-medical-facility-deserts.py'
+    #     page_label = """:blue[**Click here to explore**]"""
+    #     st.page_link(page=page_name, label=page_label, use_container_width=True)
 
     with st.expander('What is this?', expanded=True):
         st.markdown("""
@@ -58,7 +82,7 @@ with col1:
             \n 
             This app helps visualize potential 'deserts' for other critical facilities.
             """
-        )
+                    )
 
     with st.expander('What are the facilities considered?', expanded=True):
         st.markdown("""
@@ -70,7 +94,7 @@ with col1:
             6. Banks
             7. Child care centers
             8. Logistics chains FedEx/UPS/USPS. """
-    )
+                    )
 
     with st.expander('Tell me about racial/ethnic categories', expanded=True):
         st.markdown("""
@@ -94,7 +118,7 @@ with col1:
         st.markdown("""
             The data used in this project is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/) and
             [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database."""
-        )
+                    )
 
     with st.expander('Limitations', expanded=True):
         st.markdown("""
@@ -119,7 +143,7 @@ with col2:
             
             As an example, consider hospitals in Colorado:
             """
-        )
+                    )
         col21, col22 = st.columns([1, 1])
         with col21:
             poverty_threshold = st.slider('Choose poverty threshold (%)', min_value=0, max_value=100, value=10, step=5)
@@ -201,7 +225,7 @@ with col2:
             Circles represent blockgroups classified as facility deserts and are colored by their racial majority.
             You can click on the legend to toggle the display of different racial categories.
             """
-        )
+                    )
 
     with st.expander('What are Voronoi cells?', expanded=True):
         st.markdown("""
@@ -268,4 +292,3 @@ with col2:
             showlegend=False,
         )
         st.plotly_chart(fig, use_container_width=True, config=config)
-

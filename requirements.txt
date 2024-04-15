@@ -12,3 +12,6 @@ st-pages
 topojson
 tqdm
 altair
+streamlit-pills
+streamlit-antd-components
+streamlit-extras
