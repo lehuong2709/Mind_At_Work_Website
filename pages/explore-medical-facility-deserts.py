@@ -464,9 +464,10 @@ with col2:
 # """)
 
 with st.sidebar:
+    st.write('\n')
     mode = None
     mode = sac.buttons(
-        [sac.ButtonsItem(label='About', color='#c41636')],
+        [sac.ButtonsItem(label='About this app', color='#c41636')],
         index=None,
         align='center',
         use_container_width=True,
@@ -475,7 +476,7 @@ with st.sidebar:
         variant='outline',
         size='sm',
     )
-    if mode == 'About':
+    if mode == 'About this app':
         switch_page("medical-facility-deserts")
 
 
