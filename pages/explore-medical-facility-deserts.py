@@ -39,21 +39,6 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
 
 st.set_page_config(layout='centered', initial_sidebar_state='expanded')
 
-with st.sidebar:
-    mode = None
-    mode = sac.buttons(
-        [sac.ButtonsItem(label='About', color='#c41636')],
-        index=None,
-        align='center',
-        use_container_width=True,
-        color='#c41636',
-        key=None,
-        variant='outline',
-        size='sm',
-    )
-    if mode == 'About':
-        switch_page("medical-facility-deserts")
-
 
 facilities = ['Pharmacy chains', 'Urgent care centers', 'Hospitals', 'Nursing homes', 'Private schools',
               'Banks', 'Child care centers', 'Logistics chains']
@@ -477,6 +462,22 @@ with col2:
 #     A medical desert is a US census blockgroup that is more than $n$ miles away from a facility and
 #     with over $p$% of the population living below the poverty line.
 # """)
+
+with st.sidebar:
+    mode = None
+    mode = sac.buttons(
+        [sac.ButtonsItem(label='About', color='#c41636')],
+        index=None,
+        align='center',
+        use_container_width=True,
+        color='#c41636',
+        key=None,
+        variant='outline',
+        size='sm',
+    )
+    if mode == 'About':
+        switch_page("medical-facility-deserts")
+
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
                    'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
