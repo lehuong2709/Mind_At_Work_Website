@@ -464,7 +464,7 @@ with col2:
 # """)
 
 with st.sidebar:
-    st.write('\n')
+    st.markdown("""<br>""", unsafe_allow_html=True)
     mode = None
     mode = sac.buttons(
         [sac.ButtonsItem(label='About this app', color='#c41636')],
