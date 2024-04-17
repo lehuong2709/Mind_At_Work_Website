@@ -2,6 +2,7 @@ from datetime import datetime
 import geopandas as gpd
 import plotly.graph_objects as go
 import random
+from src.constants import MILES_TO_KM
 from src.usa.constants import state_names, racial_label_dict
 from src.usa.states import USAState
 from src.usa.facilities_data_handler import (
@@ -36,9 +37,9 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
 
 st.set_page_config(layout='centered', initial_sidebar_state='expanded')
 
-st.sidebar.caption('This tool aims to identify potentially vulnerable areas in the US with low access to various critical '
-                   'facilities. We define these areas by high poverty rates and large distances to facilities.'
-                   ' You can choose the distance threshold and poverty rate to identify these areas.', )
+st.sidebar.caption('This tool aims to identify potentially vulnerable areas in the US with low access to '
+                   'various critical facilities. We define these areas by high poverty rates and large distances '
+                   'to facilities. You can choose the distance threshold and poverty rate to identify these areas.')
 
 # Get the current day of the year
 day_of_year = datetime.now().timetuple().tm_yday
@@ -140,8 +141,11 @@ with st.sidebar:
             col_side1, col_side2 = st.columns(2)
             urban_distance_threshold = col_side1.slider(r'Choose urban distance threshold $n$ miles', min_value=0.0, max_value=15.0, value=2.0, step=0.5, key='urban_distance_threshold')
             rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=30.0, value=5.0, step=0.5, key='rural_distance_threshold')
+            urban_distance_threshold = MILES_TO_KM * urban_distance_threshold
+            rural_distance_threshold = MILES_TO_KM * rural_distance_threshold
         else:
             distance_threshold = st.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=3.0, step=0.5, key='distance_threshold')
+            distance_threshold = MILES_TO_KM * distance_threshold
 
 col1, col2 = st.columns([3, 2], gap='medium')
 
@@ -207,38 +211,8 @@ with col1:
         desert_df = census_df[((census_df['below_poverty'] >= poverty_threshold) & (census_df['urban']) & (census_df[distance_label] >= urban_distance_threshold)) |
                               ((census_df['below_poverty'] >= poverty_threshold) & (~census_df['urban']) & (census_df[distance_label] >= rural_distance_threshold))]
 
-    # if facility == 'Pharmacy chains':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Pharmacies_Top3'] >= distance_threshold]
-    # elif facility == 'Urgent care centers':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Urgent_Care_Centers'] >= distance_threshold]
-    # elif facility == 'Hospitals':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Hospitals'] >= distance_threshold]
-    # elif facility == 'Nursing homes':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Nursing_Homes'] >= distance_threshold]
-    # elif facility == 'Private schools':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Private_Schools'] >= distance_threshold]
-    # elif facility == 'Banks':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Banks'] >= distance_threshold]
-    # elif facility == 'Child care centers':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Childcare'] >= distance_threshold]
-    # elif facility == 'Logistics chains':
-    #     desert_df = desert_df[desert_df['Closest_Distance_Logistical_Top3'] >= distance_threshold]
-
     randomly_shuffled_indices = list(range(1, 8))
     random.shuffle(randomly_shuffled_indices)
-
-    # if show_deserts:
-    #     fig.add_trace(
-    #         go.Scattergeo(
-    #             lon=census_df['Longitude'],
-    #             lat=census_df['Latitude'],
-    #             mode='markers',
-    #             marker=dict(
-    #                 size=4,
-    #                 color='lightgray',
-    #                 opacity=0.8,
-    #                 symbol='circle',
-    #     )))
 
     for i in randomly_shuffled_indices:
         census_df_i = census_df[census_df['racial_majority'] == str(i)]
@@ -465,19 +439,8 @@ with col2:
                      + desert_type.lower() + ' deserts in ' + state_name + ': they make up :red[' + desert_percent_str +
                      '%] of ' + desert_type.lower() + ' deserts in ' + state_name + ' while being only :blue[' +
                      overall_percent_str + '%] of all blockgroups.')
-            # st.write(desert_type + ' deserts in ' + state_name + ' may disproportionately affect the ' +
-            #          str(racial_label_dict[i]) + ' population, with :red[' + desert_percent_str + '%] of these deserts '
-            #                                                                                       'being majority ' + str(racial_label_dict[i]) + ' compared to just :blue[' + overall_percent_str +
-            #          '%] of all blockgroups.')
-
-# st.markdown("""
-#     This app visualizes **facility deserts** in the US.
-#     A medical desert is a US census blockgroup that is more than $n$ miles away from a facility and
-#     with over $p$% of the population living below the poverty line.
-# """)
 
 with st.sidebar:
-    # st.markdown("""<br>""", unsafe_allow_html=True)
     mode = None
     mode = sac.buttons(
         [sac.ButtonsItem(label='Explainer', color='#c41636')],
@@ -516,7 +479,5 @@ st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.git
 #         """
 #     )
 
-
-#%%
 
 
