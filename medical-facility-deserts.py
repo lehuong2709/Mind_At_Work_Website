@@ -11,6 +11,8 @@ from src.usa.facilities_data_handler import (
 import streamlit as st
 import streamlit_antd_components as sac
 from streamlit_extras.switch_page_button import switch_page
+import pandas as pd
+import plotly.express as px
 
 
 scatter_palette = [
@@ -86,61 +88,61 @@ if facility == 'Pharmacy chains':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a CVS/Walgreeens/Walmart pharmacy and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Urgent care centers':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from an urgent care center and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Hospitals':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a hospital and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Nursing homes':
     st.markdown("""
         Let's define a **medical desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a nursing home and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Private schools':
     st.markdown("""
         Let's define an **education desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a private school and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Banks':
     st.markdown("""
         Let's define a **banking desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation#:~:text=The%20Federal%20Deposit%20Insurance%20Corporation,in%20the%20American%20banking%20system.) and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Child care centers':
     st.markdown("""
         Let's define a **facility desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a child care center and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 elif facility == 'Logistics chains':
     st.markdown("""
         Let's define a **logistics desert** as a US census [blockgroup](https://en.wikipedia.org/wiki/Census_block_group) 
         that is more than $n$ miles away from a FedEx/UPS/DHL facility and with over $p$% of the population living 
-        below the poverty line. Choose these numbers in the sidebar.
+        below the poverty line. Choose these numbers from the sidebar.
     """, unsafe_allow_html=True)
 
 with st.sidebar:
     with st.container(border=True):
-        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=30, step=5, key='poverty_threshold')
+        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=20, step=5, key='poverty_threshold')
 
     with st.container(border=True):
-        urban_rural = st.checkbox('Use separate urban/rural distances', value=False)
+        urban_rural = st.checkbox('Use separate urban/rural distances', value=True)
         if urban_rural:
             col_side1, col_side2 = st.columns(2)
             urban_distance_threshold = col_side1.slider(r'Choose urban distance threshold $n$ miles', min_value=0.0, max_value=15.0, value=2.0, step=0.5, key='urban_distance_threshold')
-            rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=30.0, value=5.0, step=0.5, key='rural_distance_threshold')
+            rural_distance_threshold = col_side2.slider(r'Choose rural distance threshold $n$ miles', min_value=0.0, max_value=30.0, value=8.0, step=1.0, key='rural_distance_threshold')
             urban_distance_threshold = MILES_TO_KM * urban_distance_threshold
             rural_distance_threshold = MILES_TO_KM * rural_distance_threshold
         else:
@@ -178,15 +180,80 @@ with col2:
             show_voronoi_cells = False
 
 
+def plot_state_boundary(fig, state_abbreviation):
+    data = pd.DataFrame({
+        'state': ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+                  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+                  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+                  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+                  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'],
+        'value': [1] * 50  # Default value for all states
+    })
+    # Set a different value for the state to highlight it
+    data.loc[data['state'] == state_abbreviation, 'value'] = 2
+
+    # Create the choropleth map
+    # choropleth = px.choropleth(
+    #     data_frame=data,
+    #     locations='state',
+    #     locationmode='USA-states',
+    #     color='value',
+    #     color_continuous_scale=["#fbfcf9", "#f9f3e1"],
+    #     scope="north america",
+    # )
+    choropleth = go.Choropleth(
+        locations=data['state'],  # Spatial coordinates
+        z=data['value'].astype(float),  # Data to be color-coded
+        locationmode='USA-states',  # Set of locations match entries in `locations`
+        colorscale=["#fbfcf9", "#f9f3e1"],  # Color scale for the choropleth map
+        showscale=False,
+    )
+
+    # Add the choropleth map to the figure
+    fig.add_trace(choropleth)
+
+    return fig
+
+
+def get_bounds(state_name, blockgroup_df):
+    min_x = blockgroup_df['Longitude'].min()
+    max_x = blockgroup_df['Longitude'].max()
+    min_y = blockgroup_df['Latitude'].min()
+    max_y = blockgroup_df['Latitude'].max()
+
+    x_span = max_x - min_x
+    y_span = max_y - min_y
+    x_pad = x_span * 0.05
+    y_pad = y_span * 0.05
+
+    bounds = [min_x, min_y, max_x, max_y]
+
+    bounds[0], bounds[2] = bounds[0] - x_pad, bounds[2] + x_pad
+    bounds[1], bounds[3] = bounds[1] - y_pad, bounds[3] + y_pad
+
+    if state_name == 'Alaska':
+        bounds[0] = -180
+        bounds[2] = -125
+        bounds[3] = bounds[3] + y_pad
+
+    if state_name == 'Hawaii':
+        bounds[0] = -162
+        bounds[3] = 23
+
+    return bounds
+
+
 with col1:
+    census_df = State.get_census_data(level='blockgroup')
+    census_df['racial_majority'] = census_df['racial_majority'].astype(str)
+
     fig = go.Figure()
-    fig, bounds = State.plot_state_boundary(fig)
+    # fig, bounds = State.plot_state_boundary(fig)
+    fig = plot_state_boundary(fig, state_abbr)
+    bounds = get_bounds(state_name, census_df)
 
     racial_fractions_overall = {'1': 0.0, '2': 0.0, '3': 0.0, '4': 0.0, '5': 0.0, '6': 0.0, '7': 0.0}
     racial_fractions_deserts = {'1': 0.0, '2': 0.0, '3': 0.0, '4': 0.0, '5': 0.0, '6': 0.0, '7': 0.0}
-
-    census_df = State.get_census_data(level='blockgroup')
-    census_df['racial_majority'] = census_df['racial_majority'].astype(str)
 
     if facility == 'Pharmacy chains':
         distance_label = 'Closest_Distance_Pharmacies_Top3'
@@ -394,15 +461,20 @@ with col1:
     }
 
     fig.update_geos(
-        showland=False,
-        showcoastlines=False,
+        showland=True,
+        showcoastlines=True,
         showframe=False,
-        showocean=False,
-        showcountries=False,
+        showocean=True,
+        showcountries=True,
+        showlakes=True,
+        lakecolor='#a4b8b7',
+        oceancolor='#a4b8b7',
+        landcolor='#fbfcf9',
+        scope="north america",
         lonaxis_range=[bounds[0], bounds[2]],
         lataxis_range=[bounds[1], bounds[3]],
         projection_type='mercator',
-        bgcolor='#a1b8b7',
+        # bgcolor='#a1b8b7',
     )
 
     fig.update_layout(

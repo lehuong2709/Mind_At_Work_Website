@@ -7,6 +7,7 @@ import geopandas as gpd
 from st_pages import Page, add_page_title, show_pages
 from streamlit_extras.switch_page_button import switch_page
 import streamlit_antd_components as sac
+import pandas as pd
 
 scatter_palette = [
     '#007fee',          # Blue
@@ -126,6 +127,69 @@ with col2:
         st.write('Released under Creative Commons BY-NC license, 2024.')
 
 
+def plot_state_boundary(fig, state_abbreviation):
+    data = pd.DataFrame({
+        'state': ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+                  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+                  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+                  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+                  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'],
+        'value': [1] * 50  # Default value for all states
+    })
+    # Set a different value for the state to highlight it
+    data.loc[data['state'] == state_abbreviation, 'value'] = 2
+
+    # Create the choropleth map
+    # choropleth = px.choropleth(
+    #     data_frame=data,
+    #     locations='state',
+    #     locationmode='USA-states',
+    #     color='value',
+    #     color_continuous_scale=["#fbfcf9", "#f9f3e1"],
+    #     scope="north america",
+    # )
+    choropleth = go.Choropleth(
+        locations=data['state'],  # Spatial coordinates
+        z=data['value'].astype(float),  # Data to be color-coded
+        locationmode='USA-states',  # Set of locations match entries in `locations`
+        colorscale=["#fbfcf9", "#f9f3e1"],  # Color scale for the choropleth map
+        showscale=False,
+    )
+
+    # Add the choropleth map to the figure
+    fig.add_trace(choropleth)
+
+    return fig
+
+
+def get_bounds(state_name, blockgroup_df):
+    min_x = blockgroup_df['Longitude'].min()
+    max_x = blockgroup_df['Longitude'].max()
+    min_y = blockgroup_df['Latitude'].min()
+    max_y = blockgroup_df['Latitude'].max()
+
+    x_span = max_x - min_x
+    y_span = max_y - min_y
+    x_pad = x_span * 0.05
+    y_pad = y_span * 0.05
+
+    bounds = [min_x, min_y, max_x, max_y]
+
+    bounds[0], bounds[2] = bounds[0] - x_pad, bounds[2] + x_pad
+    bounds[1], bounds[3] = bounds[1] - y_pad, bounds[3] + y_pad
+
+    if state_name == 'Alaska':
+        bounds[0] = -180
+        bounds[2] = -125
+        bounds[3] = bounds[3] + y_pad
+
+    if state_name == 'Hawaii':
+        bounds[0] = -162
+        bounds[3] = 23
+
+    return bounds
+
+
 with col1:
     with st.expander('How are facility deserts defined?', expanded=True):
         st.markdown("""
@@ -152,7 +216,8 @@ with col1:
         desert_df = desert_df[desert_df['Closest_Distance_Hospitals'] >= distance_threshold]
 
         fig = go.Figure()
-        fig, bounds = State.plot_state_boundary(fig)
+        fig = plot_state_boundary(fig, State.abbreviation)
+        bounds = get_bounds(state, census_df)
 
         for i in range(1, 8):
             census_df_i = census_df[census_df['racial_majority'] == str(i)]
@@ -238,7 +303,8 @@ with col1:
         census_df['racial_majority'] = census_df['racial_majority'].astype(str)
 
         fig = go.Figure()
-        fig, bounds = State.plot_state_boundary(fig)
+        fig = plot_state_boundary(fig, State.abbreviation)
+        bounds = get_bounds(state, census_df)
 
         hospitals = Hospitals.read_abridged_facilities()
         hospitals = gpd.clip(hospitals, mask=bounds)
