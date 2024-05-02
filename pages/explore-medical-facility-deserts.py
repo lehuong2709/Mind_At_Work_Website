@@ -27,7 +27,7 @@ scatter_palette = [
 ]
 
 
-st.set_page_config(initial_sidebar_state='collapsed')
+st.set_page_config(initial_sidebar_state='collapsed', layout='wide')
 
 
 About = Page("medical-facility-deserts.py", "About", None)
