@@ -429,7 +429,7 @@ with col1:
     elif facility == 'Logistics chains':
         dhl_color = '#8b1e2b'
         ups_color = '#521801'
-        fedex_color = '#cc4700'
+        fedex_color = '#4d148c'
         if show_logistics:
             fedex = FedEx.read_abridged_facilities()
             fedex = gpd.clip(fedex, mask=bounds)
