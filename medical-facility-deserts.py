@@ -428,7 +428,7 @@ with col1:
                                                 name=None, showlegend=False))
     elif facility == 'Logistics chains':
         dhl_color = '#8b1e2b'
-        ups_color = '#521801'
+        ups_color = '#cc9800'
         fedex_color = '#4d148c'
         if show_logistics:
             fedex = FedEx.read_abridged_facilities()
