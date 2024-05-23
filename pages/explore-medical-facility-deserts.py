@@ -27,7 +27,7 @@ scatter_palette = [
 ]
 
 
-st.set_page_config(initial_sidebar_state='collapsed')
+st.set_page_config(layout='wide', initial_sidebar_state='collapsed')
 
 
 About = Page("medical-facility-deserts.py", "About", None)
@@ -111,15 +111,23 @@ with col2:
     with st.expander('Data sources', expanded=True):
         st.markdown("""
             The data used in this project is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/) and
-            [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database."""
-                    )
+            [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database. \n                    
+            Data for [pharmacies](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::pharmacies-/about) is from 2010. \n
+            Data for [urgent care centers](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::urgent-care-facilities/about) is from 2009. \n
+            Data for [hospitals](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals/about) is from 2023. \n
+            Data for [nursing homes](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::nursing-homes/about) is from 2017. \n
+            Data for [private schools](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::private-schools/about) is from 2017. \n
+            Data for [FDIC insured banks](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::fdic-insured-banks/about) is from 2019. \n
+            Data for [Child care centers](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::child-care-centers/about) if from 2022. \n
+            [Census](https://data.census.gov/) data is from 2022. \n"""
+        )
 
     with st.expander('Limitations', expanded=True):
         st.markdown("""
             The results are indicative only and meant for educational purposes. Distances are approximate and based on 
             straight-line computations, and all people in a census blockgroup are assumed to be at its geometric center.
              Many other factors affect access to facilities, for example, public transportation,
-            road networks, rural-urban divide, and so on. \n
+            road networks, rural-urban divide, and so on. Data for some facilities is older than census data.\n
         """
                     )
 
@@ -139,15 +147,6 @@ def plot_state_boundary(fig, state_abbreviation):
     # Set a different value for the state to highlight it
     data.loc[data['state'] == state_abbreviation, 'value'] = 2
 
-    # Create the choropleth map
-    # choropleth = px.choropleth(
-    #     data_frame=data,
-    #     locations='state',
-    #     locationmode='USA-states',
-    #     color='value',
-    #     color_continuous_scale=["#fbfcf9", "#f9f3e1"],
-    #     scope="north america",
-    # )
     choropleth = go.Choropleth(
         locations=data['state'],  # Spatial coordinates
         z=data['value'].astype(float),  # Data to be color-coded
@@ -309,7 +308,7 @@ with col1:
         hospitals = Hospitals.read_abridged_facilities()
         hospitals = gpd.clip(hospitals, mask=bounds)
         fig.add_trace(go.Scattergeo(lon=hospitals.geometry.x, lat=hospitals.geometry.y, mode='markers',
-                                    marker=dict(size=2, color='black', opacity=0.8, symbol='x'),
+                                    marker=dict(size=4, color='black', opacity=0.8, symbol='x'),
                                     name='Hospital', showlegend=True))
 
         voronoi_df = gpd.read_file('data/usa/facilities/hospitals/voronoi_state_shapefiles/' + state_fips + '_voronoi.shp', index=False)
@@ -349,6 +348,13 @@ with col1:
             autosize=True,
             xaxis=dict(range=[bounds[0], bounds[2]], autorange=False),
             yaxis=dict(range=[bounds[1], bounds[3]], autorange=False),
-            showlegend=False,
+            showlegend=True,
+            legend=dict(
+                itemsizing='constant',
+                x=0.02,
+                y=1.00,
+                orientation='v',
+                bgcolor='rgba(255,255,255,0.5)',
+            )
         )
         st.plotly_chart(fig, use_container_width=True, config=config)

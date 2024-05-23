@@ -109,6 +109,12 @@ territories = list(territories_dictionary.keys())
 state_names = list(set(territories_dictionary.keys()).difference({'American Samoa', 'Guam', 'Puerto Rico',
                                                                   'Northern Mariana Islands', 'Virgin Islands'}))
 state_names.sort()
+populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Louisiana', 'Indiana',
+                   'Maryland', 'Colorado', 'North Carolina', 'South Carolina', 'Arizona', 'Florida',
+                   'California', 'Wisconsin', 'Texas', 'Missouri', 'Virginia',
+                   'Mississippi', 'New York', 'Kentucky', 'Michigan', 'Illinois', 'Georgia',
+                   'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
+
 
 
 # === Geographic ===

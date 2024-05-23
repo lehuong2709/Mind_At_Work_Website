@@ -173,6 +173,7 @@ cython_debug/
 *test.*
 data/test/*
 .local/test/*
+.archive
 
 # Local cache
 .local/
