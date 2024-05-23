@@ -173,6 +173,12 @@ cython_debug/
 *test.*
 data/test/*
 .local/test/*
+# Everything in folder .archive
+.archive
+.archive/*
+data/india
+data/usa/shapefiles
+
 
 # Local cache
 .local/
