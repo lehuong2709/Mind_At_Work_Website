@@ -3,7 +3,7 @@ import geopandas as gpd
 import plotly.graph_objects as go
 import random
 from src.constants import MILES_TO_KM, scatter_palette, facility_palette
-from src.usa.constants import state_names, populous_states
+from src.usa.constants import state_names, racial_label_dict, populous_states
 from src.usa.states import USAState
 from src.usa.facilities_data_handler import (
     CVS, Walgreens, Walmart, UrgentCare, Hospitals, DialysisCenters, NursingHomes,
@@ -12,6 +12,7 @@ import streamlit as st
 import streamlit_antd_components as sac
 from streamlit_extras.switch_page_button import switch_page
 import pandas as pd
+
 from utils import desert_types, get_message, distance_labels, show_location_labels, show_voronoi_labels, voronoi_file_names
 
 

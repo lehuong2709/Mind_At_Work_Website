@@ -174,6 +174,9 @@ cython_debug/
 data/test/*
 .local/test/*
 .archive
+.archive/*
+data/india
+data/usa/shapefiles
 
 # Local cache
 .local/
@@ -187,5 +190,5 @@ data/usa/Urban_Areas_7762479760217047401/*
 data/usa/Urban_Areas_7762479760217047401.zip
 
 
-streamlit-suggesting-facilities.py
+streamlit-suggesting-facilities-2.py
 test-stacked-bar-chart.py
