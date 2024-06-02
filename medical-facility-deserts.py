@@ -149,7 +149,7 @@ with st.sidebar:
             distance_threshold = st.slider(r'Choose distance threshold $n$ miles', min_value=0.0, max_value=25.0, value=3.0, step=0.5, key='distance_threshold')
             distance_threshold = MILES_TO_KM * distance_threshold
 
-col1, col2 = st.columns([3, 2], gap='medium')
+col1, col2 = st.columns([4, 2], gap='medium')
 
 with col2:
     with st.expander('Figure options'):
