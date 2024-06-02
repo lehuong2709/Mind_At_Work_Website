@@ -37,7 +37,7 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
                    'Mississippi', 'New York', 'Kentucky', 'Michigan', 'Illinois', 'Georgia',
                    'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
 
-st.set_page_config(layout='centered', initial_sidebar_state='expanded')
+st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 st.sidebar.caption('This tool aims to identify potentially vulnerable areas in the US with low access to '
                    'various critical facilities. We define these areas by high poverty rates and large distances '
