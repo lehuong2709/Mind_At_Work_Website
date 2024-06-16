@@ -10,7 +10,7 @@ from src.constants import ROOT_DIR
 CENSUS_DATA_PATH = os.path.join(ROOT_DIR, 'data', 'usa', 'census')           # Path to the census data
 SHAPEFILE_PATH = os.path.join(ROOT_DIR, 'data', 'usa', 'shapefiles')         # Path to the shapefiles
 PLOTS_PATH = os.path.join(ROOT_DIR, 'plots', 'usa')                          # Path to the plots
-FACILITIES_PATH = os.path.join(ROOT_DIR, 'data', 'usa', 'facilities')        # Path to the facilities data
+FACILITIES_PATH = os.path.join(ROOT_DIR, 'data', 'usa', 'existing_facilities')        # Path to the existing_facilities data
 
 # === Files ===
 USA_SHAPEFILE_WITH_STATES = os.path.join(SHAPEFILE_PATH, 'north_america_political_boundaries', 'Political_Boundaries__Area_.shp')
@@ -114,7 +114,9 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
                    'California', 'Wisconsin', 'Texas', 'Missouri', 'Virginia',
                    'Mississippi', 'New York', 'Kentucky', 'Michigan', 'Illinois', 'Georgia',
                    'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
-
+small_states = ['Alaska', 'Delaware', 'Hawaii', 'Idaho', 'Maine', 'Montana',
+                'Nebraska', 'New Hampshire', 'New Mexico', 'North Dakota', 'Rhode Island',
+                'South Dakota', 'Vermont', 'West Virginia', 'Wyoming']
 
 
 # === Geographic ===
@@ -131,3 +133,59 @@ waterbody_points = [Point(-130, 30),    # Pacific Ocean
                     Point(-87, 47),     # Lake Superior, USA side
                     Point(-87, 48),     # Lake Superior, Canada side
                     ]
+
+
+state_region_mapping = {
+    "Connecticut": "New England",
+    "Maine": "New England",
+    "Massachusetts": "New England",
+    "New Hampshire": "New England",
+    "Rhode Island": "New England",
+    "Vermont": "New England",
+    "New Jersey": "Mid-Atlantic",
+    "New York": "Mid-Atlantic",
+    "Pennsylvania": "Mid-Atlantic",
+    "Illinois": "East North Central",
+    "Indiana": "East North Central",
+    "Michigan": "East North Central",
+    "Ohio": "East North Central",
+    "Wisconsin": "East North Central",
+    "Iowa": "West North Central",
+    "Kansas": "West North Central",
+    "Minnesota": "West North Central",
+    "Missouri": "West North Central",
+    "Nebraska": "West North Central",
+    "North Dakota": "West North Central",
+    "South Dakota": "West North Central",
+    "Delaware": "South Atlantic",
+    "Florida": "South Atlantic",
+    "Georgia": "South Atlantic",
+    "Maryland": "South Atlantic",
+    "North Carolina": "South Atlantic",
+    "South Carolina": "South Atlantic",
+    "Virginia": "South Atlantic",
+    "West Virginia": "South Atlantic",
+    "District of Columbia": "South Atlantic",
+    "Alabama": "East South Central",
+    "Kentucky": "East South Central",
+    "Mississippi": "East South Central",
+    "Tennessee": "East South Central",
+    "Arkansas": "West South Central",
+    "Louisiana": "West South Central",
+    "Oklahoma": "West South Central",
+    "Texas": "West South Central",
+    "Arizona": "Mountain",
+    "Colorado": "Mountain",
+    "Idaho": "Mountain",
+    "Montana": "Mountain",
+    "Nevada": "Mountain",
+    "New Mexico": "Mountain",
+    "Utah": "Mountain",
+    "Wyoming": "Mountain",
+    "Alaska": "Pacific",
+    "California": "Pacific",
+    "Hawaii": "Pacific",
+    "Oregon": "Pacific",
+    "Washington": "Pacific"
+}
+
