@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+<<<<<<< Updated upstream
 # C extensions
 *.so
 
@@ -188,3 +189,7 @@ data/usa/Urban_Areas_7762479760217047401.zip
 
 streamlit-suggesting-facilities.py
 test-stacked-bar-chart.py
+=======
+data/.DS_Store
+data/.DS_Store
+>>>>>>> Stashed changes
