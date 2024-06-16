@@ -32,7 +32,7 @@ def get_base_url(page):
         if page == "Suggesting new facilities":
             return "http://localhost:8501/Suggesting%20new%20facilities"
         elif page == "Visualizing facility deserts":
-            return "http://localhost:8501/"
+            return "https://usa-medical-deserts.streamlit.app/"
         elif page == "Explainer":
             return "http://localhost:8501/Explainer"
 
