@@ -1,0 +1,5 @@
+[theme]
+primaryColor="#c41636"
+
+[client]
+showSidebarNavigation = false
