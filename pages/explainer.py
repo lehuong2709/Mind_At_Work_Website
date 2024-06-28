@@ -37,7 +37,7 @@ mode = None
 # )
 mode = st.button('Start Exploring!', use_container_width=True, type='primary')
 if mode:
-    switch_page("Visualizing facility deserts")
+    switch_page("medical-facility-deserts")
 
 with st.expander('What is this?', expanded=True):
     st.markdown("""
