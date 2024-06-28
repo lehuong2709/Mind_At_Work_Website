@@ -189,7 +189,7 @@ with st.sidebar:
 
     move_to_medical_deserts = st.button('Visualizing facility deserts', use_container_width=True)
     if move_to_medical_deserts:
-        switch_page("Visualizing facility deserts")
+        switch_page("medical-facility-deserts")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
