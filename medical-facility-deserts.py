@@ -20,20 +20,20 @@ from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facil
 def get_base_url(page):
     if st.secrets.get("IS_DEPLOYED", False):
         # If deployed, use the Streamlit Cloud URL
-        if page == 'Suggesting new facilities':
-            return "https://usa-medical-deserts.streamlit.app/Suggesting%20new%20facilities"
-        elif page == 'Visualizing medical deserts':
+        if page == 'suggesting-new-facilities':
+            return "https://usa-medical-deserts.streamlit.app/suggesting-new-facilities"
+        elif page == 'visualizing-medical-deserts':
             return "https://usa-medical-deserts.streamlit.app/"
-        elif page == "Explainer":
+        elif page == "explainer":
             return "https://usa-medical-deserts.streamlit.app/Explainer"
     else:
         # If local, use localhost
-        if page == "Suggesting new facilities":
-            return "https://usa-medical-deserts.streamlit.app/Suggesting%20new%20facilities"
-        elif page == "Visualizing medical deserts":
+        if page == "suggesting-new-facilities":
+            return "https://usa-medical-deserts.streamlit.app/suggesting-new-facilities"
+        elif page == "visualizing-medical-deserts":
             return "http://localhost:8501/"
-        elif page == "Explainer":
-            return "http://localhost:8501/Explainer"
+        elif page == "explainer":
+            return "http://localhost:8501/explainer"
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
