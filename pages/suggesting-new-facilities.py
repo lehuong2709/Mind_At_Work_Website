@@ -119,8 +119,8 @@ with st.sidebar:
     with st.container(border=True):
         st.write('Choose distance threshold $n$ miles')
         col_side1, col_side2 = st.columns(2)
-        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=2.0, step=0.5, format='%.1f')
-        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=8.0, step=1.0, format='%.1f')
+        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=1.5, step=0.5, format='%.1f')
+        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=5.0, step=1.0, format='%.1f')
 
     with st.expander('Figure options', expanded=True):
         show_deserts = st.checkbox(label='Show medical deserts', value=False)
