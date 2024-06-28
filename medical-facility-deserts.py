@@ -192,7 +192,7 @@ with col2:
                              '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
                              overall_percent_str + '%] of all blockgroups.')
 
-    url = get_base_url('Suggesting new facilities')
+    url = get_base_url('suggesting-new-facilities')
     st.markdown(
         '''
         We also created a [tool](''' + url + ''') that suggests locations for new facilities to 
