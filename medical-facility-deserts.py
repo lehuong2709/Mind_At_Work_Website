@@ -206,7 +206,7 @@ with st.sidebar:
 
     move_to_suggesting_facilities = st.button('Suggesting new facilities', use_container_width=True)
     if move_to_suggesting_facilities:
-        switch_page("suggesting-new-facilities")
+        switch_page("suggesting new facilities")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
