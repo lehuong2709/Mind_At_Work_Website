@@ -22,19 +22,19 @@ def get_base_url(page):
     if st.secrets.get("IS_DEPLOYED", False):
         # If deployed, use the Streamlit Cloud URL
         if page == 'Suggesting new facilities':
-            return "https://usa-medical-deserts.streamlit.app/Suggesting%20new%20facilities"
+            return "https://usa-medical-deserts.streamlit.app/suggesting-new-facilities"
         elif page == 'Visualizing facility deserts':
             return "https://usa-medical-deserts.streamlit.app/"
         elif page == "Explainer":
-            return "https://usa-medical-deserts.streamlit.app/Explainer"
+            return "https://usa-medical-deserts.streamlit.app/explainer"
     else:
         # If local, use localhost
         if page == "Suggesting new facilities":
-            return "http://localhost:8501/Suggesting%20new%20facilities"
+            return "http://localhost:8501/Suggesting-new-facilities"
         elif page == "Visualizing facility deserts":
             return "https://usa-medical-deserts.streamlit.app/"
         elif page == "Explainer":
-            return "http://localhost:8501/Explainer"
+            return "http://localhost:8501/explainer"
 
 
 
@@ -42,9 +42,9 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 show_pages(
     [
-        Page("medical-facility-deserts.py", "Visualizing facility deserts", None),
-        Page("pages/suggesting-new-facilities.py", "Suggesting new facilities", None),
-        Page("pages/explainer.py", "Explainer", None),
+        Page("medical-facility-deserts.py", "medical-facility-deserts", None),
+        Page("pages/suggesting-new-facilities.py", "suggesting-new-facilities", None),
+        Page("pages/explainer.py", "explainer", None),
     ]
 )
 
