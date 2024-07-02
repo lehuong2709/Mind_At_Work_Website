@@ -40,9 +40,9 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 show_pages(
     [
-        Page("medical-facility-deserts.py", "Visualizing facility deserts", None),
-        Page("pages/suggesting-new-facilities.py", "Suggesting new facilities", None),
-        Page("pages/explainer.py", "Explainer", None),
+        Page("medical-facility-deserts.py", "medical-facility-deserts", None),
+        Page("pages/suggesting-new-facilities.py", "suggesting-new-facilities", None),
+        Page("pages/explainer.py", "explainer", None),
     ]
 )
 
@@ -206,7 +206,7 @@ with st.sidebar:
 
     move_to_suggesting_facilities = st.button('Suggesting new facilities', use_container_width=True)
     if move_to_suggesting_facilities:
-        switch_page("suggesting new facilities")
+        switch_page("suggesting-new-facilities")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
