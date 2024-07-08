@@ -29,7 +29,6 @@ def get_page_url(page_name):
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='suggesting-new-facilities')
 
-
 def get_facility_from_facility_name(facilities, facility_name):
     for facility in facilities:
         if facility.display_name == facility_name:
