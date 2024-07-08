@@ -4,10 +4,8 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import streamlit_antd_components as sac
-from streamlit_extras.switch_page_button import switch_page
-from st_pages import Page, add_page_title, show_pages
 
+from src.constants import DEFAULT_POVERTY_THRESHOLD, DEFAULT_RURAL_DISTANCE_THRESHOLD, DEFAULT_URBAN_DISTANCE_THRESHOLD
 from src.usa.constants import state_names, racial_label_dict, populous_states
 from src.usa.states import USAState
 from src.usa.facilities import (
@@ -17,38 +15,18 @@ from src.usa.utils import racial_labels, colors, compute_medical_deserts
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_medical_deserts, plot_blockgroups, plot_voronoi_cells
 
 
-def get_base_url(page):
-    if st.secrets.get("IS_DEPLOYED", False):
-        # If deployed, use the Streamlit Cloud URL
-        if page == 'suggesting-new-facilities':
-            return "https://usa-medical-deserts.streamlit.app/suggesting-new-facilities"
-        elif page == 'visualizing-medical-deserts':
-            return "https://usa-medical-deserts.streamlit.app/"
-        elif page == "explainer":
-            return "https://usa-medical-deserts.streamlit.app/Explainer"
+def get_page_url(page_name):
+    is_deployed = st.secrets.get('IS_DEPLOYED')
+    if is_deployed:
+        return 'https://usa-medical-deserts.streamlit.app/' + page_name
     else:
-        # If local, use localhost
-        if page == "suggesting-new-facilities":
-            return "https://usa-medical-deserts.streamlit.app/suggesting-new-facilities"
-        elif page == "visualizing-medical-deserts":
-            return "http://localhost:8501/"
-        elif page == "explainer":
-            return "http://localhost:8501/explainer"
+        return 'http://localhost:8501/' + page_name
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
-
-show_pages(
-    [
-        Page("medical-facility-deserts.py", "Visualizing facility deserts", None),
-        Page("pages/suggesting-new-facilities.py", "Suggesting new facilities", None),
-        Page("pages/explainer.py", "Explainer", None),
-    ]
-)
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='medical-facility-deserts')
 
 st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
-                   'access to various critical facilities such as pharmacies, hospitals, and schools.'
-                   )
+                   'access to various critical facilities such as pharmacies, hospitals, and schools.')
 
 
 def get_facility_from_facility_name(facilities, facility_name):
@@ -94,13 +72,13 @@ st.markdown(facility.get_message(), unsafe_allow_html=True)
 
 with st.sidebar:
     with st.container(border=True):
-        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=20, step=5, key='poverty_threshold')
+        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=DEFAULT_POVERTY_THRESHOLD, step=5, key='poverty_threshold')
 
     with st.container(border=True):
         st.write('Choose distance threshold $n$ miles')
         col_side1, col_side2 = st.columns(2)
-        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=1.5, step=0.5, format='%.1f')
-        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=5.0, step=1.0, format='%.1f')
+        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=DEFAULT_URBAN_DISTANCE_THRESHOLD, step=0.5, format='%.1f')
+        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=DEFAULT_RURAL_DISTANCE_THRESHOLD, step=1.0, format='%.1f')
 
 col1, col2 = st.columns([3, 2], gap='medium')
 
@@ -144,7 +122,6 @@ with col1:
     }
 
     st.plotly_chart(fig, use_container_width=True, config=config)
-
 
 with col2:
     st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
@@ -192,7 +169,7 @@ with col2:
                              '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
                              overall_percent_str + '%] of all blockgroups.')
 
-    url = get_base_url('suggesting-new-facilities')
+    url = get_page_url('suggesting-new-facilities')
     st.markdown(
         '''
         We also created a [tool](''' + url + ''') that suggests locations for new facilities to 
@@ -202,11 +179,11 @@ with col2:
 with st.sidebar:
     move_to_explanation = st.button('Explanation', use_container_width=True)
     if move_to_explanation:
-        switch_page("explainer")
+        st.switch_page("pages/explainer.py")
 
     move_to_suggesting_facilities = st.button('Suggesting new facilities', use_container_width=True)
     if move_to_suggesting_facilities:
-        switch_page("suggesting-new-facilities")
+        st.switch_page("pages/suggesting-new-facilities.py")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'

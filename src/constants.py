@@ -122,3 +122,8 @@ USA = Country(name='United States of America',
 country_names_to_objects_dictionary = {
     'USA': USA
 }
+
+# === Default thresholds for facility deserts ===
+DEFAULT_POVERTY_THRESHOLD = 20
+DEFAULT_URBAN_DISTANCE_THRESHOLD = 2.0
+DEFAULT_RURAL_DISTANCE_THRESHOLD = 10.0

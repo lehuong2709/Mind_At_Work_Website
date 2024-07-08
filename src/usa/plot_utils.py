@@ -190,9 +190,12 @@ def plot_blockgroups(fig, census_df, color=None):
         random.shuffle(racial_labels_copy)
         for racial_label in racial_labels_copy:
             census_df_label = census_df[census_df['racial_majority'] == racial_label]
+            name=racial_label.split('_')[0].capitalize()
+            if name == 'Aian' or name == 'Nhopi':
+                name = name.upper()
             if len(census_df_label) > 0:
                 fig.add_trace(go.Scattergeo(
-                    name=racial_label.split('_')[0].capitalize(),
+                    name=name,
                     lon=census_df_label['Longitude'], lat=census_df_label['Latitude'],
                     marker=dict(
                         color=colors[racial_label], opacity=0.6, line=dict(width=0.5, color='rgba(0, 0, 0, 0.9)'),

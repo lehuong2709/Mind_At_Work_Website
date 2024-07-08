@@ -2,9 +2,6 @@ import pandas as pd
 import geopandas as gpd
 import plotly.graph_objects as go
 import streamlit as st
-from st_pages import Page, add_page_title, show_pages
-from streamlit_extras.switch_page_button import switch_page
-import streamlit_antd_components as sac
 
 from src.constants import scatter_palette
 from src.usa.states import USAState
@@ -13,7 +10,7 @@ from src.usa.constants import racial_label_dict
 from src.usa.utils import racial_labels, compute_medical_deserts
 from src.usa.plot_utils import plot_state, plot_blockgroups, plot_voronoi_cells, plot_existing_facilities
 
-st.set_page_config(layout='wide', initial_sidebar_state='collapsed')
+st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='explainer')
 
 
 st.markdown("""
@@ -24,20 +21,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 
-mode = None
-# mode = sac.buttons(
-#     [sac.ButtonsItem(label='Start Exploring!', color='#c41636')],
-#     index=None,
-#     align='center',
-#     use_container_width=True,
-#     color='#c41636',
-#     key=None,
-#     variant='filled',
-#     size='sm',
-# )
 mode = st.button('Start Exploring!', use_container_width=True, type='primary')
 if mode:
-    switch_page("medical-facility-deserts")
+    st.switch_page("medical-facility-deserts.py")
 
 with st.expander('What is this?', expanded=True):
     st.markdown("""

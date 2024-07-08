@@ -9,6 +9,7 @@ import streamlit_antd_components as sac
 from streamlit_extras.switch_page_button import switch_page
 from st_pages import Page, add_page_title, show_pages
 
+from src.constants import DEFAULT_POVERTY_THRESHOLD, DEFAULT_RURAL_DISTANCE_THRESHOLD, DEFAULT_URBAN_DISTANCE_THRESHOLD
 from src.usa.constants import state_names, racial_label_dict, populous_states
 from src.usa.states import USAState
 from src.usa.facilities import (
@@ -18,35 +19,15 @@ from src.usa.utils import racial_labels, colors, compute_medical_deserts, get_de
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_medical_deserts, plot_blockgroups, plot_voronoi_cells, plot_new_facilities
 
 
-def get_base_url(page):
-    if st.secrets.get("IS_DEPLOYED", False):
-        # If deployed, use the Streamlit Cloud URL
-        if page == 'Suggesting new facilities':
-            return "https://usa-medical-deserts.streamlit.app/Suggesting%20new%20facilities"
-        elif page == 'Visualizing facility deserts':
-            return "https://usa-medical-deserts.streamlit.app/"
-        elif page == "Explainer":
-            return "https://usa-medical-deserts.streamlit.app/Explainer"
+def get_page_url(page_name):
+    is_deployed = st.secrets.get('IS_DEPLOYED')
+    if is_deployed:
+        return 'https://usa-medical-deserts.streamlit.app/' + page_name
     else:
-        # If local, use localhost
-        if page == "Suggesting new facilities":
-            return "http://localhost:8501/Suggesting%20new%20facilities"
-        elif page == "Visualizing facility deserts":
-            return "https://usa-medical-deserts.streamlit.app/"
-        elif page == "Explainer":
-            return "http://localhost:8501/Explainer"
+        return 'http://localhost:8501/' + page_name
 
 
-
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
-
-show_pages(
-    [
-        Page("medical-facility-deserts.py", "Visualizing facility deserts", None),
-        Page("pages/suggesting-new-facilities.py", "Suggesting new facilities", None),
-        Page("pages/explainer.py", "Explainer", None),
-    ]
-)
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='suggesting-new-facilities')
 
 
 def get_facility_from_facility_name(facilities, facility_name):
@@ -99,7 +80,7 @@ census_df = State.get_census_data(level='blockgroup')
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    url = get_base_url("Visualizing facility deserts")
+    url = get_page_url('')
     st.markdown('''
         This tool suggests locations of new facilities to reduce the number of [medical deserts](''' + url + '''). 
         We present three solutions based on three different optimization models; each solution suggests up to 100 new facilities.
@@ -114,13 +95,13 @@ with col2:
 
 with st.sidebar:
     with st.container(border=True):
-        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=20, step=5, key='poverty_threshold')
+        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=DEFAULT_POVERTY_THRESHOLD, step=5, key='poverty_threshold')
 
     with st.container(border=True):
         st.write('Choose distance threshold $n$ miles')
         col_side1, col_side2 = st.columns(2)
-        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=1.5, step=0.5, format='%.1f')
-        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=5.0, step=1.0, format='%.1f')
+        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=DEFAULT_URBAN_DISTANCE_THRESHOLD, step=0.5, format='%.1f')
+        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=DEFAULT_RURAL_DISTANCE_THRESHOLD, step=1.0, format='%.1f')
 
     with st.expander('Figure options', expanded=True):
         show_deserts = st.checkbox(label='Show medical deserts', value=False)
@@ -185,11 +166,11 @@ with col_inf:
 with st.sidebar:
     move_to_explanation = st.button('Explanation', use_container_width=True)
     if move_to_explanation:
-        switch_page("explainer")
+        st.switch_page("pages/explainer.py")
 
     move_to_medical_deserts = st.button('Visualizing facility deserts', use_container_width=True)
     if move_to_medical_deserts:
-        switch_page("medical-facility-deserts")
+        st.switch_page("medical-facility-deserts.py")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
