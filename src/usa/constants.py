@@ -4,6 +4,7 @@ USA Constants
 import os
 from shapely.geometry import Point
 from src.constants import ROOT_DIR
+import random
 
 
 # === Directories ===
@@ -114,6 +115,11 @@ populous_states = ['Oklahoma', 'Pennsylvania', 'Massachusetts', 'Alabama', 'Loui
                    'California', 'Wisconsin', 'Texas', 'Missouri', 'Virginia',
                    'Mississippi', 'New York', 'Kentucky', 'Michigan', 'Illinois', 'Georgia',
                    'Ohio', 'Tennessee', 'Minnesota', 'Oregon', 'New Jersey', 'Washington']
+interesting_states = ['Alabama', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Florida', 'Georgia',
+                      'Louisiana', 'Michigan', 'Mississippi', 'New York', 'North Carolina', 'Ohio',
+                      'Pennsylvania', 'South Carolina', 'Tennessee', 'Texas', 'Virginia', 'Washington']
+random.seed(42)
+random.shuffle(interesting_states)
 small_states = ['Alaska', 'Delaware', 'Hawaii', 'Idaho', 'Maine', 'Montana',
                 'Nebraska', 'New Hampshire', 'New Mexico', 'North Dakota', 'Rhode Island',
                 'South Dakota', 'Vermont', 'West Virginia', 'Wyoming']

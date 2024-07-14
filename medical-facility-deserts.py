@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.constants import DEFAULT_POVERTY_THRESHOLD, DEFAULT_RURAL_DISTANCE_THRESHOLD, DEFAULT_URBAN_DISTANCE_THRESHOLD
-from src.usa.constants import state_names, racial_label_dict, populous_states
+from src.usa.constants import state_names, racial_label_dict, populous_states, interesting_states
 from src.usa.states import USAState
 from src.usa.facilities import (
     Pharmacies, CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes,
@@ -60,7 +60,7 @@ with st.sidebar:
     def update_state_name():
         st.session_state['state_name'] = st.session_state['state_name_new']
 
-    state_of_the_day = state_of_the_day(populous_states)
+    state_of_the_day = state_of_the_day(interesting_states)
     if 'state_name' in st.session_state:
         state_of_the_day = st.session_state['state_name']
     state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)

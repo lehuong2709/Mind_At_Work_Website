@@ -5,18 +5,14 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import streamlit_antd_components as sac
-from streamlit_extras.switch_page_button import switch_page
-from st_pages import Page, add_page_title, show_pages
 
 from src.constants import DEFAULT_POVERTY_THRESHOLD, DEFAULT_RURAL_DISTANCE_THRESHOLD, DEFAULT_URBAN_DISTANCE_THRESHOLD
-from src.usa.constants import state_names, racial_label_dict, populous_states
+from src.usa.constants import state_names, racial_label_dict, populous_states, interesting_states
 from src.usa.states import USAState
-from src.usa.facilities import (
-    CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes,
-    ChildCare, PrivateSchools, FDICInsuredBanks, DHL, UPS, FedEx, PharmaciesTop3)
-from src.usa.utils import racial_labels, colors, compute_medical_deserts, get_demographic_data
-from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_medical_deserts, plot_blockgroups, plot_voronoi_cells, plot_new_facilities
+from src.usa.facilities import (UrgentCare, Hospitals, NursingHomes,
+    ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3)
+from src.usa.utils import racial_labels, compute_medical_deserts, get_demographic_data
+from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_new_facilities
 
 
 def get_page_url(page_name):
@@ -28,6 +24,7 @@ def get_page_url(page_name):
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='suggesting-new-facilities')
+
 
 def get_facility_from_facility_name(facilities, facility_name):
     for facility in facilities:
@@ -66,7 +63,7 @@ with st.sidebar:
     def update_state_name():
         st.session_state['state_name'] = st.session_state['state_name_new']
 
-    state_of_the_day = state_of_the_day(populous_states)
+    state_of_the_day = state_of_the_day(interesting_states)
     if 'state_name' in st.session_state:
         state_of_the_day = st.session_state['state_name']
     state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
@@ -147,11 +144,11 @@ with st.sidebar:
                                                     on_change=update_rural_distance_threshold)
 
 
-col1, col2 = st.columns([3, 2])
+col1, col2 = st.columns([3, 2], gap='medium')
 
 with col2:
     with st.container(border=True):
-        k = st.select_slider(label='Select the number of new facilities', options=[0, 5, 10, 25, 50, 100], value=25)
+        k = st.select_slider(label='Choose the number of new facilities', options=[0, 5, 10, 25, 50, 100], value=25)
 
     with st.popover(label='Figure options', use_container_width=True):
         show_deserts = st.checkbox(label='Show medical deserts', value=False)
@@ -220,7 +217,6 @@ def norm_column_1(norm, census_df, k):
         difference_df = original_desert_df[~original_desert_df.index.isin(new_desert_df.index)]
         fig = plot_blockgroups(fig, difference_df, color='lightgrey')
         fig = plot_blockgroups(fig, new_desert_df)
-        # fig = plot_medical_deserts(fig, census_df, new_distance_label, old_distance_label, poverty_threshold, urban_distance_threshold, rural_distance_threshold)
     if show_existing_facilities:
         fig = plot_existing_facilities(fig, facility, bounds)
     if show_new_facilities:
@@ -355,13 +351,6 @@ with st.expander(label='How does this work?'):
         st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models. '
                    'Facilities present in the combined solution are in red.')
 
-        # lon, lat = census_df.loc[facilities]['Longitude'], census_df.loc[facilities]['Latitude']
-        # fig.add_trace(go.Scattergeo(lon=lon, lat=lat, mode='markers',
-        #                             marker=dict(size=6, color=color, opacity=0.8, symbol='diamond'),
-        #                             name=name, showlegend=True,
-        #                             line=dict(width=1.0, color='red'),
-        #                             ))
-
         original_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, old_distance_label)
         original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
         original_medical_deserts = str(sum(original_demographic_data.values()))
@@ -406,76 +395,6 @@ with st.expander(label='How does this work?'):
         new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
         fig_new = plot_stacked_bar(new_demographic_data)
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
-
-
-    # with col_1:
-    #     original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
-    #     new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
-    #
-    #     fig = go.Figure()
-    #     fig, bounds = plot_state(fig, State)
-    #     if show_deserts:
-    #         difference_df = original_desert_df[~original_desert_df.index.isin(new_desert_df.index)]
-    #         fig = plot_blockgroups(fig, difference_df, color='lightgrey')
-    #         fig = plot_blockgroups(fig, new_desert_df)
-    #         # fig = plot_medical_deserts(fig, census_df, new_distance_label, old_distance_label, poverty_threshold, urban_distance_threshold, rural_distance_threshold)
-    #     if show_existing_facilities:
-    #         fig = plot_existing_facilities(fig, facility, bounds)
-    #     if show_new_facilities:
-    #         fig = plot_new_facilities(fig, new_facilities[:k], census_df, name='Suggested Facilities')
-    #
-    #     st.plotly_chart(fig, use_container_width=True)
-    #
-    # with col_2:
-    #     st.markdown('''<h4 style='text-align: center; color: black;'>Combined </h4>''', unsafe_allow_html=True)
-    #
-    #     original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
-    #     original_medical_deserts = str(sum(original_demographic_data.values()))
-    #     st.markdown('''<center>Original medical deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-    #     fig_original = plot_stacked_bar(original_demographic_data)
-    #     st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
-    #
-    #     new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
-    #     new_medical_deserts = str(sum(new_demographic_data.values()))
-    #     st.markdown('''<center>Remaining medical deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-    #     new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
-    #     fig_new = plot_stacked_bar(new_demographic_data)
-    #     st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
-
-
-
-    # with col_3:
-    #     norm_column('inf', census_df, k=k)
-    #
-    # with col_4:
-    #     st.markdown('''<h4 style='text-align: center; color: black;'>Combined </h4>''', unsafe_allow_html=True)
-    #
-    #     original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
-    #     original_medical_deserts = str(sum(original_demographic_data.values()))
-    #     st.markdown('''<center>Original medical deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-    #     fig_original = plot_stacked_bar(original_demographic_data)
-    #     st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
-    #
-    #     new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
-    #     new_medical_deserts = str(sum(new_demographic_data.values()))
-    #     st.markdown('''<center>Remaining medical deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-    #     new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
-    #     fig_new = plot_stacked_bar(new_demographic_data)
-    #     st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
-    #
-    #     fig = go.Figure()
-    #     fig, bounds = plot_state(fig, State)
-    #     if show_deserts:
-    #         difference_df = original_desert_df[~original_desert_df.index.isin(new_desert_df.index)]
-    #         fig = plot_blockgroups(fig, difference_df, color='lightgrey')
-    #         fig = plot_blockgroups(fig, new_desert_df)
-    #         # fig = plot_medical_deserts(fig, census_df, new_distance_label, old_distance_label, poverty_threshold, urban_distance_threshold, rural_distance_threshold)
-    #     if show_existing_facilities:
-    #         fig = plot_existing_facilities(fig, facility, bounds)
-    #     if show_new_facilities:
-    #         fig = plot_new_facilities(fig, new_facilities[:k], census_df, name='Suggested Facilities')
-    #
-    #     st.plotly_chart(fig, use_container_width=True)
 
 
 with st.sidebar:
