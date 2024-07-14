@@ -7,6 +7,7 @@ from src.constants import scatter_palette
 from src.usa.states import USAState
 from src.usa.facilities import Hospitals
 from src.usa.constants import racial_label_dict
+from streamlit_pills import pills
 from src.usa.utils import racial_labels, compute_medical_deserts
 from src.usa.plot_utils import plot_state, plot_blockgroups, plot_voronoi_cells, plot_existing_facilities
 
@@ -40,29 +41,52 @@ with st.expander('What is this?', expanded=True):
 col1, col2 = st.columns([1, 1])
 
 with col2:
-    with st.expander('What are the facilities considered?', expanded=True):
-        st.markdown("""
-            1. Pharmacy chains CVS/Walgreens/Walmart
-            2. Urgent care centers
-            3. Hospitals
-            4. Nursing homes
-            5. Private schools
-            6. Banks
-            7. Child care centers"""
-        )
+    with st.expander('What facilities are considered?', expanded=True):
+        facility_names = [
+            'Pharmacy chains CVS/Walgreens/Walmart',
+            'Urgent care centers',
+            'Hospitals',
+            'Nursing homes',
+            'Private schools',
+            'Banks',
+            'Child care centers'
+        ]
+        facility_name = pills(label='', options=facility_names, label_visibility='collapsed', clearable=True, index=None)
+        if facility_name == 'Pharmacy chains CVS/Walgreens/Walmart':
+            st.markdown('CVS, Walgreens, and Walmart are the three largest pharmacy chains in the US. Each CVS/Walgreens/Walmart pharmacy is considered a separate facility.')
+        elif facility_name == 'Urgent care centers':
+            st.markdown('Urgent care centers are walk-in clinics that provide non-emergency medical care.')
+        elif facility_name == 'Hospitals':
+            st.markdown('Each hospital is considered a separate facility.')
+        elif facility_name == 'Nursing homes':
+            st.markdown('Nursing homes provide residential care for elderly or disabled individuals. Each nursing home is considered a separate facility.')
+        elif facility_name == 'Private schools':
+            st.markdown('Private schools are educational institutions that are not operated by the government. Each private school is considered a separate facility.')
+        elif facility_name == 'Banks':
+            st.markdown('Each FDIC insured bank is considered a separate facility.')
+        elif facility_name == 'Child care centers':
+            st.markdown('Child care centers provide care for children. Each child care center is considered a separate facility.')
 
+        # st.markdown("""We consider one of seven types of facilities at a time. You can choose from the following:
+        #     1. Pharmacy chains CVS/Walgreens/Walmart
+        #     2. Urgent care centers
+        #     3. Hospitals
+        #     4. Nursing homes
+        #     5. Private schools
+        #     6. Banks
+        #     7. Child care centers""", unsafe_allow_html=True)
     with st.expander('Tell me about racial/ethnic categories', expanded=True):
         st.markdown("""
-            The racial/ethnic majority in a blockgroup is one of the following seven categories:
-            1. White alone
-            2. Black or African American alone
-            3. American Indian or Alaska Native (AIAN) alone
-            4. Asian alone
-            5. Native Hawaiian or Other Pacific Islander (NHOPI) alone
-            6. Hispanic
-            7. Other or no racial majority \n
-            The quantifier 'alone' is omitted in the tool for brevity."""
-                    )
+            The US census bureau recognizes the following racial/ethnic groups:
+            - White alone
+            - Black or African American alone
+            - American Indian or Alaska Native (AIAN) alone
+            - Asian alone
+            - Native Hawaiian or Other Pacific Islander (NHOPI) alone
+            - Hispanic
+            - Other or no racial majority \n
+            The quantifier 'alone' is omitted in the tool for brevity. We categorize blockgroups based on their racial majority."""
+        )
 
     with st.expander('Created by', expanded=True):
         st.markdown("""Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), and Mohit Singh. Based on 

@@ -22,25 +22,10 @@ import streamlit as st
 
 facility_types = ['medical', 'educational', 'food_related', 'financial', 'logistics', 'child_care', 'other']
 
-# facilities_files = [
-#     'Child_Care_Centers.csv',
-#     'DHL_Facilities.csv',
-#     'Dialysis_Centers.csv',
-#     'FDIC_Insured_Banks.csv',
-#     'FedEx_Facilities.csv',
-#     'Hospitals.csv',
-#     'Nursing_Homes.csv',
-#     'Pharmacies.csv',
-#     'Private_Schools.csv',
-#     'Public_Refrigerated_Warehouses.csv',
-#     'UPS_Facilities.csv',
-#     'Urgent_Care_Facilities.csv'
-# ]
-
 
 class FacilitiesDataHandler:
     def __init__(self, name, full_data_file_path=None, abridged_data_file_path=None, type=None, display_name=None,
-                 descrption=None, color=None):
+                 description=None, color=None):
         self.name = name
         self.full_data_file_path = full_data_file_path
         if abridged_data_file_path is None:
@@ -58,7 +43,7 @@ class FacilitiesDataHandler:
         else:
             self.color = color
         self.distance_label = 'closest_distance_' + self.name
-        self.description = descrption
+        self.description = description
         self.voronoi_folder = os.path.join('data', 'usa', 'existing_facilities', self.name, 'voronoi_state_shapefiles')
 
     def get_message(self):
@@ -209,21 +194,21 @@ class FacilitiesDataHandler:
         return facilities
 
 
-Pharmacies = FacilitiesDataHandler(name='pharmacies', type='medical', display_name='Pharmacies', descrption='a pharmacy')
+Pharmacies = FacilitiesDataHandler(name='pharmacies', type='medical', display_name='Pharmacies', description='a pharmacy')
 CVS = FacilitiesDataHandler(name='cvs_pharmacies', type='medical', display_name='CVS pharmacies', color='#8b0000')
 Walgreens = FacilitiesDataHandler(name='walgreens_pharmacies', type='medical', color='#006400')
 Walmart = FacilitiesDataHandler(name='walmart_pharmacies', type='medical', color='#00008b')
 PharmaciesTop3 = FacilitiesDataHandler(name='top_3_pharmacy_chains', type='medical', display_name='Pharmacy chains',
-                                       descrption='a CVS/Walgreeens/Walmart pharmacy')
-UrgentCare = FacilitiesDataHandler(name='urgentcare_centers', type='medical', descrption='an urgent care center')
-Hospitals = FacilitiesDataHandler(name='hospitals', type='medical', descrption='a hospital')
+                                       description='a CVS/Walgreeens/Walmart pharmacy')
+UrgentCare = FacilitiesDataHandler(name='urgentcare_centers', type='medical', description='an urgent care center')
+Hospitals = FacilitiesDataHandler(name='hospitals', type='medical', description='a hospital')
 DialysisCenters = FacilitiesDataHandler(name='dialysis_centers', type='medical')
-NursingHomes = FacilitiesDataHandler(name='nursing_homes', type='medical', descrption='a nursing home')
-ChildCare = FacilitiesDataHandler(name='childcare_centers', type='facility', descrption='a childcare center')
+NursingHomes = FacilitiesDataHandler(name='nursing_homes', type='medical', description='a nursing home')
+ChildCare = FacilitiesDataHandler(name='childcare_centers', type='facility', description='a childcare center')
 FedEx = FacilitiesDataHandler(name='fedex_facilities', type='logistics', display_name='FedEx', color='#cc4700')
 UPS = FacilitiesDataHandler(name='ups_facilities', type='logistics', display_name='UPS', color='#521801')
 DHL = FacilitiesDataHandler(name='dhl_facilities', type='logistics', display_name='DHL', color='#8b1e2b')
-PrivateSchools = FacilitiesDataHandler(name='private_schools', type='education', descrption='a private school')
+PrivateSchools = FacilitiesDataHandler(name='private_schools', type='education', description='a private school')
 PublicRefrigeratedWarehouses = FacilitiesDataHandler(name='public_refrigerated_warehouses', type='food')
 FDICInsuredBanks = FacilitiesDataHandler(name='fdic_insured_banks', type='banking', display_name='Banks',
-                                         descrption="""an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation)""")
+                                         description="""an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation)""")

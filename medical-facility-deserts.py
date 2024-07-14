@@ -44,16 +44,30 @@ def state_of_the_day(state_names):
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-
 with st.sidebar:
-    facility_display_name = st.selectbox('Choose a facility', facility_display_names)
-    facility = get_facility_from_facility_name(facilities, facility_display_name)
-    state_of_the_day = state_of_the_day(populous_states)
-    state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day))
+    def update_facility_display_name():
+        st.session_state['facility_display_name'] = st.session_state['facility_display_name_new']
 
-State = USAState(state_name)
-state_fips = State.fips
-state_abbr = State.abbreviation
+    if 'facility_display_name' in st.session_state:
+        facility_display_name = st.session_state['facility_display_name']
+        index = facility_display_names.index(facility_display_name)
+    else:
+        index = 0
+    facility_display_name = st.selectbox(label='Choose a facility', options=facility_display_names, index=index, key='facility_display_name_new',
+                 help='Select the type of facility to analyze', on_change=update_facility_display_name)
+    facility = get_facility_from_facility_name(facilities, facility_display_name)
+
+    def update_state_name():
+        st.session_state['state_name'] = st.session_state['state_name_new']
+
+    state_of_the_day = state_of_the_day(populous_states)
+    if 'state_name' in st.session_state:
+        state_of_the_day = st.session_state['state_name']
+    state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
+
+    State = USAState(state_name)
+    state_fips = State.fips
+    state_abbr = State.abbreviation
 
 st.markdown("""
     <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
@@ -63,30 +77,60 @@ st.markdown("""
         </span>
     </h1>
     <h3 style="font-size: 18px; text-align: center; margin-top: 0em;">
-        Based on distances to <span style="color: #c41636">""" + facility.display_name + """</span>
+        Based on distances to <span style="color: #c41636">""" + facility.display_name.lower() + """</span>
     </h3>
-    <br>
     """, unsafe_allow_html=True)
 
 st.markdown(facility.get_message(), unsafe_allow_html=True)
 
 with st.sidebar:
+    def update_poverty_threshold():
+        st.session_state['poverty_threshold'] = st.session_state['poverty_threshold_new']
+
     with st.container(border=True):
-        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, value=DEFAULT_POVERTY_THRESHOLD, step=5, key='poverty_threshold')
+        if 'poverty_threshold' in st.session_state:
+            poverty_threshold = st.session_state['poverty_threshold']
+        else:
+            poverty_threshold = DEFAULT_POVERTY_THRESHOLD
+        poverty_threshold = st.slider(r'Choose poverty threshold $p$%', min_value=0, max_value=100, step=5, key='poverty_threshold_new',
+                                      value=poverty_threshold, help='Only blockgroups with over $p$% of the population below the poverty line are considered ' + facility.type + ' deserts.',
+                                      on_change=update_poverty_threshold)
+
+    def update_urban_distance_threshold():
+        st.session_state['urban_distance_threshold'] = st.session_state['urban_distance_threshold_new']
+
+    def update_rural_distance_threshold():
+        st.session_state['rural_distance_threshold'] = st.session_state['rural_distance_threshold_new']
 
     with st.container(border=True):
         st.write('Choose distance threshold $n$ miles')
         col_side1, col_side2 = st.columns(2)
-        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, value=DEFAULT_URBAN_DISTANCE_THRESHOLD, step=0.5, format='%.1f')
-        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, value=DEFAULT_RURAL_DISTANCE_THRESHOLD, step=1.0, format='%.1f')
+        if 'urban_distance_threshold' in st.session_state:
+            urban_distance_threshold = st.session_state['urban_distance_threshold']
+        else:
+            urban_distance_threshold = DEFAULT_URBAN_DISTANCE_THRESHOLD
+        urban_distance_threshold = col_side1.slider(r'For urban areas', min_value=0.0, max_value=15.0, step=0.5,
+                                                    value=urban_distance_threshold, format='%.1f', key='urban_distance_threshold_new',
+                                                    help='Distance threshold for urban areas; only blockgroups further than this distance from the nearest facility are considered ' + facility.type + ' deserts.',
+                                                    on_change=update_urban_distance_threshold)
+
+        if 'rural_distance_threshold' in st.session_state:
+            rural_distance_threshold = st.session_state['rural_distance_threshold']
+        else:
+            rural_distance_threshold = DEFAULT_RURAL_DISTANCE_THRESHOLD
+        rural_distance_threshold = col_side2.slider(r'For rural areas', min_value=0.0, max_value=30.0, step=1.0,
+                                                    value=rural_distance_threshold, format='%.1f', key='rural_distance_threshold_new',
+                                                    help='Distance threshold for rural areas; only blockgroups further than this distance from the nearest facility are considered ' + facility.type + ' deserts.',
+                                                    on_change=update_rural_distance_threshold)
+
 
 col1, col2 = st.columns([3, 2], gap='medium')
 
 with col2:
-    with st.expander('Figure options'):
+    with st.popover('Figure options', use_container_width=True):
         show_deserts = st.checkbox('Show ' + facility.type + ' deserts', value=True)
         show_facility_locations = st.checkbox('Show ' + facility.display_name.lower(), value=False)
-        show_voronoi_cells = st.checkbox('''Show [voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
+        show_voronoi_cells = st.checkbox('''Show [Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
 
 with col1:
