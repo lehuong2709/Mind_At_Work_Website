@@ -271,10 +271,10 @@ with st.expander(label='How does this work?'):
         all_facilities = facilities_1.union(facilities_2).union(facilities_inf)
 
         fillcolors = {
-            facility: 'red' if facility in facilities_combined else 'grey' for facility in all_facilities
+            facility: 'aqua' if facility in facilities_combined else 'grey' for facility in all_facilities
         }
         colors = {
-            facility: 'darkred' if facility in facilities_combined else 'black' for facility in all_facilities
+            facility: 'blue' if facility in facilities_combined else 'black' for facility in all_facilities
         }
 
         col11, col21, col31 = st.columns(3)
@@ -301,7 +301,7 @@ with st.expander(label='How does this work?'):
                             opacity=0.8,
                             symbol='diamond'
                         ),
-                        name='Solution 1',
+                        name='Facilities in solution 1',
                         showlegend=show_label1,
                     ))
                 show_label1 = False
@@ -320,7 +320,7 @@ with st.expander(label='How does this work?'):
                                 color=colors[f],
                             )
                         ),
-                        name='Solution 2',
+                        name='Facilities in solution 2',
                         showlegend=show_label2,
                     ))
                 show_label2 = False
@@ -340,7 +340,7 @@ with st.expander(label='How does this work?'):
                                 color=colors[f]
                             )
                         ),
-                        name='Solution 3',
+                        name='Facilities in solution 3',
                         showlegend=show_label3,
                     ))
                 show_label3 = False
@@ -349,7 +349,7 @@ with st.expander(label='How does this work?'):
 
     with col2:
         st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models. '
-                   'Facilities present in the combined solution are in red.')
+                   'Facilities present in the combined solution are in blue.')
 
         original_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, old_distance_label)
         original_demographic_data = get_demographic_data(original_desert_df, racial_labels)

@@ -160,12 +160,20 @@ def plot_existing_facilities(fig, Facility, bounds, size=4):
     return fig
 
 
-def plot_new_facilities(fig, facilities, census_df, color='dark red', size=6, name='Proposed new existing_facilities'):
+def plot_new_facilities(fig, facilities, census_df, color='aqua', size=6, name='Proposed new existing_facilities'):
     lon, lat = census_df.loc[facilities]['Longitude'], census_df.loc[facilities]['Latitude']
     fig.add_trace(go.Scattergeo(lon=lon, lat=lat, mode='markers',
-                                marker=dict(size=size, color=color, opacity=0.8, symbol='diamond'),
+                                marker=dict(
+                                    size=size,
+                                    color=color,
+                                    opacity=0.8,
+                                    symbol='diamond',
+                                    line=dict(
+                                        width=2.0,
+                                        color='black',
+                                    ),
+                                ),
                                 name=name, showlegend=True,
-                                line=dict(width=1.0, color='red'),
                                 ))
 
     return fig
