@@ -361,6 +361,8 @@ with st.expander(label='How does this work?'):
         st.markdown('''<center>Remaining medical deserts</center>''', unsafe_allow_html=True)
 
         combined_solution_label = facility.distance_label + '_combined_k_' + str(k)
+        if k == 0:
+            combined_solution_label = old_distance_label
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, combined_solution_label)
         new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
         new_medical_deserts = str(sum(new_demographic_data.values()))
@@ -370,6 +372,8 @@ with st.expander(label='How does this work?'):
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
         solution_1_distance_label = facility.distance_label + '_p_1_k_' + str(k)
+        if k == 0:
+            solution_1_distance_label = old_distance_label
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, solution_1_distance_label)
         new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
         new_medical_deserts = str(sum(new_demographic_data.values()))
@@ -379,6 +383,8 @@ with st.expander(label='How does this work?'):
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
         solution_2_distance_label = facility.distance_label + '_p_2_k_' + str(k)
+        if k == 0:
+            solution_2_distance_label = old_distance_label
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, solution_2_distance_label)
         new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
         new_medical_deserts = str(sum(new_demographic_data.values()))
@@ -388,6 +394,8 @@ with st.expander(label='How does this work?'):
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
         solution_inf_distance_label = facility.distance_label + '_p_inf_k_' + str(k)
+        if k == 0:
+            solution_inf_distance_label = old_distance_label
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, solution_inf_distance_label)
         new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
         new_medical_deserts = str(sum(new_demographic_data.values()))
