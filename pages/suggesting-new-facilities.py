@@ -20,7 +20,8 @@ def get_page_url(page_name):
     if is_deployed:
         return 'https://usa-medical-deserts.streamlit.app/' + page_name
     else:
-        return 'http://localhost:8501/' + page_name
+        return 'https://usa-medical-deserts.streamlit.app/' + page_name
+        # return 'http://localhost:8501/' + page_name
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='suggesting-new-facilities')
