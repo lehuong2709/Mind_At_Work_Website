@@ -94,9 +94,9 @@ census_df = State.get_census_data(level='blockgroup')
 
 url = get_page_url('')
 st.markdown('''
-    This tool suggests locations of new facilities to reduce the number of [medical deserts](''' + url + '''). 
+    This tool suggests locations of new facilities to reduce the number of [''' + facility.type + ''' deserts](''' + url + '''). 
     To aid planning, the tool allows you to choose the number of new facilities to suggest, with the potential to expand later.
-    As before, you can also choose the poverty and distance thresholds that define a medical desert in the sidebar.
+    As before, you can also choose the poverty and distance thresholds that define a ''' + facility.type + ''' desert in the sidebar.
     ''', unsafe_allow_html=True
 )
 
@@ -150,10 +150,19 @@ with col2:
     with st.container(border=True):
         k = st.select_slider(label='Choose the number of new facilities', options=[0, 5, 10, 25, 50, 100], value=25)
 
-    with st.popover(label='Figure options', use_container_width=True):
-        show_deserts = st.checkbox(label='Show medical deserts', value=False)
-        show_existing_facilities = st.checkbox(label='Show existing facilities', value=True)
-        show_new_facilities = st.checkbox(label='Show new facilities', value=True)
+    col21, col22, col23 = st.columns(3)
+
+    with col21:
+        show_deserts = st.checkbox(label=facility.type.capitalize() + ' deserts', value=False)
+    with col22:
+        show_existing_facilities = st.checkbox(label='Existing facilities', value=True)
+    with col23:
+        show_new_facilities = st.checkbox(label='Suggested facilities', value=True)
+
+    # with st.popover(label='Figure options', use_container_width=True):
+    #     show_deserts = st.checkbox(label='Show medical deserts', value=False)
+    #     show_existing_facilities = st.checkbox(label='Show existing facilities', value=True)
+    #     show_new_facilities = st.checkbox(label='Show new facilities', value=True)
 
 
 with col1:
@@ -184,13 +193,13 @@ with col1:
 with col2:
     original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
     original_medical_deserts = str(sum(original_demographic_data.values()))
-    st.markdown('''<center>Original medical deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+    st.markdown('''<center>Original ''' + facility.type + ''' deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
     fig_original = plot_stacked_bar(original_demographic_data)
     st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
 
     new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
     new_medical_deserts = str(sum(new_demographic_data.values()))
-    st.markdown('''<center>Remaining medical deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+    st.markdown('''<center>Remaining ''' + facility.type + ''' deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
     new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
     fig_new = plot_stacked_bar(new_demographic_data)
     st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
@@ -257,7 +266,7 @@ with st.expander(label='How does this work?'):
         You can compare the three solutions in the figure below.
     ''')
 
-    col1, col2 = st.columns([3, 2])
+    col1, col2 = st.columns([3, 2], gap='medium')
 
     with col1:
         facilities_1 = pd.read_csv('data/usa/new_facilities/' + facility.name + '/new_facilities_1.csv', index_col=0)['100'].apply(literal_eval)
@@ -354,11 +363,11 @@ with st.expander(label='How does this work?'):
         original_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, old_distance_label)
         original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
         original_medical_deserts = str(sum(original_demographic_data.values()))
-        st.markdown('''<center>Original medical deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+        st.markdown('''<center>Original ''' + facility.type + ''' deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
         fig_original = plot_stacked_bar(original_demographic_data)
         st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
 
-        st.markdown('''<center>Remaining medical deserts</center>''', unsafe_allow_html=True)
+        st.markdown('''<center>Remaining ''' + str(facility.type) + ''' deserts</center>''', unsafe_allow_html=True)
 
         combined_solution_label = facility.distance_label + '_combined_k_' + str(k)
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, combined_solution_label)

@@ -127,10 +127,20 @@ with st.sidebar:
 col1, col2 = st.columns([3, 2], gap='medium')
 
 with col2:
-    with st.popover('Figure options', use_container_width=True):
-        show_deserts = st.checkbox('Show ' + facility.type + ' deserts', value=True)
-        show_facility_locations = st.checkbox('Show ' + facility.display_name.lower(), value=False)
-        show_voronoi_cells = st.checkbox('''Show [Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
+    st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
+               + '. Colored by racial/ethnic majority.')
+    col21, col22, col23 = st.columns(3)
+    with col21:
+        show_deserts = st.checkbox(facility.type.capitalize() + ' deserts', value=True)
+    with col22:
+        show_facility_locations = st.checkbox(facility.display_name, value=False)
+    with col23:
+        show_voronoi_cells = st.checkbox('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
+
+    # with st.popover('Figure options', use_container_width=True):
+    #     show_deserts = st.checkbox('Show ' + facility.type + ' deserts', value=True)
+    #     show_facility_locations = st.checkbox('Show ' + facility.display_name.lower(), value=False)
+    #     show_voronoi_cells = st.checkbox('''Show [Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
 
 with col1:
@@ -168,8 +178,8 @@ with col1:
     st.plotly_chart(fig, use_container_width=True, config=config)
 
 with col2:
-    st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
-               + '. Colored by racial/ethnic majority.')
+    # st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
+    #            + '. Colored by racial/ethnic majority.')
 
     legend_labels = {
         'white_alone': 'Majority White',
