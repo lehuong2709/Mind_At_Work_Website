@@ -262,9 +262,10 @@ def norm_column_2(norm, census_df, k):
 
 with st.expander(label='How does this work?'):
     st.markdown('''
-        Under the hood, our solution is a combination of three distinct solutions based on different optimization models that 
-        prioritize different aspects of fairness. Each of these three solutions suggests up to 100 new facilities. 
-        You can compare the three solutions in the figure below.
+        Under the hood, our proposed solution above is a combination of three distinct solutions, each of which suggests 
+         locations of up to 100 new facilities. These solutions optimize different aspects of fairness, and 
+        are based on minimizing the $L_1$, $L_2$, and $L_\infty$ norms respectively of the distances of people in 
+        various demographic groups from the nearest facility (see our [paper](https://arxiv.org/abs/2211.14873) for more details). You can compare the three solutions in the figure below.
     ''')
 
     col1, col2 = st.columns([3, 2], gap='medium')
@@ -359,7 +360,7 @@ with st.expander(label='How does this work?'):
 
     with col2:
         st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models. '
-                   'Facilities present in the combined solution are in blue.')
+                   'Facilities present in our proposed solution above are in blue, those not in the proposed solution are in grey.')
 
         original_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, old_distance_label)
         original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
@@ -426,7 +427,9 @@ with st.sidebar:
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
-                   'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
                    'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
+
+st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
+                   'The maps are approximate.')
 
 

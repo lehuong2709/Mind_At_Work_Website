@@ -24,7 +24,8 @@ def get_page_url(page_name):
         # return 'http://localhost:8501/' + page_name
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='medical-facility-deserts')
+st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='medical-facility-deserts')
+
 
 st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                    'access to various critical facilities such as pharmacies, hospitals, and schools.')
@@ -35,7 +36,6 @@ def get_facility_from_facility_name(facilities, facility_name):
         if facility.display_name == facility_name:
             return facility
 
-
 def state_of_the_day(state_names):
     day_of_year = datetime.now().timetuple().tm_yday
     state_of_the_day = state_names[day_of_year % len(state_names)]
@@ -45,7 +45,11 @@ def state_of_the_day(state_names):
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-with st.sidebar:
+col1, col2 = st.columns([1, 1], gap='medium')
+
+with col1:
+    col11, col12 = st.columns(2)
+
     def update_facility_display_name():
         st.session_state['facility_display_name'] = st.session_state['facility_display_name_new']
 
@@ -54,37 +58,41 @@ with st.sidebar:
         index = facility_display_names.index(facility_display_name)
     else:
         index = 0
-    facility_display_name = st.selectbox(label='Choose a facility', options=facility_display_names, index=index, key='facility_display_name_new',
-                 help='Select the type of facility to analyze', on_change=update_facility_display_name)
-    facility = get_facility_from_facility_name(facilities, facility_display_name)
+
+    with col11:
+        facility_display_name = st.selectbox(label='Choose a facility', options=facility_display_names, index=index, key='facility_display_name_new',
+                                             help='Select the type of facility to analyze', on_change=update_facility_display_name)
+        facility = get_facility_from_facility_name(facilities, facility_display_name)
 
     def update_state_name():
         st.session_state['state_name'] = st.session_state['state_name_new']
 
-    state_of_the_day = state_of_the_day(interesting_states)
-    if 'state_name' in st.session_state:
-        state_of_the_day = st.session_state['state_name']
-    state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
+    with col12:
+        state_of_the_day = state_of_the_day(interesting_states)
+        if 'state_name' in st.session_state:
+            state_of_the_day = st.session_state['state_name']
+        state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
 
-    State = USAState(state_name)
-    state_fips = State.fips
-    state_abbr = State.abbreviation
+        State = USAState(state_name)
+        state_fips = State.fips
+        state_abbr = State.abbreviation
 
-st.markdown("""
-    <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
-        """ + facility.type.capitalize() + """ deserts in
-        <span style="color: #c41636">
-            """ + state_name + """
-        </span>
-    </h1>
-    <h3 style="font-size: 18px; text-align: center; margin-top: 0em;">
-        Based on distances to <span style="color: #c41636">""" + facility.display_name.lower() + """</span>
-    </h3>
-    """, unsafe_allow_html=True)
+with col2:
+    st.markdown("""
+        <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
+            """ + facility.type.capitalize() + """ deserts in
+            <span style="color: #c41636">
+                """ + state_name + """
+            </span>
+        </h1>
+        <h3 style="font-size: 18px; text-align: center; margin-top: 0em;">
+            Based on distances to <span style="color: #c41636">""" + facility.display_name.lower() + """</span>
+        </h3>
+        """, unsafe_allow_html=True)
 
-st.markdown(facility.get_message(), unsafe_allow_html=True)
+    st.markdown(facility.get_message(), unsafe_allow_html=True)
 
-with st.sidebar:
+with col2:
     def update_poverty_threshold():
         st.session_state['poverty_threshold'] = st.session_state['poverty_threshold_new']
 
@@ -124,19 +132,20 @@ with st.sidebar:
                                                     help='Distance threshold for rural areas; only blockgroups further than this distance from the nearest facility are considered ' + facility.type + ' deserts.',
                                                     on_change=update_rural_distance_threshold)
 
-
-col1, col2 = st.columns([3, 2], gap='medium')
+#
+# col1, col2 = st.columns([3, 2], gap='medium')
 
 with col2:
-    st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
-               + '. Colored by racial/ethnic majority.')
-    col21, col22, col23 = st.columns(3)
-    with col21:
-        show_deserts = st.checkbox(facility.type.capitalize() + ' deserts', value=True)
-    with col22:
-        show_facility_locations = st.checkbox(facility.display_name, value=False)
-    with col23:
-        show_voronoi_cells = st.checkbox('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
+    with st.container(border=True):
+        st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
+                   + '. Colored by racial/ethnic majority.')
+        col21, col22, col23 = st.columns(3)
+        with col21:
+            show_deserts = st.checkbox(facility.type.capitalize() + ' deserts', value=True)
+        with col22:
+            show_facility_locations = st.checkbox(facility.display_name, value=False)
+        with col23:
+            show_voronoi_cells = st.checkbox('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
     # with st.popover('Figure options', use_container_width=True):
     #     show_deserts = st.checkbox('Show ' + facility.type + ' deserts', value=True)
@@ -219,10 +228,11 @@ with col2:
                 if over_five_deserts and (four_times_deserts or over_ten_percent_difference):
                     overall_percent_str = str(round(fraction_of_all_blockgroups * 100, 2))
                     desert_percent_str = str(round(fraction_of_medical_deserts * 100, 2))
-                    st.write(legend_labels[racial_label] + ' blockgroups may be disproportionately affected by '
-                             + facility.type + ' deserts in ' + state_name + ': they make up :red[' + desert_percent_str +
-                             '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
-                             overall_percent_str + '%] of all blockgroups.')
+                    with st.container(border=True):
+                        st.write(legend_labels[racial_label] + ' blockgroups may be disproportionately affected by '
+                                 + facility.type + ' deserts in ' + state_name + ': they make up :red[' + desert_percent_str +
+                                 '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
+                                 overall_percent_str + '%] of all blockgroups.')
 
     url = get_page_url('suggesting-new-facilities')
     st.markdown(
@@ -244,6 +254,3 @@ with st.sidebar:
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
                    'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
                    'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
-
-st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
-                   'The maps are approximate.')
