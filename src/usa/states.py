@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from src.regions import Province
 import requests
+import streamlit as st
 
 
 class USAState(Province):
@@ -21,6 +22,9 @@ class USAState(Province):
         self._name = name
         self._fips = territories_dictionary[name]['fips']
         self._abbreviation = territories_dictionary[name]['abbreviation']
+
+    def __reduce__(self):
+        return USAState, (self.name, self.fips, self.abbreviation)
 
     def get_state_info(self):
         """
@@ -129,7 +133,7 @@ class USAState(Province):
             url_blockgroup = url_header + url_variables + url_footer + census_key
 
             response = requests.get(url_blockgroup)
-            if response.status_code == 200:         # Check if the request was successful (status code 200)
+            if response.status_code == 200:  # Check if the request was successful (status code 200)
                 data = response.text
             else:
                 raise ValueError('Failed to retrieve US census data. Status code:', response.status_code)
@@ -159,7 +163,7 @@ class USAState(Province):
             url_tract = url_header + url_variables + url_footer + census_key
 
             response = requests.get(url_tract)
-            if response.status_code == 200:             # Check if the request was successful (status code 200)
+            if response.status_code == 200:  # Check if the request was successful (status code 200)
                 data = response.text
             else:
                 raise ValueError('Failed to retrieve US census data. Status code:', response.status_code)
@@ -188,7 +192,7 @@ class USAState(Province):
             url_county = url_header + url_variables + url_footer + census_key
 
             response = requests.get(url_county)
-            if response.status_code == 200:             # Check if the request was successful (status code 200)
+            if response.status_code == 200:  # Check if the request was successful (status code 200)
                 data = response.text
             else:
                 raise ValueError('Failed to retrieve US census data. Status code:', response.status_code)
@@ -232,6 +236,7 @@ class USAState(Province):
 
         return census_data
 
+    @st.cache_data
     def get_census_data(self, level='blockgroup', override_cache=False, save_to_file=False, census_key=None):
         """
         Get data for US Census data for the state from the local cache or the internet. If the data is retrieved from the
@@ -249,6 +254,5 @@ class USAState(Province):
                 census_data = self._get_census_data_from_api(level=level, census_key=census_key)
         else:
             census_data = self._get_census_data_from_api(level=level, census_key=census_key)
-
 
         return census_data

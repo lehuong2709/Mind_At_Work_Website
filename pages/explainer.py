@@ -6,9 +6,8 @@ import streamlit as st
 from src.constants import scatter_palette
 from src.usa.states import USAState
 from src.usa.facilities import Hospitals
-from src.usa.constants import racial_label_dict
 from streamlit_pills import pills
-from src.usa.utils import racial_labels, compute_medical_deserts
+from src.usa.utils import compute_medical_deserts
 from src.usa.plot_utils import plot_state, plot_blockgroups, plot_voronoi_cells, plot_existing_facilities
 
 st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='explainer')

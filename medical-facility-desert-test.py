@@ -6,35 +6,48 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.constants import DEFAULT_POVERTY_THRESHOLD, DEFAULT_RURAL_DISTANCE_THRESHOLD, DEFAULT_URBAN_DISTANCE_THRESHOLD
-from src.usa.constants import state_names, racial_label_dict, populous_states, interesting_states
+from src.usa.constants import state_names, interesting_states
 from src.usa.states import USAState
-from src.usa.facilities import (
-    Pharmacies, CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes,
-    ChildCare, PrivateSchools, FDICInsuredBanks, DHL, UPS, FedEx, PharmaciesTop3)
-from src.usa.utils import racial_labels, colors, compute_medical_deserts
-from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_medical_deserts, plot_blockgroups, plot_voronoi_cells
-
-
-def get_page_url(page_name):
-    is_deployed = st.secrets.get('IS_DEPLOYED')
-    if is_deployed:
-        return 'https://usa-medical-deserts.streamlit.app/' + page_name
-    else:
-        return 'https://usa-medical-deserts.streamlit.app/' + page_name
-        # return 'http://localhost:8501/' + page_name
+from src.usa.facilities import CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes, ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3
+from src.usa.utils import racial_labels, compute_medical_deserts, get_page_url, get_demographic_data
+from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='medical-facility-deserts')
 
-
 st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                    'access to various critical facilities such as pharmacies, hospitals, and schools.')
+
+
+def get_disproportionately_affected_racial_groups(demographics_all, demographics_deserts):
+    def is_disproportionately_affected(fraction_all, fraction_deserts, n_deserts):
+        more_than_five_deserts = (n_deserts >= 5)
+        four_times_more_deserts = fraction_deserts > 4 * fraction_all
+        over_ten_percent_difference = fraction_deserts - fraction_all > 0.1
+        if more_than_five_deserts and (four_times_more_deserts or over_ten_percent_difference):
+            return True
+        else:
+            return False
+
+    n_blockgroups = sum(demographics_all.values())
+    n_deserts = sum(demographics_deserts.values())
+
+    disproportionately_affected_racial_groups = []
+    for racial_label in demographics_all.keys():
+        if racial_label in demographics_deserts.keys():
+            fraction_all = demographics_all[racial_label]/n_blockgroups
+            fraction_deserts = demographics_deserts[racial_label]/n_deserts
+            if is_disproportionately_affected(fraction_all, fraction_deserts, demographics_deserts[racial_label]):
+                disproportionately_affected_racial_groups.append(racial_label)
+
+    return disproportionately_affected_racial_groups
 
 
 def get_facility_from_facility_name(facilities, facility_name):
     for facility in facilities:
         if facility.display_name == facility_name:
             return facility
+
 
 def state_of_the_day(state_names):
     day_of_year = datetime.now().timetuple().tm_yday
@@ -45,11 +58,9 @@ def state_of_the_day(state_names):
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-col1, col2 = st.columns([1, 1], gap='medium')
+col_left, col_center, col_right = st.columns([1, 3, 1])
 
-with col1:
-    col11, col12 = st.columns(2)
-
+with col_left:
     def update_facility_display_name():
         st.session_state['facility_display_name'] = st.session_state['facility_display_name_new']
 
@@ -58,26 +69,23 @@ with col1:
         index = facility_display_names.index(facility_display_name)
     else:
         index = 0
-
-    with col11:
-        facility_display_name = st.selectbox(label='Choose a facility', options=facility_display_names, index=index, key='facility_display_name_new',
-                                             help='Select the type of facility to analyze', on_change=update_facility_display_name)
-        facility = get_facility_from_facility_name(facilities, facility_display_name)
+    facility_display_name = st.selectbox(label='Choose a facility', options=facility_display_names, index=index, key='facility_display_name_new',
+                                         help='Select the type of facility to analyze', on_change=update_facility_display_name)
+    facility = get_facility_from_facility_name(facilities, facility_display_name)
 
     def update_state_name():
         st.session_state['state_name'] = st.session_state['state_name_new']
 
-    with col12:
-        state_of_the_day = state_of_the_day(interesting_states)
-        if 'state_name' in st.session_state:
-            state_of_the_day = st.session_state['state_name']
-        state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
+    state_of_the_day = state_of_the_day(interesting_states)
+    if 'state_name' in st.session_state:
+        state_of_the_day = st.session_state['state_name']
+    state_name = st.selectbox('Choose a US state', options=state_names, index=state_names.index(state_of_the_day), key='state_name_new', on_change=update_state_name)
 
-        State = USAState(state_name)
-        state_fips = State.fips
-        state_abbr = State.abbreviation
+    State = USAState(state_name)
+    state_fips = State.fips
+    state_abbr = State.abbreviation
 
-with col2:
+with col_center:
     st.markdown("""
         <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
             """ + facility.type.capitalize() + """ deserts in
@@ -90,9 +98,9 @@ with col2:
         </h3>
         """, unsafe_allow_html=True)
 
-    st.markdown(facility.get_message(), unsafe_allow_html=True)
+st.markdown(facility.get_message(), unsafe_allow_html=True)
 
-with col2:
+with col_left:
     def update_poverty_threshold():
         st.session_state['poverty_threshold'] = st.session_state['poverty_threshold_new']
 
@@ -132,20 +140,14 @@ with col2:
                                                     help='Distance threshold for rural areas; only blockgroups further than this distance from the nearest facility are considered ' + facility.type + ' deserts.',
                                                     on_change=update_rural_distance_threshold)
 
-#
-# col1, col2 = st.columns([3, 2], gap='medium')
 
-with col2:
-    with st.container(border=True):
-        st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
-                   + '. Colored by racial/ethnic majority.')
-        col21, col22, col23 = st.columns(3)
-        with col21:
-            show_deserts = st.checkbox(facility.type.capitalize() + ' deserts', value=True)
-        with col22:
-            show_facility_locations = st.checkbox(facility.display_name, value=False)
-        with col23:
-            show_voronoi_cells = st.checkbox('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
+with col_right:
+    st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
+               + '. Colored by racial/ethnic majority.')
+
+    show_deserts = st.toggle(facility.type.capitalize() + ' deserts', value=True)
+    show_facility_locations = st.toggle(facility.display_name, value=False)
+    show_voronoi_cells = st.toggle('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
     # with st.popover('Figure options', use_container_width=True):
     #     show_deserts = st.checkbox('Show ' + facility.type + ' deserts', value=True)
@@ -153,7 +155,7 @@ with col2:
     #     show_voronoi_cells = st.checkbox('''Show [Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
 
-with col1:
+with col_center:
     census_df = State.get_census_data(level='blockgroup')
 
     fig = go.Figure()
@@ -187,7 +189,7 @@ with col1:
 
     st.plotly_chart(fig, use_container_width=True, config=config)
 
-with col2:
+with col_right:
     # st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + state_name
     #            + '. Colored by racial/ethnic majority.')
 
@@ -201,12 +203,10 @@ with col2:
         'other': 'Other',
     }
 
-    demographics_all = {racial_label: census_df[census_df['racial_majority'] == racial_label].shape[0] for racial_label in racial_labels}
-    demographics_all = {k: demographics_all[k] for k in demographics_all.keys() if demographics_all[k] > 0}
+    demographics_all = get_demographic_data(census_df, racial_labels)
     n_blockgroups = len(census_df)
 
-    demographics_deserts = {racial_label: desert_df[desert_df['racial_majority'] == racial_label].shape[0] for racial_label in racial_labels}
-    demographics_deserts = {k: demographics_deserts[k] for k in demographics_deserts.keys() if demographics_deserts[k] > 0}
+    demographics_deserts = get_demographic_data(desert_df, racial_labels)
 
     fig1, fig2 = plot_stacked_bar(demographics_all), plot_stacked_bar(demographics_deserts)
 
@@ -215,24 +215,37 @@ with col2:
     st.markdown('''<center><b>''' + str(len(desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
     st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
 
-    if len(desert_df) > 0:
-        for racial_label in racial_labels:
-            if racial_label in demographics_all and racial_label in demographics_deserts and racial_label != 'other':
-                fraction_of_all_blockgroups = demographics_all[racial_label]/n_blockgroups
-                fraction_of_medical_deserts = demographics_deserts[racial_label]/len(desert_df)
+    disproportionately_affected_racial_groups = get_disproportionately_affected_racial_groups(demographics_all, demographics_deserts)
+    for racial_label in disproportionately_affected_racial_groups:
+        fraction_all = demographics_all[racial_label]/n_blockgroups
+        percent_all = str(round(fraction_all * 100, 2))
 
-                four_times_deserts = fraction_of_medical_deserts> 4 * fraction_of_all_blockgroups
-                over_ten_percent_difference = fraction_of_medical_deserts - fraction_of_all_blockgroups > 0.1
-                over_five_deserts = fraction_of_medical_deserts * len(desert_df) >= 5
+        fraction_deserts = demographics_deserts[racial_label]/len(desert_df)
+        percent_deserts = str(round(fraction_deserts * 100, 2))
 
-                if over_five_deserts and (four_times_deserts or over_ten_percent_difference):
-                    overall_percent_str = str(round(fraction_of_all_blockgroups * 100, 2))
-                    desert_percent_str = str(round(fraction_of_medical_deserts * 100, 2))
-                    with st.container(border=True):
-                        st.write(legend_labels[racial_label] + ' blockgroups may be disproportionately affected by '
-                                 + facility.type + ' deserts in ' + state_name + ': they make up :red[' + desert_percent_str +
-                                 '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
-                                 overall_percent_str + '%] of all blockgroups.')
+        with st.container(border=True):
+            st.write(legend_labels[racial_label] + ' blockgroups make up :red[' + percent_deserts + '%] of ' +
+                     facility.type + ' deserts in ' + state_name + ' while being only :blue[' + percent_all +
+                     '%] of all blockgroups.')
+
+    # if len(desert_df) > 0:
+    #     for racial_label in racial_labels:
+    #         if racial_label in demographics_all and racial_label in demographics_deserts and racial_label != 'other':
+    #             fraction_of_all_blockgroups = demographics_all[racial_label]/n_blockgroups
+    #             fraction_of_medical_deserts = demographics_deserts[racial_label]/len(desert_df)
+    #
+    #             four_times_deserts = fraction_of_medical_deserts> 4 * fraction_of_all_blockgroups
+    #             over_ten_percent_difference = fraction_of_medical_deserts - fraction_of_all_blockgroups > 0.1
+    #             over_five_deserts = fraction_of_medical_deserts * len(desert_df) >= 5
+    #
+    #             if over_five_deserts and (four_times_deserts or over_ten_percent_difference):
+    #                 overall_percent_str = str(round(fraction_of_all_blockgroups * 100, 2))
+    #                 desert_percent_str = str(round(fraction_of_medical_deserts * 100, 2))
+    #                 with st.container(border=True):
+    #                     st.write(legend_labels[racial_label] + ' blockgroups may be disproportionately affected by '
+    #                              + facility.type + ' deserts in ' + state_name + ': they make up :red[' + desert_percent_str +
+    #                              '%] of ' + facility.type + ' deserts in ' + state_name + ' while being only :blue[' +
+    #                              overall_percent_str + '%] of all blockgroups.')
 
     url = get_page_url('suggesting-new-facilities')
     st.markdown(
@@ -241,7 +254,7 @@ with col2:
         reduce the impact of ''' + facility.type + ''' deserts.'''.format(facility.type), unsafe_allow_html=True
     )
 
-with st.sidebar:
+with col_left:
     move_to_explanation = st.button('Explanation', use_container_width=True)
     if move_to_explanation:
         st.switch_page("pages/explainer.py")
@@ -254,3 +267,6 @@ with st.sidebar:
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
                    'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
                    'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
+
+st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
+                   'The maps are approximate.')
