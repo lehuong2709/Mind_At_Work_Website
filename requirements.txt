@@ -123,7 +123,7 @@ st-annotated-text==4.0.1
 st-pages==0.4.5
 st-theme==1.2.3
 stack-data==0.6.3
-streamlit==1.35.0
+streamlit
 streamlit-antd-components==0.3.2
 streamlit-camera-input-live==0.2.0
 streamlit-card==1.0.2
