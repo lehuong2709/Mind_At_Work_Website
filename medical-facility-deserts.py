@@ -11,12 +11,36 @@ from src.usa.states import USAState
 from src.usa.facilities import CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes, ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3
 from src.usa.utils import racial_labels, racial_labels_display_names, compute_medical_deserts, get_page_url, get_demographic_data, get_facility_from_facility_name, get_state_of_the_day
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells
+import streamlit_antd_components as sac
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='medical-facility-deserts')
+st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        padding-top: 2rem;  /* Adjust this value as needed */
+        padding-bottom: 2rem; /* Optionally reduce bottom padding too */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                    'access to various critical facilities such as pharmacies, hospitals, and schools.')
 
+
+tab = sac.tabs(
+    items=['Visualize facility deserts', 'Suggest new facilities', 'Explanation'],
+    index=0,
+    align='center',
+)
+
+if tab == 'Suggest new facilities':
+    st.switch_page("pages/suggesting-new-facilities.py")
+if tab == 'Explanation':
+    st.switch_page("pages/explainer.py")
 
 
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
@@ -70,7 +94,8 @@ st.markdown("""
     </h3>
     """, unsafe_allow_html=True)
 
-st.markdown(facility.get_message(), unsafe_allow_html=True)
+st.markdown('''This tool aims to identify poorer areas with low access to various critical facilities.'''
+            + facility.get_message(), unsafe_allow_html=True)
 
 with st.sidebar:
     # Poverty threshold
@@ -214,14 +239,14 @@ with col2:
         reduce the impact of ''' + facility.type + ''' deserts.'''.format(facility.type), unsafe_allow_html=True
     )
 
-with st.sidebar:
-    move_to_explanation = st.button('Explanation', use_container_width=True)
-    if move_to_explanation:
-        st.switch_page("pages/explainer.py")
-
-    move_to_suggesting_facilities = st.button('Suggesting new facilities', use_container_width=True)
-    if move_to_suggesting_facilities:
-        st.switch_page("pages/suggesting-new-facilities.py")
+# with st.sidebar:
+#     move_to_explanation = st.button('Explanation', use_container_width=True)
+#     if move_to_explanation:
+#         st.switch_page("explainer.py")
+#
+#     move_to_suggesting_facilities = st.button('Suggesting new facilities', use_container_width=True)
+#     if move_to_suggesting_facilities:
+#         st.switch_page("pages/suggesting-new-facilities.py")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
@@ -229,4 +254,4 @@ st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.git
                    'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
 
 st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
-                   'The maps are approximate.')
+                   'Map boundaries are approximate.')

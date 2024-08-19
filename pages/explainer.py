@@ -9,8 +9,33 @@ from src.usa.facilities import Hospitals
 from streamlit_pills import pills
 from src.usa.utils import compute_medical_deserts
 from src.usa.plot_utils import plot_state, plot_blockgroups, plot_voronoi_cells, plot_existing_facilities
+import streamlit_antd_components as sac
 
-st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='explainer')
+
+st.set_page_config(layout='wide', initial_sidebar_state='collapsed')
+
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        padding-top: 2rem;  /* Adjust this value as needed */
+        padding-bottom: 2rem; /* Optionally reduce bottom padding too */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+tab = sac.tabs(
+    items=['Visualize facility deserts', 'Suggest new facilities', 'Explanation'],
+    index=2,
+    align='center',
+)
+
+if tab == 'Visualize facility deserts':
+    st.switch_page("medical-facility-deserts.py")
+if tab == 'Suggest new facilities':
+    st.switch_page("pages/suggesting-new-facilities.py")
 
 
 st.markdown("""
@@ -21,9 +46,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 
-mode = st.button('Start Exploring!', use_container_width=True, type='primary')
-if mode:
-    st.switch_page("medical-facility-deserts.py")
+# mode = st.button('Start Exploring!', use_container_width=True, type='primary')
+# if mode:
+#     st.switch_page("medical-facility-deserts.py")
 
 with st.expander('What is this?', expanded=True):
     st.markdown("""

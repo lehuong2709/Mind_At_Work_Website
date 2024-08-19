@@ -37,7 +37,7 @@ def get_demographic_data(census_df, racial_labels):
 
 
 @st.cache_data
-def compute_medical_deserts(state_df, poverty_threshold=20, n_urban=2, n_rural=10, distance_label='Closest_Distance_Pharmacies_Top3'):
+def compute_medical_deserts(state_df, poverty_threshold=20, n_urban=2, n_rural=10, distance_label='closest_distance_top_3_pharmacy_chains'):
     desert_df = state_df[state_df['below_poverty'] >= poverty_threshold]
     desert_df = desert_df[((desert_df['urban'] == 1) & (desert_df[distance_label] > MILES_TO_KM * n_urban)) | ((desert_df['urban'] == 0) & (desert_df[distance_label] > MILES_TO_KM * n_rural))]
 
