@@ -11,16 +11,29 @@ from src.usa.facilities import (UrgentCare, Hospitals, NursingHomes,
     ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3)
 from src.usa.utils import racial_labels, compute_medical_deserts, get_demographic_data, get_page_url
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_new_facilities
+import streamlit_antd_components as sac
 
 
-@st.cache_data
-def read_new_facilities(facility_name):
-    new_facilities_path = os.path.join('data', 'usa', 'new_facilities', facility_name, 'new_facilities_combined.csv')
-    new_facilities = pd.read_csv(new_facilities_path, index_col=0)
-    return new_facilities['100'].apply(literal_eval)
+st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        padding-top: 2rem;  /* Adjust this value as needed */
+        padding-bottom: 2rem; /* Optionally reduce bottom padding too */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='suggesting-new-facilities')
+# @st.cache_data
+# def read_new_facilities(facility_name):
+#     new_facilities_path = os.path.join('../data', 'usa', 'new_facilities', facility_name, 'new_facilities_combined.csv')
+#     new_facilities = pd.read_csv(new_facilities_path, index_col=0)
+#     return new_facilities['100'].apply(literal_eval)
 
 
 def get_facility_from_facility_name(facilities, facility_name):
@@ -33,6 +46,18 @@ def state_of_the_day(state_names):
     day_of_year = datetime.now().timetuple().tm_yday
     state_of_the_day = state_names[day_of_year % len(state_names)]
     return state_of_the_day
+
+
+tab = sac.tabs(
+    items=['Visualize facility deserts', 'Suggest new facilities', 'Explanation'],
+    index=1,
+    align='center',
+)
+
+if tab == 'Visualize facility deserts':
+    st.switch_page("medical-facility-deserts.py")
+if tab == 'Explanation':
+    st.switch_page("pages/explainer.py")
 
 
 st.sidebar.caption('This tool suggests new facilities to reduce the number of facility deserts, based on '
@@ -193,7 +218,7 @@ with col1:
     if show_existing_facilities:
         fig = plot_existing_facilities(fig, facility, bounds)
     if show_new_facilities:
-        fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='Suggested facilities',
+        fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='Proposed facilities',
                                   marker_color='cyan', marker_symbol='diamond', p='combined',
                                   marker_line_color='black', marker_line_width=2.0)
 
@@ -241,7 +266,7 @@ with st.expander(label='How does this work?'):
         )
 
         if show_new_facilities:
-            fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='In combined solution',
+            fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='In proposed solution',
                                   marker_color='cyan', marker_symbol='diamond', p='combined', marker_size=10,
                                   marker_line_color='black', marker_line_width=0.0)
         if show_solution1:
@@ -263,8 +288,7 @@ with st.expander(label='How does this work?'):
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models. '
-                   'Facilities present in our proposed solution above are in blue, those not in the proposed solution are in grey.')
+        st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models')
 
         original_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, old_distance_label)
         original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
@@ -281,7 +305,7 @@ with st.expander(label='How does this work?'):
         new_desert_df = compute_medical_deserts(census_df, poverty_threshold, urban_distance_threshold, rural_distance_threshold, combined_solution_label)
         new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
         new_medical_deserts = str(sum(new_demographic_data.values()))
-        st.markdown('''<center>Combined solution (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+        st.markdown('''<center>Proposed solution (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
         new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
         fig_new = plot_stacked_bar(new_demographic_data)
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
@@ -320,20 +344,20 @@ with st.expander(label='How does this work?'):
         st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
 
-with st.sidebar:
-    move_to_explanation = st.button('Explanation', use_container_width=True)
-    if move_to_explanation:
-        st.switch_page("pages/explainer.py")
-
-    move_to_medical_deserts = st.button('Visualizing facility deserts', use_container_width=True)
-    if move_to_medical_deserts:
-        st.switch_page("medical-facility-deserts.py")
+# with st.sidebar:
+#     move_to_explanation = st.button('Explanation', use_container_width=True)
+#     if move_to_explanation:
+#         st.switch_page("pages/explainer.py")
+#
+#     move_to_medical_deserts = st.button('Visualizing facility deserts', use_container_width=True)
+#     if move_to_medical_deserts:
+#         st.switch_page("medical-facility-deserts.py")
 
 
 st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
                    'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
 
 st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
-                   'The maps are approximate.')
+                   'Map boundaries are approximate.')
 
 
