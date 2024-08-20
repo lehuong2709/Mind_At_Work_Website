@@ -283,7 +283,7 @@ if tab == 'Suggest New Facilities':
         To aid planning, the tool allows you to choose the number of new facilities to suggest, with the potential to expand later.
         As before, you can also choose the poverty and distance thresholds that define a ''' + facility.type + ''' desert in the sidebar.
         ''', unsafe_allow_html=True
-                )
+    )
 
     col1, col2 = st.columns([3, 2], gap='medium')
 
