@@ -164,7 +164,7 @@ if tab == 'Visualize Facility Deserts':
     st.markdown('''This tool aims to identify poorer areas with low access to various critical facilities.'''
                 + facility.get_message(), unsafe_allow_html=True)
 
-    col1, col2 = st.columns([3, 2], gap='medium')
+    col1, col2 = st.columns([3, 2], gap='small')
 
     with col2:
         st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + State.name
@@ -208,7 +208,8 @@ if tab == 'Visualize Facility Deserts':
             }
         }
 
-        st.plotly_chart(fig, use_container_width=True, config=config)
+        with st.container(border=True):
+            st.plotly_chart(fig, use_container_width=True, config=config)
 
     with col2:
         demographics_all = get_demographic_data(census_df, racial_labels)
@@ -218,11 +219,12 @@ if tab == 'Visualize Facility Deserts':
 
         fig1, fig2 = plot_stacked_bar(demographics_all), plot_stacked_bar(demographics_deserts)
 
-        st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(census_df)) + '''</b> blockgroups</center>''', unsafe_allow_html=True)
-        st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
+        with st.container(border=True):
+            st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(census_df)) + '''</b> blockgroups</center>''', unsafe_allow_html=True)
+            st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
-        st.markdown('''<center><b>''' + str(len(desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
-        st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
+            st.markdown('''<center><b>''' + str(len(desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
+            st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
 
         for racial_label in racial_labels:
             if racial_label in demographics_deserts and racial_label != 'other':
@@ -285,7 +287,7 @@ if tab == 'Suggest New Facilities':
         ''', unsafe_allow_html=True
                 )
 
-    col1, col2 = st.columns([3, 2], gap='medium')
+    col1, col2 = st.columns([3, 2], gap='small')
 
     with col2:
         with st.container(border=True):
@@ -299,7 +301,6 @@ if tab == 'Suggest New Facilities':
             show_existing_facilities = st.checkbox(label='Existing facilities', value=True)
         with col23:
             show_new_facilities = st.checkbox(label='Suggested facilities', value=True)
-
 
     with col1:
         old_distance_label = facility.distance_label
@@ -323,21 +324,23 @@ if tab == 'Suggest New Facilities':
                                       marker_color='cyan', marker_symbol='diamond', p='combined',
                                       marker_line_color='black', marker_line_width=2.0)
 
-        st.plotly_chart(fig, use_container_width=True)
+        with st.container(border=True):
+            st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
-        original_medical_deserts = str(sum(original_demographic_data.values()))
-        st.markdown('''<center>Original ''' + facility.type + ''' deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-        fig_original = plot_stacked_bar(original_demographic_data)
-        st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
+        with st.container(border=True):
+            original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
+            original_medical_deserts = str(sum(original_demographic_data.values()))
+            st.markdown('''<center>Original ''' + facility.type + ''' deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+            fig_original = plot_stacked_bar(original_demographic_data)
+            st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
 
-        new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
-        new_medical_deserts = str(sum(new_demographic_data.values()))
-        st.markdown('''<center>Remaining ''' + facility.type + ''' deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
-        new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
-        fig_new = plot_stacked_bar(new_demographic_data)
-        st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
+            new_demographic_data = get_demographic_data(new_desert_df, racial_labels)
+            new_medical_deserts = str(sum(new_demographic_data.values()))
+            st.markdown('''<center>Remaining ''' + facility.type + ''' deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
+            new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
+            fig_new = plot_stacked_bar(new_demographic_data)
+            st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
     with st.expander(label='How does this work?'):
         st.markdown('''
@@ -347,49 +350,50 @@ if tab == 'Suggest New Facilities':
             various demographic groups from the nearest facility (see our [paper](https://arxiv.org/abs/2211.14873) for more details). You can compare the three solutions in the figure below.
         ''')
 
-        col1, col2 = st.columns([3, 2], gap='medium')
+        col1, col2 = st.columns([3, 2], gap='small')
 
         with col1:
-            col11, col21, col31 = st.columns(3)
-            with col11:
-                show_solution1 = st.checkbox('Solution 1', value=True)
-            with col21:
-                show_solution2 = st.checkbox('Solution 2', value=True)
-            with col31:
-                show_solution3 = st.checkbox('Solution 3', value=True)
+            with st.container(border=True):
+                st.caption(f'**Figure**: Suggested locations for new facilities in the three solutions based on different optimization models.')
 
-            fig = go.Figure()
-            fig, bounds = plot_state(fig, State)
+                col11, col21, col31 = st.columns(3)
+                with col11:
+                    show_solution1 = st.checkbox('Solution 1', value=True)
+                with col21:
+                    show_solution2 = st.checkbox('Solution 2', value=True)
+                with col31:
+                    show_solution3 = st.checkbox('Solution 3', value=True)
 
-            fig.update_layout(
-                legend=dict(title='Facilities')
-            )
+                fig = go.Figure()
+                fig, bounds = plot_state(fig, State)
 
-            if show_new_facilities:
-                fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='In proposed solution',
-                                          marker_color='cyan', marker_symbol='diamond', p='combined', marker_size=10,
-                                          marker_line_color='black', marker_line_width=0.0)
-            if show_solution1:
-                fig = plot_new_facilities(
-                    fig=fig, facility=facility, state_fips=State.fips, p=1, k=k, name='In solution 1',
-                    marker_symbol='circle-open-dot', marker_size=9, marker_color='black', marker_line_color='black', marker_line_width=1.5,
-                )
-            if show_solution2:
-                fig = plot_new_facilities(
-                    fig=fig, facility=facility, state_fips=State.fips, p=2, k=k, name='In solution 2',
-                    marker_symbol='triangle-up-open', marker_size=12, marker_color='black', marker_line_color='black', marker_line_width=1.5,
-                )
-            if show_solution3:
-                fig = plot_new_facilities(
-                    fig=fig, facility=facility, state_fips=State.fips, p='inf', k=k, name='In solution 3',
-                    marker_symbol='triangle-down-open', marker_size=12, marker_color='black', marker_line_color='black', marker_line_width=1.5,
+                fig.update_layout(
+                    legend=dict(title='Facilities')
                 )
 
-            st.plotly_chart(fig, use_container_width=True)
+                if show_new_facilities:
+                    fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='In proposed solution',
+                                              marker_color='cyan', marker_symbol='diamond', p='combined', marker_size=10,
+                                              marker_line_color='black', marker_line_width=0.0)
+                if show_solution1:
+                    fig = plot_new_facilities(
+                        fig=fig, facility=facility, state_fips=State.fips, p=1, k=k, name='In solution 1',
+                        marker_symbol='circle-open-dot', marker_size=9, marker_color='black', marker_line_color='black', marker_line_width=1.5,
+                    )
+                if show_solution2:
+                    fig = plot_new_facilities(
+                        fig=fig, facility=facility, state_fips=State.fips, p=2, k=k, name='In solution 2',
+                        marker_symbol='triangle-up-open', marker_size=12, marker_color='black', marker_line_color='black', marker_line_width=1.5,
+                    )
+                if show_solution3:
+                    fig = plot_new_facilities(
+                        fig=fig, facility=facility, state_fips=State.fips, p='inf', k=k, name='In solution 3',
+                        marker_symbol='triangle-down-open', marker_size=12, marker_color='black', marker_line_color='black', marker_line_width=1.5,
+                    )
+
+                st.plotly_chart(fig, use_container_width=True)
 
         with col2:
-            st.caption('Figure: Suggested new facilities in the three solutions based on different optimization models')
-
             original_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, old_distance_label)
             original_demographic_data = get_demographic_data(original_desert_df, racial_labels)
             original_medical_deserts = str(sum(original_demographic_data.values()))

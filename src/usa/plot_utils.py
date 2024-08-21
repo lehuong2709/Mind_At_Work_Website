@@ -51,20 +51,22 @@ def plot_state(fig, State):
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0, pad=0),
-        autosize=True,
+        autosize=False,
+        # paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        # plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
         xaxis=dict(range=[bounds['min_x'], bounds['max_x']], autorange=False),
         yaxis=dict(range=[bounds['min_y'], bounds['max_y']], autorange=False),
         showlegend=True,
         legend=dict(
             itemsizing='constant',
             x=0.02,
-            y=0.98,
+            # y=0.98,
             orientation='v',
             bgcolor='rgba(255,255,255,0.5)',
         )
     )
 
-    fig.update_yaxes(automargin=True)
+    # fig.update_yaxes(automargin=True)
 
     return fig, bounds
 
@@ -178,9 +180,9 @@ def plot_blockgroups(fig, blockgroup_df, color=None):
             legend=dict(
                 itemsizing='constant',
                 x=0.02,
-                y=0.98,
+                # y=0.98,
                 bgcolor='rgba(255,255,255,0.5)',
-                title= dict(
+                title=dict(
                     text='Racial/ethnic majority',
                     font=dict(
                         size=12,
@@ -202,7 +204,7 @@ def plot_stacked_bar(demographic_data):
         'nhopi_alone': 'Majority NHOPI',
         'hispanic': 'Majority Hispanic',
         'other': 'Other',
-        'no_desert': 'Previous medical deserts',
+        'no_desert': 'No longer a medical desert',
     }
 
     if sum(demographic_data.values()) == 0:
