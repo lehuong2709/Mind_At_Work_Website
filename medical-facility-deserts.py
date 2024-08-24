@@ -161,7 +161,7 @@ if tab == 'Visualize Facility Deserts':
         </h3>
         """, unsafe_allow_html=True)
 
-    st.markdown('''This tool aims to identify poorer areas with low access to various critical facilities.'''
+    st.markdown('''This tool aims to identify poorer areas with low access to critical facilities.'''
                 + facility.get_message(), unsafe_allow_html=True)
 
     col1, col2 = st.columns([3, 2], gap='small')
@@ -169,46 +169,50 @@ if tab == 'Visualize Facility Deserts':
     with col2:
         st.caption(f'**Figure**: Census blockgroups classified as ' + facility.type + ' deserts in ' + State.name
                    + '. Colored by racial/ethnic majority.')
-        col21, col22, col23 = st.columns(3)
-        with col21:
-            show_deserts = st.checkbox(facility.type.capitalize() + ' deserts', value=True)
-        with col22:
-            show_facility_locations = st.checkbox(facility.display_name, value=False)
-        with col23:
-            show_voronoi_cells = st.checkbox('''[Voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) cells''', value=False)
 
     with col1:
-        fig = go.Figure()
-        fig, bounds = plot_state(fig, State)
-
-        distance_label = facility.distance_label
-        desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, distance_label)
-
-        if show_deserts:
-            fig = plot_blockgroups(fig, desert_df)
-
-        if show_facility_locations:
-            if facility.name == 'top_3_pharmacy_chains':
-                for pharmacy_chain in [CVS, Walgreens, Walmart]:
-                    fig = plot_existing_facilities(fig, pharmacy_chain, bounds)
-            else:
-                fig = plot_existing_facilities(fig, facility, bounds)
-
-        if show_voronoi_cells:
-            fig = plot_voronoi_cells(fig, facility, state_fips)
-
-        config = {
-            'modeBarButtonsToRemove': ['zoomOut', 'select2d'],
-            'staticPlot': False,
-            'scrollZoom': True,
-            'toImageButtonOptions': {
-                'format': 'png',
-                'scale': 1.5,
-                'filename': facility.type + '_deserts_' + state_abbr + '_' + facility.name + '.png',
-            }
-        }
-
         with st.container(border=True):
+            items = sac.checkbox(
+                items=[facility.type.capitalize() + ' deserts', facility.display_name, 'Voronoi cells'],
+                index=[0],
+                size='xs',
+                align='center',
+            )
+
+            show_deserts = True if facility.type.capitalize() + ' deserts' in items else False
+            show_facility_locations = True if facility.display_name in items else False
+            show_voronoi_cells = True if 'Voronoi cells' in items else False
+
+            fig = go.Figure()
+            fig, bounds = plot_state(fig, State)
+
+            distance_label = facility.distance_label
+            desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, distance_label)
+
+            if show_deserts is True:
+                fig = plot_blockgroups(fig, desert_df)
+
+            if show_facility_locations is True:
+                if facility.name == 'top_3_pharmacy_chains':
+                    for pharmacy_chain in [CVS, Walgreens, Walmart]:
+                        fig = plot_existing_facilities(fig, pharmacy_chain, bounds)
+                else:
+                    fig = plot_existing_facilities(fig, facility, bounds)
+
+            if show_voronoi_cells is True:
+                fig = plot_voronoi_cells(fig, facility, state_fips)
+
+            config = {
+                'modeBarButtonsToRemove': ['zoomOut', 'select2d'],
+                'staticPlot': False,
+                'scrollZoom': True,
+                'toImageButtonOptions': {
+                    'format': 'png',
+                    'scale': 1.5,
+                    'filename': facility.type + '_deserts_' + state_abbr + '_' + facility.name + '.png',
+                }
+            }
+
             st.plotly_chart(fig, use_container_width=True, config=config)
 
     with col2:
@@ -293,38 +297,40 @@ if tab == 'Suggest New Facilities':
         with st.container(border=True):
             k = st.select_slider(label='Choose the number of new facilities', options=[0, 5, 10, 25, 50, 100], value=25)
 
-        col21, col22, col23 = st.columns(3)
-
-        with col21:
-            show_deserts = st.checkbox(label=facility.type.capitalize() + ' deserts', value=False)
-        with col22:
-            show_existing_facilities = st.checkbox(label='Existing facilities', value=True)
-        with col23:
-            show_new_facilities = st.checkbox(label='Suggested facilities', value=True)
-
     with col1:
-        old_distance_label = facility.distance_label
-        new_distance_label = facility.distance_label + '_combined_k_' + str(k)
-        if k == 0:
-            new_distance_label = old_distance_label
-
-        original_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, old_distance_label)
-        new_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, new_distance_label)
-
-        fig = go.Figure()
-        fig, bounds = plot_state(fig, State)
-        if show_deserts:
-            difference_df = original_desert_df[~original_desert_df.index.isin(new_desert_df.index)]
-            fig = plot_blockgroups(fig, difference_df, color='lightgrey')
-            fig = plot_blockgroups(fig, new_desert_df)
-        if show_existing_facilities:
-            fig = plot_existing_facilities(fig, facility, bounds)
-        if show_new_facilities:
-            fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='Proposed facilities',
-                                      marker_color='cyan', marker_symbol='diamond', p='combined',
-                                      marker_line_color='black', marker_line_width=2.0)
-
         with st.container(border=True):
+            old_distance_label = facility.distance_label
+            new_distance_label = facility.distance_label + '_combined_k_' + str(k)
+            if k == 0:
+                new_distance_label = old_distance_label
+
+            original_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, old_distance_label)
+            new_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, new_distance_label)
+
+            items = sac.checkbox(
+                items=[facility.type.capitalize() + ' deserts', 'Existing facilities', 'Suggested facilities'],
+                index=[1, 2],
+                size='xs',
+                align='center',
+            )
+
+            show_deserts = True if facility.type.capitalize() + ' deserts' in items else False
+            show_existing_facilities = True if 'Existing facilities' in items else False
+            show_new_facilities = True if 'Suggested facilities' in items else False
+
+            fig = go.Figure()
+            fig, bounds = plot_state(fig, State)
+            if show_deserts:
+                difference_df = original_desert_df[~original_desert_df.index.isin(new_desert_df.index)]
+                fig = plot_blockgroups(fig, difference_df, color='lightgrey')
+                fig = plot_blockgroups(fig, new_desert_df)
+            if show_existing_facilities:
+                fig = plot_existing_facilities(fig, facility, bounds)
+            if show_new_facilities:
+                fig = plot_new_facilities(fig, facility=facility, state_fips=State.fips, k=k, name='Proposed facilities',
+                                          marker_color='cyan', marker_symbol='diamond', p='combined',
+                                          marker_line_color='black', marker_line_width=2.0)
+
             st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -356,13 +362,15 @@ if tab == 'Suggest New Facilities':
             with st.container(border=True):
                 st.caption(f'**Figure**: Suggested locations for new facilities in the three solutions based on different optimization models.')
 
-                col11, col21, col31 = st.columns(3)
-                with col11:
-                    show_solution1 = st.checkbox('Solution 1', value=True)
-                with col21:
-                    show_solution2 = st.checkbox('Solution 2', value=True)
-                with col31:
-                    show_solution3 = st.checkbox('Solution 3', value=True)
+                show_solutions = sac.checkbox(
+                    items=['Solution 1', 'Solution 2', 'Solution 3'],
+                    size='xs',
+                    align='center',
+                    index=[0, 1, 2]
+                )
+                show_solution1 = True if 'Solution 1' in show_solutions else False
+                show_solution2 = True if 'Solution 2' in show_solutions else False
+                show_solution3 = True if 'Solution 3' in show_solutions else False
 
                 fig = go.Figure()
                 fig, bounds = plot_state(fig, State)
