@@ -4,6 +4,7 @@ import pandas as pd
 from typing import List, Tuple
 import bisect
 
+
 class Point:
     def __init__(self, longitude: float, latitude: float, precision: int = 3):
         """

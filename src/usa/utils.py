@@ -25,15 +25,8 @@ def get_page_url(page_name):
         return 'https://usa-medical-deserts.streamlit.app/' + page_name
 
 
-def get_demographic_data(census_df, racial_labels):
-    # data = {}
-    # for racial_label in racial_labels:
-    #     if racial_label in census_df['racial_majority'].unique():
-    #         data[racial_label] = len(census_df[census_df['racial_majority'] == racial_label])
-
+def get_demographic_data(census_df):
     return dict(census_df['racial_majority'].value_counts())
-
-    # return data
 
 
 @st.cache_data

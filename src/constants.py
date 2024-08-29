@@ -13,29 +13,12 @@ from src.regions import Region, Country
 # === Units ===
 MILES_TO_KM = 1.60934
 
+
 # === Colors ===
-WATERBODY_COLOR = '#a1b8b7'                 # teal, for sea, ocean, lake, river, etc.
-LAND_COLOR_PRIMARY = '#f4f2d6'              # beige, for land being plotted
+WATERBODY_COLOR = '#a4b8b7'                 # teal, for sea, ocean, lake, river, etc.
+LAND_COLOR_PRIMARY = '#f9f3e1'              # beige, for land being plotted
 LAND_COLOR_SECONDARY = '#fbfcf9'            # soft white, for other landmass
 BOUNDARY_COLOR = '#818181'                  # gray, for boundaries
-
-# A color cycle for color-blind friendly plots
-# scatter_palette = [
-#     '#609fd5',          # Cornflower Blue
-#     '#7cbd95',          # Sea Green
-#     '#BBF080',          # Light Lime
-#     '#ffbb7f',          # Light Orange
-#     '#89e5b9',          # Light Sea Green
-#     '#bd89e5',          # Lavender Purple
-#     '#ef7476',          # Coral
-#     '#558367',          # Forest Green
-#     '#344b76',          # Dark Slate Blue
-#     '#fff08a',          # Pale Yellow
-#     '#967117',          # Olive
-#     '#f7cad5',          # Pale Pink
-#     '#bbbbbb',          # Gray
-#     '#f79abc',          # Orchid Pink
-# ]
 
 # A color cycle for color-blind friendly plots
 scatter_palette = [
@@ -55,28 +38,6 @@ scatter_palette = [
     '#18fe90'           # Light Green
 ]
 
-
-facility_palette = [
-    '#8B0000',           # Dark Red
-    '#006400',           # Dark Green
-    '#00008B',           # Dark Blue
-    '#c96e00',           # Dark Orange
-    '#8B008B',           # Dark Purple
-    '#696969',           # Dim Gray
-    '#CCCC00',           # Dark Yellow
-]
-
-old_color_cycle = [
-    "#0072B2",           # Blue
-    "#249e24",           # Green
-    "#924900",           # Brown
-    "#F0E442",           # Yellow
-    "#999999",           # Gray
-    "#b66dff",           # Purple
-    "#D53E00",           # Red
-    "#920000",           # Dark Red
-    "#009292",           # Cyan
-]
 
 # === Plotting ===
 
