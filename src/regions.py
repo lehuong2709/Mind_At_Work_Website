@@ -130,17 +130,6 @@ class Country(Region):
         return False
 
 
-USA = Country(name='USA',
-              official_names=['United States of America', 'United States', 'America'],
-              common_names=['USA', 'US'],
-              shapefile=None,
-              default_crs=None)
-# country_names_to_objects_dictionary = {
-#     'USA': USA
-# }
-country_names_to_objects_dictionary = [('USA', USA)]
-
-
 class Province:
     """
     Represents a province with its name and the country it belongs to.
@@ -155,10 +144,6 @@ class Province:
             country (Country): The country that the province belongs to.
         """
         self._name = name
-
-        # if country not in [item[0] for item in country_names_to_objects_dictionary]:
-        #     raise ValueError(
-        #         f'Country {country} is not currently supported. Please add it to the country_names_to_objects_dictionary.'.format(country))
         self._country = country
 
     @property

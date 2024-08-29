@@ -1,9 +1,10 @@
+import geopandas as gpd
 import plotly.graph_objects as go
 import os
-from src.usa.utils import colors, compute_medical_deserts, racial_labels, racial_labels_display_names
 import pandas as pd
 import random
-import geopandas as gpd
+from src.usa.utils import colors, racial_labels, racial_labels_display_names
+from src.constants import WATERBODY_COLOR, LAND_COLOR_PRIMARY, LAND_COLOR_SECONDARY, BOUNDARY_COLOR
 
 
 def plot_state(fig, State):
@@ -25,8 +26,9 @@ def plot_state(fig, State):
         locations=data['state'],  # Spatial coordinates
         z=data['value'].astype(float),  # Data to be color-coded
         locationmode='USA-states',  # Set of locations match entries in `locations`
-        colorscale=["#fbfcf9", "#f9f3e1"],  # Color scale for the choropleth map
+        colorscale=[LAND_COLOR_SECONDARY, LAND_COLOR_PRIMARY],  # Color scale for the choropleth map
         showscale=False,
+        hoverinfo='location'
     )
 
     # Add the choropleth map to the figure
@@ -40,9 +42,9 @@ def plot_state(fig, State):
         showocean=True,
         showcountries=True,
         showlakes=True,
-        lakecolor='#a4b8b7',
-        oceancolor='#a4b8b7',
-        landcolor='#fbfcf9',
+        lakecolor=WATERBODY_COLOR,
+        oceancolor=WATERBODY_COLOR,
+        landcolor=LAND_COLOR_SECONDARY,
         scope="north america",
         lonaxis_range=[bounds['min_x'], bounds['max_x']],
         lataxis_range=[bounds['min_y'], bounds['max_y']],
@@ -52,15 +54,12 @@ def plot_state(fig, State):
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0, pad=0),
         autosize=False,
-        # paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
-        # plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
         xaxis=dict(range=[bounds['min_x'], bounds['max_x']], autorange=False),
         yaxis=dict(range=[bounds['min_y'], bounds['max_y']], autorange=False),
         showlegend=True,
         legend=dict(
             itemsizing='constant',
             x=0.02,
-            # y=0.98,
             orientation='v',
             bgcolor='rgba(255,255,255,0.5)',
         )
@@ -180,7 +179,6 @@ def plot_blockgroups(fig, blockgroup_df, color=None):
             legend=dict(
                 itemsizing='constant',
                 x=0.02,
-                # y=0.98,
                 bgcolor='rgba(255,255,255,0.5)',
                 title=dict(
                     text='Racial/ethnic majority',
