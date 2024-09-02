@@ -14,7 +14,7 @@ from src.usa.utils import racial_labels, racial_labels_display_names, compute_me
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='Facility Deserts in USA', page_icon='🏥')
 
 
 def update_variable(variable_name):
