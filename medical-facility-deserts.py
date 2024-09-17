@@ -1,6 +1,7 @@
 from datetime import datetime
 import geopandas as gpd
 import os
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -11,7 +12,7 @@ from src.usa.constants import state_names, interesting_states
 from src.usa.states import USAState
 from src.usa.facilities import CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes, ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3
 from src.usa.utils import racial_labels, racial_labels_display_names, compute_medical_deserts, get_page_url, get_demographic_data, get_facility_from_facility_name, get_state_of_the_day
-from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities
+from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities, plot_cities
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='Facility Deserts in USA', page_icon='🏥')
@@ -19,6 +20,63 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='
 
 def update_variable(variable_name):
     st.session_state[variable_name] = st.session_state['_' + variable_name]
+
+
+def demographic_analysis():
+    def get_demographic_proportions(census_df):
+        return dict(census_df['racial_majority'].value_counts(normalize=True, dropna=False))
+
+    proportion_of_overall_population = pd.DataFrame(index=racial_labels, columns=state_names, data=np.zeros((len(racial_labels), len(state_names))))
+    proportion_of_medical_deserts = pd.DataFrame(index=racial_labels, columns=state_names, data=np.zeros((len(racial_labels), len(state_names))))
+
+    poor_blockgroups_fraction_overall = pd.Series(index=state_names, data=np.zeros(len(state_names)))
+    poor_blockgroups_fraction_far_away = pd.Series(index=state_names, data=np.zeros(len(state_names)))
+
+    for state_name in state_names:
+        State = USAState(state_name)
+        census_df = State.get_census_data(level='blockgroup')
+        overall_demographic_data = get_demographic_proportions(census_df)
+
+        desert_df = compute_medical_deserts(census_df, poverty_threshold=st.session_state.poverty_threshold, n_urban=st.session_state.urban_distance_threshold * 1.602, n_rural=st.session_state.rural_distance_threshold * 1.602)
+        desert_demographic_data = get_demographic_proportions(desert_df)
+
+        far_away_df = compute_medical_deserts(census_df, poverty_threshold=0, n_urban=st.session_state.urban_distance_threshold * 1.602, n_rural=st.session_state.rural_distance_threshold * 1.602)
+
+        poor_blockgroups_fraction_overall.loc[state_name] = len(census_df[census_df['below_poverty'] >= st.session_state.poverty_threshold])/len(census_df)
+        poor_blockgroups_fraction_far_away.loc[state_name] = len(far_away_df[far_away_df['below_poverty'] >= st.session_state.poverty_threshold])/len(far_away_df)
+
+        for racial_label in racial_labels:
+            if racial_label in overall_demographic_data:
+                proportion_of_overall_population.loc[racial_label, state_name] = overall_demographic_data[racial_label]
+            if racial_label in desert_demographic_data:
+                proportion_of_medical_deserts.loc[racial_label, state_name] = desert_demographic_data[racial_label]
+
+    for racial_label in racial_labels:
+        proportion_of_overall_population.rename(index={racial_label: racial_labels_display_names[racial_label]}, inplace=True)
+        proportion_of_medical_deserts.rename(index={racial_label: racial_labels_display_names[racial_label]}, inplace=True)
+
+    M = max(100*((proportion_of_medical_deserts - proportion_of_overall_population).values.flatten()))
+    m = min(100*((proportion_of_medical_deserts - proportion_of_overall_population).values.flatten()))
+
+    alpha = abs(m)/(M + abs(m))
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=100*(proportion_of_medical_deserts - proportion_of_overall_population),
+            x=state_names,
+            y=[racial_labels_display_names[racial_label] for racial_label in racial_labels],
+            colorscale=[[0, 'violet'], [alpha, 'white'], [1, 'orange']],
+            colorbar=dict(title='''Percentage<br> point<br> difference'''),
+        )
+    )
+
+    return fig
+
+
+def loop_list(list_like_object):
+    l = list(list_like_object)
+    l = l + [l[0]]
+    return l
 
 
 def get_facility_from_user():
@@ -148,18 +206,18 @@ st.markdown(
 
 # Create a tab to select the tool to use
 tab = sac.tabs(
-    items=['Visualize Facility Deserts', 'Suggest New Facilities', 'Explanation'],
+    items=['Facility Deserts', 'Opening New Facilities', 'Explanation'],
     index=0,
     align='center',
 )
 
 # Sidebar messages for the different tools
-if tab == 'Visualize Facility Deserts':
+if tab == 'Facility Deserts':
     st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                        'access to various critical facilities such as pharmacies, hospitals, and schools.')
 
-if tab == 'Suggest New Facilities':
-    st.sidebar.caption('This tool suggests new facilities to reduce the number of facility deserts, based on '
+if tab == 'Opening New Facilities':
+    st.sidebar.caption('This tool proposes new facilities to reduce the number of facility deserts, based on '
                        'the optimization models in our [paper](https://arxiv.org/abs/2211.14873) on '
                        'fairness in facility location.')
 
@@ -167,7 +225,7 @@ if tab == 'Suggest New Facilities':
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-if tab == 'Visualize Facility Deserts' or tab == 'Suggest New Facilities':
+if tab == 'Facility Deserts' or tab == 'Opening New Facilities':
     # Get the facility type and state from the user
     with st.sidebar:
         facility = get_facility_from_user()
@@ -185,7 +243,7 @@ if tab == 'Visualize Facility Deserts' or tab == 'Suggest New Facilities':
 
 
 # Display the selected tab
-if tab == 'Visualize Facility Deserts':
+if tab == 'Facility Deserts':
     # Display the title of the tool
     st.markdown("""
         <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
@@ -226,7 +284,7 @@ if tab == 'Visualize Facility Deserts':
 
             # Create a new figure for the map
             fig = go.Figure()
-            fig, bounds = plot_state(fig, State)                                                    # Plot the state boundaries on the map
+            fig, bounds = plot_state(fig, State)
 
             # Compute the medical deserts based on the selected poverty and distance thresholds
             distance_label = facility.distance_label
@@ -301,7 +359,7 @@ if tab == 'Visualize Facility Deserts':
         url = get_page_url('suggesting-new-facilities')
         st.markdown(
             '''
-            Also check out our tool to suggest locations for new facilities to 
+            Also check out our [tool](''' + url + ''') to suggest locations for new facilities to 
             reduce the impact of ''' + facility.type + ''' deserts.'''.format(facility.type), unsafe_allow_html=True
         )
 
@@ -312,8 +370,59 @@ if tab == 'Visualize Facility Deserts':
     st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
                        'Map boundaries are approximate.')
 
+    with st.expander('More analysis'):
+        with st.container(border=True):
+            st.markdown('''<center><b>Rural vs urban medical deserts</b></center>''', unsafe_allow_html=True)
 
-if tab == 'Suggest New Facilities':
+            rural_df = census_df[census_df['urban'] == 0]
+            urban_df = census_df[census_df['urban'] == 1]
+
+            rural_desert_df = desert_df[desert_df['urban'] == 0]
+            urban_desert_df = desert_df[desert_df['urban'] == 1]
+
+            rural_overall_demographics = get_demographic_data(rural_df)
+            urban_overall_demographics = get_demographic_data(urban_df)
+
+            rural_desert_demographics = get_demographic_data(rural_desert_df)
+            urban_desert_demographics = get_demographic_data(urban_desert_df)
+
+            col_rural, col_urban = st.columns(2)
+
+            with col_rural:
+                st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(rural_df)) + '''</b> rural blockgroups</center>''', unsafe_allow_html=True)
+                fig_rural_overall = plot_stacked_bar(rural_overall_demographics)
+                st.plotly_chart(fig_rural_overall, use_container_width=True, config={'displayModeBar': False})
+
+                st.markdown('''<center><b>''' + str(len(rural_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
+                fig_rural_deserts = plot_stacked_bar(rural_desert_demographics)
+                st.plotly_chart(fig_rural_deserts, use_container_width=True, config={'displayModeBar': False})
+
+            with col_urban:
+                st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(urban_df)) + '''</b> urban blockgroups</center>''', unsafe_allow_html=True)
+                fig_urban_overall = plot_stacked_bar(urban_overall_demographics)
+                st.plotly_chart(fig_urban_overall, use_container_width=True, config={'displayModeBar': False})
+
+                st.markdown('''<center><b>''' + str(len(urban_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
+                fig_urban_deserts = plot_stacked_bar(urban_desert_demographics)
+                st.plotly_chart(fig_urban_deserts, use_container_width=True, config={'displayModeBar': False})
+
+        with st.container(border=True):
+            st.markdown('''<center><b>Racial disparities among medical deserts</b></center>''', unsafe_allow_html=True)
+
+            st.write('''This heatmap shows the difference between the proportion of the population in medical deserts and the overall population.<br>''' +
+                     '''- :orange[Orange] indicates that the proportion of the population in medical deserts is higher than the overall population.<br>''' +
+                     '''- :violet[Violet] indicates that the proportion of the population in medical deserts is lower than the overall population.''', unsafe_allow_html=True)
+
+            fig = demographic_analysis()
+
+            fig.update_layout(
+                margin=dict(t=0),
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+
+if tab == 'Opening New Facilities':
     def facility_names(facility):
         if facility.name == 'top_3_pharmacy_chains':
             return 'pharmacies'
@@ -323,7 +432,7 @@ if tab == 'Suggest New Facilities':
 
     st.markdown("""
         <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
-             Suggesting new """ + facility_names(facility) + """ in
+             Proposing new """ + facility_names(facility) + """ in
             <span style="color: #c41636">
                 """ + State.name + """
             </span>
@@ -358,7 +467,7 @@ if tab == 'Suggest New Facilities':
             new_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, new_distance_label)
 
             items = sac.checkbox(
-                items=[facility.type.capitalize() + ' deserts', 'Existing facilities', 'Suggested facilities'],
+                items=[facility.type.capitalize() + ' deserts', 'Existing facilities', 'Proposed facilities'],
                 index=[1, 2],
                 size='xs',
                 align='center',
@@ -366,7 +475,7 @@ if tab == 'Suggest New Facilities':
 
             show_deserts = True if facility.type.capitalize() + ' deserts' in items else False
             show_existing_facilities = True if 'Existing facilities' in items else False
-            show_new_facilities = True if 'Suggested facilities' in items else False
+            show_new_facilities = True if 'Proposed facilities' in items else False
 
             fig = go.Figure()
             fig, bounds = plot_state(fig, State)
@@ -398,6 +507,137 @@ if tab == 'Suggest New Facilities':
             fig_new = plot_stacked_bar(new_demographic_data)
             st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
+    with st.container(border=True):
+        col1, col2 = st.columns([1, 1])
+
+        urban_df = census_df[census_df['urban'] == 1]
+        rural_df = census_df[census_df['urban'] == 0]
+
+        urban_poor_df = urban_df[urban_df['below_poverty'] >= st.session_state.poverty_threshold]
+        rural_poor_df = rural_df[rural_df['below_poverty'] >= st.session_state.poverty_threshold]
+        urban_uninsured_df = urban_df[urban_df['no_health_ins'] >= 20]
+        rural_uninsured_df = rural_df[rural_df['no_health_ins'] >= 20]
+        urban_minority_df = urban_df[(urban_df['racial_majority'] != 'white_alone')]
+        rural_minority_df = rural_df[(rural_df['racial_majority'] != 'white_alone')]
+        urban_desert_df = urban_poor_df[urban_poor_df[facility.distance_label] > 1.602 * st.session_state.urban_distance_threshold]
+        rural_desert_df = rural_poor_df[rural_poor_df[facility.distance_label] > 1.602 * st.session_state.rural_distance_threshold]
+
+        urban_list_original = [
+            urban_df[facility.distance_label].mean(),
+            urban_poor_df[facility.distance_label].mean(),
+            urban_uninsured_df[facility.distance_label].mean(),
+            urban_minority_df[facility.distance_label].mean(),
+            urban_desert_df[facility.distance_label].mean(),
+        ]
+
+        urban_list_posterior = [
+            urban_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            urban_poor_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            urban_uninsured_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            urban_minority_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            urban_desert_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+        ]
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatterpolar(
+            r=loop_list(urban_list_original),
+            theta=loop_list(['All', 'Poor', 'Low insurance', 'Minority', 'Medical deserts']),
+            name='Existing',
+            marker=dict(
+                size=10,
+                color='tomato',
+            ),
+            fill='toself',
+            fillcolor='rgba(255, 0, 0, 0.2)'
+        ))
+
+        fig.add_trace(go.Scatterpolar(
+            r=loop_list(urban_list_posterior),
+            theta=loop_list(['All', 'Poor', 'Low insurance', 'Minority', 'Medical deserts']),
+            name='After opening ' + str(k) + ' proposed facilities',
+            textfont=dict(
+                size=40,
+            ),
+            marker=dict(
+                size=10,
+                color='forestgreen',
+            ),
+            fill='toself',
+            fillcolor='rgba(0, 128, 0, 0.2)'
+        ))
+
+        fig.update_layout(
+            title='Average distance to closest facility <br> Urban blockgroups in ' + State.name,
+            legend=dict(
+                orientation='h',
+                x=0.5,
+                xanchor='center',
+            ),
+            margin=dict(l=0, r=0),
+        )
+
+        with col1:
+            st.plotly_chart(fig, use_container_width=True)
+
+        rural_list_original = [
+            rural_df[facility.distance_label].mean(),
+            rural_poor_df[facility.distance_label].mean(),
+            rural_uninsured_df[facility.distance_label].mean(),
+            rural_minority_df[facility.distance_label].mean(),
+            rural_desert_df[facility.distance_label].mean(),
+        ]
+
+        rural_list_posterior = [
+            rural_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            rural_poor_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            rural_uninsured_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            rural_minority_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+            rural_desert_df[facility.distance_label + '_combined_k_' + str(k)].mean(),
+        ]
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatterpolar(
+            r=loop_list(rural_list_original),
+            theta=loop_list(['All', 'Poor', 'Low insurance', 'Minority', 'Medical deserts']),
+            name='Existing',
+            marker=dict(
+                size=10,
+                color='tomato',
+            ),
+            fill='toself',
+            fillcolor='rgba(255, 0, 0, 0.2)'
+        ))
+
+        fig.add_trace(go.Scatterpolar(
+            r=loop_list(rural_list_posterior),
+            theta=loop_list(['All', 'Poor', 'Low insurance', 'Minority', 'Medical deserts']),
+            name='After opening ' + str(k) + ' proposed facilities',
+            textfont=dict(
+                size=40,
+            ),
+            marker=dict(
+                size=10,
+                color='forestgreen',
+            ),
+            fill='toself',
+            fillcolor='rgba(0, 128, 0, 0.2)'
+        ))
+
+        fig.update_layout(
+            title='Average distance to closest facility <br> Rural blockgroups in ' + State.name,
+            legend=dict(
+                orientation='h',
+                x=0.5,
+                xanchor='center',
+            ),
+            margin=dict(l=0, r=0),
+        )
+
+        with col2:
+            st.plotly_chart(fig, use_container_width=True)
+
     with st.expander(label='How does this work?'):
         st.markdown('''
             Under the hood, our proposed solution above is a combination of three distinct solutions, each of which suggests 
@@ -410,7 +650,7 @@ if tab == 'Suggest New Facilities':
 
         with col1:
             with st.container(border=True):
-                st.caption(f'**Figure**: Suggested locations for new facilities in the three solutions based on different optimization models.')
+                st.caption(f'**Figure**: Proposed locations for new facilities in the three solutions based on different optimization models.')
 
                 show_solutions = sac.checkbox(
                     items=['Solution 1', 'Solution 2', 'Solution 3'],

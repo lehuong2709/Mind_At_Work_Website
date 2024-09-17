@@ -5,6 +5,22 @@ import pandas as pd
 import random
 from src.usa.utils import colors, racial_labels, racial_labels_display_names
 from src.constants import WATERBODY_COLOR, LAND_COLOR_PRIMARY, LAND_COLOR_SECONDARY, BOUNDARY_COLOR
+import streamlit as st
+
+
+@st.cache_data
+def get_us_cities(State):
+    df_cities = pd.read_csv('data/usa/cities/uscities.csv')
+    state_abbr = State.abbreviation
+    df_cities = df_cities[df_cities['state_id'] == state_abbr]
+    df_cities.sort_values(by='population', ascending=False, inplace=True)
+    if state_abbr in ['CA', 'TX', 'FL', 'NY']:
+        n_cities = 10
+    else:
+        n_cities = 5
+    df_cities = df_cities.head(n_cities)
+
+    return df_cities
 
 
 def plot_state(fig, State):
@@ -68,6 +84,29 @@ def plot_state(fig, State):
     # fig.update_yaxes(automargin=True)
 
     return fig, bounds
+
+
+def plot_cities(fig, State):
+    df_cities = get_us_cities(State)
+    fig.add_trace(
+        go.Scattergeo(
+            lon=df_cities['lng'],
+            lat=df_cities['lat'],
+            text=df_cities['city'],
+            textposition='top center',
+            mode='markers+text',
+            hoverinfo='text',
+            marker=dict(
+                symbol='pentagon',
+                size=10,
+                opacity=0.8,
+                color='black',
+            ),
+            showlegend=False,
+        ),
+    )
+
+    return fig
 
 
 def plot_points(fig, df, bounds=None, name='Points', showlegend=True,
