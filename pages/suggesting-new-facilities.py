@@ -1,6 +1,7 @@
 from datetime import datetime
 import geopandas as gpd
 import os
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -11,7 +12,7 @@ from src.usa.constants import state_names, interesting_states
 from src.usa.states import USAState
 from src.usa.facilities import CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes, ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3
 from src.usa.utils import racial_labels, racial_labels_display_names, compute_medical_deserts, get_page_url, get_demographic_data, get_facility_from_facility_name, get_state_of_the_day
-from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities
+from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities, plot_demographic_analysis, plot_radar_chart, plot_distance_histogram
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
@@ -19,6 +20,12 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 def update_variable(variable_name):
     st.session_state[variable_name] = st.session_state['_' + variable_name]
+
+
+def loop_list(list_like_object):
+    l = list(list_like_object)
+    l = l + [l[0]]
+    return l
 
 
 def get_facility_from_user():
@@ -149,18 +156,18 @@ st.markdown(
 
 # Create a tab to select the tool to use
 tab = sac.tabs(
-    items=['Visualize Facility Deserts', 'Suggest New Facilities', 'Explanation'],
+    items=['Facility Deserts', 'Opening New Facilities', 'Explanation', 'More Analysis'],
     index=1,
     align='center',
 )
 
 # Sidebar messages for the different tools
-if tab == 'Visualize Facility Deserts':
+if tab == 'Facility Deserts' or tab == 'More Analysis':
     st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                        'access to various critical facilities such as pharmacies, hospitals, and schools.')
 
-if tab == 'Suggest New Facilities':
-    st.sidebar.caption('This tool suggests new facilities to reduce the number of facility deserts, based on '
+if tab == 'Opening New Facilities':
+    st.sidebar.caption('This tool proposes new facilities to reduce the number of facility deserts, based on '
                        'the optimization models in our [paper](https://arxiv.org/abs/2211.14873) on '
                        'fairness in facility location.')
 
@@ -168,7 +175,7 @@ if tab == 'Suggest New Facilities':
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-if tab == 'Visualize Facility Deserts' or tab == 'Suggest New Facilities':
+if tab == 'Facility Deserts' or tab == 'Opening New Facilities' or tab == 'More Analysis':
     # Get the facility type and state from the user
     with st.sidebar:
         facility = get_facility_from_user()
@@ -186,7 +193,7 @@ if tab == 'Visualize Facility Deserts' or tab == 'Suggest New Facilities':
 
 
 # Display the selected tab
-if tab == 'Visualize Facility Deserts':
+if tab == 'Facility Deserts':
     # Display the title of the tool
     st.markdown("""
         <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
@@ -227,7 +234,7 @@ if tab == 'Visualize Facility Deserts':
 
             # Create a new figure for the map
             fig = go.Figure()
-            fig, bounds = plot_state(fig, State)                                                    # Plot the state boundaries on the map
+            fig, bounds = plot_state(fig, State)
 
             # Compute the medical deserts based on the selected poverty and distance thresholds
             distance_label = facility.distance_label
@@ -302,7 +309,7 @@ if tab == 'Visualize Facility Deserts':
         url = get_page_url('suggesting-new-facilities')
         st.markdown(
             '''
-            Also check out our tool to suggest locations for new facilities to 
+            Also check out our [tool](''' + url + ''') to suggest locations for new facilities to 
             reduce the impact of ''' + facility.type + ''' deserts.'''.format(facility.type), unsafe_allow_html=True
         )
 
@@ -313,8 +320,43 @@ if tab == 'Visualize Facility Deserts':
     st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
                        'Map boundaries are approximate.')
 
+    with st.expander('More analysis'):
+        st.markdown('''<center><b>Rural vs urban medical deserts</b></center>''', unsafe_allow_html=True)
 
-if tab == 'Suggest New Facilities':
+        rural_df = census_df[census_df['urban'] == 0]
+        urban_df = census_df[census_df['urban'] == 1]
+
+        rural_desert_df = desert_df[desert_df['urban'] == 0]
+        urban_desert_df = desert_df[desert_df['urban'] == 1]
+
+        rural_overall_demographics = get_demographic_data(rural_df)
+        urban_overall_demographics = get_demographic_data(urban_df)
+
+        rural_desert_demographics = get_demographic_data(rural_desert_df)
+        urban_desert_demographics = get_demographic_data(urban_desert_df)
+
+        col_rural, col_urban = st.columns(2)
+
+        with col_rural:
+            st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(rural_df)) + '''</b> rural blockgroups</center>''', unsafe_allow_html=True)
+            fig_rural_overall = plot_stacked_bar(rural_overall_demographics)
+            st.plotly_chart(fig_rural_overall, use_container_width=True, config={'displayModeBar': False})
+
+            st.markdown('''<center><b>''' + str(len(rural_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
+            fig_rural_deserts = plot_stacked_bar(rural_desert_demographics)
+            st.plotly_chart(fig_rural_deserts, use_container_width=True, config={'displayModeBar': False})
+
+        with col_urban:
+            st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(urban_df)) + '''</b> urban blockgroups</center>''', unsafe_allow_html=True)
+            fig_urban_overall = plot_stacked_bar(urban_overall_demographics)
+            st.plotly_chart(fig_urban_overall, use_container_width=True, config={'displayModeBar': False})
+
+            st.markdown('''<center><b>''' + str(len(urban_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
+            fig_urban_deserts = plot_stacked_bar(urban_desert_demographics)
+            st.plotly_chart(fig_urban_deserts, use_container_width=True, config={'displayModeBar': False})
+
+
+if tab == 'Opening New Facilities':
     def facility_names(facility):
         if facility.name == 'top_3_pharmacy_chains':
             return 'pharmacies'
@@ -324,7 +366,7 @@ if tab == 'Suggest New Facilities':
 
     st.markdown("""
         <h1 style="font-size: 40px; text-align: center; margin-bottom: 0em; margin-top: 0em; line-height: 1.0;">
-             Suggesting new """ + facility_names(facility) + """ in
+             Proposing new """ + facility_names(facility) + """ in
             <span style="color: #c41636">
                 """ + State.name + """
             </span>
@@ -359,7 +401,7 @@ if tab == 'Suggest New Facilities':
             new_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, new_distance_label)
 
             items = sac.checkbox(
-                items=[facility.type.capitalize() + ' deserts', 'Existing facilities', 'Suggested facilities'],
+                items=[facility.type.capitalize() + ' deserts', 'Existing facilities', 'Proposed facilities'],
                 index=[1, 2],
                 size='xs',
                 align='center',
@@ -367,7 +409,7 @@ if tab == 'Suggest New Facilities':
 
             show_deserts = True if facility.type.capitalize() + ' deserts' in items else False
             show_existing_facilities = True if 'Existing facilities' in items else False
-            show_new_facilities = True if 'Suggested facilities' in items else False
+            show_new_facilities = True if 'Proposed facilities' in items else False
 
             fig = go.Figure()
             fig, bounds = plot_state(fig, State)
@@ -399,6 +441,28 @@ if tab == 'Suggest New Facilities':
             fig_new = plot_stacked_bar(new_demographic_data)
             st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
 
+    with st.container(border=True):
+        st.markdown('''<center><b>Distance (in miles) to closest ''' + facility.description[2:] + ''' in ''' + State.name + '''<br>At blockgroup level</b></center>''', unsafe_allow_html=True)
+
+        col_urban, col_rural = st.columns([1, 1])
+
+        fig_urban, fig_rural = plot_radar_chart(
+            State=State,
+            facility=facility,
+            k=k,
+            poverty_threshold=st.session_state.poverty_threshold,
+        )
+
+        with col_urban:
+            st.plotly_chart(fig_urban, use_container_width=True, config={'displayModeBar': False})
+
+        with col_rural:
+            st.plotly_chart(fig_rural, use_container_width=True, config={'displayModeBar': False})
+
+        st.caption('**Figure**: Radar charts showing the distances of blockgroups in urban and rural areas of ' + State.name + ' to the nearest ' + facility.description[2:] + '.'
+                                                                                                                                                                               ' The radar charts show the median distance to the nearest ' + facility.description[2:] + ' for each demographic group in the blockgroups.'
+                                                                                                                                                                                                                                                                         ' Low insurance blockgroups are those with less than 80% of the population having health insurance.')
+
     with st.expander(label='How does this work?'):
         st.markdown('''
             Under the hood, our proposed solution above is a combination of three distinct solutions, each of which suggests 
@@ -411,7 +475,7 @@ if tab == 'Suggest New Facilities':
 
         with col1:
             with st.container(border=True):
-                st.caption(f'**Figure**: Suggested locations for new facilities in the three solutions based on different optimization models.')
+                st.caption(f'**Figure**: Proposed locations for new facilities in the three solutions based on different optimization models.')
 
                 show_solutions = sac.checkbox(
                     items=['Solution 1', 'Solution 2', 'Solution 3'],
@@ -521,7 +585,6 @@ if tab == 'Explanation':
     </h1>
     <br>
     """, unsafe_allow_html=True)
-
 
     with st.expander('What is this?', expanded=True):
         st.markdown("""
@@ -692,4 +755,32 @@ if tab == 'Explanation':
             }
 
             st.plotly_chart(fig, use_container_width=True, config=config)
+
+
+if tab == 'More Analysis':
+    st.markdown('''<center><b>Racial disparities among medical deserts</b></center>''', unsafe_allow_html=True)
+
+    st.write('''This heatmap shows the difference between the proportion of the population in medical deserts and the overall population.<br>''' +
+             '''- :orange[Orange] indicates that the proportion of the population in medical deserts is higher than the overall population.<br>''' +
+             '''- :violet[Violet] indicates that the proportion of the population in medical deserts is lower than the overall population.''', unsafe_allow_html=True)
+
+    fig = plot_demographic_analysis(
+        poverty_threshold=st.session_state.poverty_threshold,
+        urban_distance_threshold=st.session_state.urban_distance_threshold,
+        rural_distance_threshold=st.session_state.rural_distance_threshold,
+        distance_label=facility.distance_label,
+    )
+
+    fig.update_layout(
+        margin=dict(t=0),
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
+                       'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
+                       'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
+
+    st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
+                       'Map boundaries are approximate.')
 

@@ -96,4 +96,4 @@ DHL = Facilities(name='dhl_facilities', type='logistics', display_name='DHL', co
 PrivateSchools = Facilities(name='private_schools', type='education', description='a private school')
 PublicRefrigeratedWarehouses = Facilities(name='public_refrigerated_warehouses', type='food')
 FDICInsuredBanks = Facilities(name='fdic_insured_banks', type='banking', display_name='Banks',
-                                         description="""an [FDIC insured bank](https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation)""")
+                                         description="""an FDIC insured bank""")

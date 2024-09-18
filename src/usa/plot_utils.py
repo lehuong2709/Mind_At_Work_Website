@@ -6,6 +6,10 @@ import random
 from src.usa.utils import colors, racial_labels, racial_labels_display_names
 from src.constants import WATERBODY_COLOR, LAND_COLOR_PRIMARY, LAND_COLOR_SECONDARY, BOUNDARY_COLOR
 import streamlit as st
+from src.usa.constants import state_names
+from src.usa.states import USAState
+from src.usa.utils import compute_medical_deserts
+import numpy as np
 
 
 @st.cache_data
@@ -313,3 +317,266 @@ def plot_stacked_bar(demographic_data):
 
     return fig
 
+
+@st.cache_data
+def plot_demographic_analysis(poverty_threshold, urban_distance_threshold, rural_distance_threshold, distance_label):
+    def get_demographic_proportions(census_df):
+        return dict(census_df['racial_majority'].value_counts(normalize=True, dropna=False))
+
+    proportion_of_overall_population = pd.DataFrame(index=racial_labels, columns=state_names, data=np.zeros((len(racial_labels), len(state_names))))
+    proportion_of_medical_deserts = pd.DataFrame(index=racial_labels, columns=state_names, data=np.zeros((len(racial_labels), len(state_names))))
+
+    poor_blockgroups_fraction_overall = pd.Series(index=state_names, data=np.zeros(len(state_names)))
+    poor_blockgroups_fraction_far_away = pd.Series(index=state_names, data=np.zeros(len(state_names)))
+
+    for state_name in state_names:
+        State = USAState(state_name)
+        census_df = State.get_census_data(level='blockgroup')
+        overall_demographic_data = get_demographic_proportions(census_df)
+
+        desert_df = compute_medical_deserts(census_df, poverty_threshold=poverty_threshold, n_urban=urban_distance_threshold * 1.602, n_rural=rural_distance_threshold * 1.602,
+                                            distance_label=distance_label)
+        desert_demographic_data = get_demographic_proportions(desert_df)
+
+        far_away_df = compute_medical_deserts(census_df, poverty_threshold=0, n_urban=urban_distance_threshold * 1.602, n_rural=rural_distance_threshold * 1.602,
+                                              distance_label=distance_label)
+
+        poor_blockgroups_fraction_overall.loc[state_name] = len(census_df[census_df['below_poverty'] >= poverty_threshold])/len(census_df)
+        poor_blockgroups_fraction_far_away.loc[state_name] = len(far_away_df[far_away_df['below_poverty'] >= poverty_threshold])/len(far_away_df)
+
+        for racial_label in racial_labels:
+            if racial_label in overall_demographic_data:
+                proportion_of_overall_population.loc[racial_label, state_name] = overall_demographic_data[racial_label]
+            if racial_label in desert_demographic_data:
+                proportion_of_medical_deserts.loc[racial_label, state_name] = desert_demographic_data[racial_label]
+
+    for racial_label in racial_labels:
+        proportion_of_overall_population.rename(index={racial_label: racial_labels_display_names[racial_label]}, inplace=True)
+        proportion_of_medical_deserts.rename(index={racial_label: racial_labels_display_names[racial_label]}, inplace=True)
+
+    M = max(100*((proportion_of_medical_deserts - proportion_of_overall_population).values.flatten()))
+    m = min(100*((proportion_of_medical_deserts - proportion_of_overall_population).values.flatten()))
+
+    alpha = abs(m)/(M + abs(m))
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=100*(proportion_of_medical_deserts - proportion_of_overall_population),
+            x=state_names,
+            y=[racial_labels_display_names[racial_label] for racial_label in racial_labels],
+            colorscale=[[0, 'violet'], [alpha, 'white'], [1, 'orange']],
+            colorbar=dict(title='''Percentage<br> point<br> difference'''),
+        )
+    )
+
+    return fig
+
+
+@st.cache_data
+def get_urban_and_rural_df(census_df):
+    urban_df = census_df[census_df['urban'] == 1]
+    rural_df = census_df[census_df['urban'] == 0]
+    return urban_df, rural_df
+
+
+@st.cache_data
+def get_poor_df(census_df, poverty_threshold):
+    poor_df = census_df[census_df['below_poverty'] >= poverty_threshold]
+    return poor_df
+
+
+@st.cache_data
+def get_uninsured_df(census_df, uninsured_threshold):
+    uninsured_df = census_df[census_df['no_health_ins'] >= uninsured_threshold]
+    return uninsured_df
+
+
+@st.cache_data
+def get_minority_and_majority_df(census_df):
+    minority_df = census_df[census_df['racial_majority'] != 'white_alone']
+    majority_df = census_df[census_df['racial_majority'] == 'white_alone']
+    return minority_df, majority_df
+
+
+def plot_radar_chart(State, facility, k, poverty_threshold):
+    """
+    Plot a radar chart comparing two lists of scalar values, before and after opening k facilities
+    """
+    def loop_list(list_like_object):
+        """
+        Loop a list-like object to make it circular
+        """
+        l = list(list_like_object)
+        l = l + [l[0]]
+        return l
+
+    census_df = State.get_census_data(level='blockgroup')
+    urban_df, rural_df = get_urban_and_rural_df(census_df)
+
+    urban_poor_df = get_poor_df(urban_df, poverty_threshold=poverty_threshold)
+    rural_poor_df = get_poor_df(rural_df, poverty_threshold=poverty_threshold)
+
+    urban_uninsured_df = get_uninsured_df(urban_df, uninsured_threshold=20)
+    rural_uninsured_df = get_uninsured_df(rural_df, uninsured_threshold=20)
+
+    urban_minority_df, urban_majority_df = get_minority_and_majority_df(urban_df)
+    rural_minority_df, rural_majority_df = get_minority_and_majority_df(rural_df)
+
+    distance_label_before = facility.distance_label
+    distance_label_after = facility.distance_label + '_combined_k_' + str(k)
+
+    labels = ['''All''', 'Poor', '''Low<br>insurance''', '''Racial<br>minorities''', 'White']
+    urban_list_before = [
+        urban_df[distance_label_before].mean(),
+        urban_poor_df[distance_label_before].mean(),
+        urban_uninsured_df[distance_label_before].mean(),
+        urban_minority_df[distance_label_before].mean(),
+        urban_majority_df[distance_label_before].mean(),
+    ]
+    rural_list_before = [
+        rural_df[distance_label_before].mean(),
+        rural_poor_df[distance_label_before].mean(),
+        rural_uninsured_df[distance_label_before].mean(),
+        rural_minority_df[distance_label_before].mean(),
+        rural_majority_df[distance_label_before].mean(),
+    ]
+    urban_list_after = [
+        urban_df[distance_label_after].mean(),
+        urban_poor_df[distance_label_after].mean(),
+        urban_uninsured_df[distance_label_after].mean(),
+        urban_minority_df[distance_label_after].mean(),
+        urban_majority_df[distance_label_after].mean(),
+    ]
+    rural_list_after = [
+        rural_df[distance_label_after].mean(),
+        rural_poor_df[distance_label_after].mean(),
+        rural_uninsured_df[distance_label_after].mean(),
+        rural_minority_df[distance_label_after].mean(),
+        rural_majority_df[distance_label_after].mean(),
+    ]
+
+    fig_urban = go.Figure()
+
+    fig_urban.add_trace(go.Scatterpolar(
+        r=loop_list(urban_list_before),
+        theta=loop_list(labels),
+        name='Existing',
+        marker=dict(
+            size=10,
+            # color='tomato',
+            color='#b66dff',
+        ),
+        fill='toself',
+        fillcolor='rgba(255, 0, 255, 0.1)'
+    ))
+
+    fig_urban.add_trace(go.Scatterpolar(
+        r=loop_list(urban_list_after),
+        theta=loop_list(labels),
+        name='After opening ' + str(k) + ' proposed facilities',
+        textfont=dict(
+            size=40,
+        ),
+        marker=dict(
+            size=10,
+            # color='forestgreen',
+            color='#21d565',
+        ),
+        fill='toself',
+        fillcolor='rgba(25, 200, 25, 0.2)'
+    ))
+
+    fig_urban.update_layout(
+        title=dict(
+            text='Urban areas',
+            y=0.9,
+        ),
+        legend=dict(
+            orientation='h',
+            x=0.5,
+            xanchor='center',
+        ),
+        margin=dict(t=20, l=50),
+    )
+
+    fig_rural = go.Figure()
+
+    fig_rural.add_trace(go.Scatterpolar(
+        r=loop_list(rural_list_before),
+        theta=loop_list(labels),
+        name='Existing',
+        marker=dict(
+            size=10,
+            # color='tomato',
+            color='#b66dff',
+        ),
+        fill='toself',
+        fillcolor='rgba(255, 0, 255, 0.1)'
+    ))
+
+    fig_rural.add_trace(go.Scatterpolar(
+        r=loop_list(rural_list_after),
+        theta=loop_list(labels),
+        name='After opening ' + str(k) + ' proposed facilities',
+        textfont=dict(
+            size=40,
+        ),
+        marker=dict(
+            size=10,
+            # color='forestgreen',
+            color='#21d565',
+        ),
+        fill='toself',
+        fillcolor='rgba(25, 200, 25, 0.2)'
+    ))
+
+    fig_rural.update_layout(
+        title=dict(
+            text='Rural areas',
+            y=0.9,
+        ),
+        legend=dict(
+            orientation='h',
+            x=0.5,
+            xanchor='center',
+        ),
+        margin=dict(t=20, l=50),
+    )
+
+    return fig_urban, fig_rural
+
+
+def plot_distance_histogram(State, facility, k):
+    distance_label = facility.distance_label
+    census_df = State.get_census_data(level='blockgroup')
+
+    distances_before = census_df[distance_label]/1.602
+    distances_after = census_df[distance_label + '_combined_k_' + str(k)]/1.602
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Histogram(
+        x=distances_before - distances_after,
+        opacity=0.50,
+    ))
+
+    fig.update_layout(
+        xaxis_title='Distance (miles)',
+        yaxis_title='Number of blockgroups',
+        barmode='overlay',
+        legend=dict(
+            orientation='h',
+            x=0.5,
+            y=0.9,
+            xanchor='center',
+        ),
+        # yaxis=dict(
+        #     showgrid=False,
+        #     scaleanchor='x',
+        #     scaleratio=1.0,
+        # ),
+        height=200,
+        margin=dict(t=0, l=0, r=0, b=0),
+    )
+
+    return fig
