@@ -158,7 +158,7 @@ st.markdown(
 # Create a tab to select the tool to use
 tab = sac.tabs(
     items=['Facility Deserts', 'Opening New Facilities', 'Explanation', 'More Analysis'],
-    index=3,
+    index=0,
     align='center',
 )
 
