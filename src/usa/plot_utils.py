@@ -369,7 +369,7 @@ def plot_demographic_analysis(poverty_threshold, urban_distance_threshold, rural
         )
     )
 
-    return fig
+    return fig, proportion_of_overall_population, proportion_of_medical_deserts
 
 
 @st.cache_data
@@ -425,7 +425,7 @@ def plot_radar_chart(State, facility, k, poverty_threshold):
     distance_label_before = facility.distance_label
     distance_label_after = facility.distance_label + '_combined_k_' + str(k)
 
-    labels = ['''All''', 'Poor', '''Low<br>insurance''', '''Racial<br>minorities''', 'White']
+    labels = ['''All''', '''Low<br>income''', '''Low<br>insurance''', '''Majority<br>racial<br>minority''', '''Majority<br>white''']
     urban_list_before = [
         urban_df[distance_label_before].mean(),
         urban_poor_df[distance_label_before].mean(),
@@ -496,7 +496,7 @@ def plot_radar_chart(State, facility, k, poverty_threshold):
             x=0.5,
             xanchor='center',
         ),
-        margin=dict(t=20, l=50),
+        margin=dict(t=25, l=50),
     )
 
     fig_rural = go.Figure()
@@ -540,7 +540,7 @@ def plot_radar_chart(State, facility, k, poverty_threshold):
             x=0.5,
             xanchor='center',
         ),
-        margin=dict(t=20, l=50),
+        margin=dict(t=25, l=50),
     )
 
     return fig_urban, fig_rural

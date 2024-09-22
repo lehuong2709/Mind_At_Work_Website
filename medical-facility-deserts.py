@@ -13,6 +13,7 @@ from src.usa.states import USAState
 from src.usa.facilities import CVS, Walgreens, Walmart, UrgentCare, Hospitals, NursingHomes, ChildCare, PrivateSchools, FDICInsuredBanks, PharmaciesTop3
 from src.usa.utils import racial_labels, racial_labels_display_names, compute_medical_deserts, get_page_url, get_demographic_data, get_facility_from_facility_name, get_state_of_the_day
 from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facilities, plot_blockgroups, plot_voronoi_cells, plot_new_facilities, plot_demographic_analysis, plot_radar_chart, plot_distance_histogram
+from src.tabs.analysis import run_analysis_tab
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='Facility Deserts in USA', page_icon='🏥')
@@ -140,6 +141,7 @@ def get_distance_thresholds_from_user():
 
     return
 
+
 # Remove extra padding from the top and bottom of the page
 st.markdown(
     """
@@ -156,12 +158,12 @@ st.markdown(
 # Create a tab to select the tool to use
 tab = sac.tabs(
     items=['Facility Deserts', 'Opening New Facilities', 'Explanation', 'More Analysis'],
-    index=0,
+    index=3,
     align='center',
 )
 
 # Sidebar messages for the different tools
-if tab == 'Facility Deserts' or tab == 'More Analysis':
+if tab == 'Facility Deserts':
     st.sidebar.caption('This tool aims to identify facility deserts in the US – poorer areas with low '
                        'access to various critical facilities such as pharmacies, hospitals, and schools.')
 
@@ -174,7 +176,7 @@ if tab == 'Opening New Facilities':
 facilities = [PharmaciesTop3, UrgentCare, Hospitals, NursingHomes, PrivateSchools, FDICInsuredBanks, ChildCare]
 facility_display_names = [facility.display_name for facility in facilities]
 
-if tab == 'Facility Deserts' or tab == 'Opening New Facilities' or tab == 'More Analysis':
+if tab == 'Facility Deserts' or tab == 'Opening New Facilities':
     # Get the facility type and state from the user
     with st.sidebar:
         facility = get_facility_from_user()
@@ -458,9 +460,9 @@ if tab == 'Opening New Facilities':
         with col_rural:
             st.plotly_chart(fig_rural, use_container_width=True, config={'displayModeBar': False})
 
-        st.caption('**Figure**: Radar charts showing the distances of blockgroups in urban and rural areas of ' + State.name + ' to the nearest ' + facility.description[2:] + '.'
-                   ' The radar charts show the median distance to the nearest ' + facility.description[2:] + ' for each demographic group in the blockgroups.'
-                   ' Low insurance blockgroups are those with less than 80% of the population having health insurance.')
+        st.caption('**Figure**: Distances of various kinds of blockgroups in urban and rural areas of ' + State.name + ' to the nearest ' + facility.description[2:] + '.'
+                   ' Low insurance blockgroups are those with less than 80% of the population having health insurance.'
+                     ' Low income blockgroups are those with more than ' + str(st.session_state.poverty_threshold) + '% of the population below the poverty line.')
 
     with st.expander(label='How does this work?'):
         st.markdown('''
@@ -756,30 +758,33 @@ if tab == 'Explanation':
             st.plotly_chart(fig, use_container_width=True, config=config)
 
 
+# if tab == 'More Analysis':
+#     st.markdown('''<center><b>Racial disparities among medical deserts</b></center>''', unsafe_allow_html=True)
+#
+#     st.write('''This heatmap shows the difference between the proportion of the population in medical deserts and the overall population.<br>''' +
+#              '''- :orange[Orange] indicates that the proportion of the population in medical deserts is higher than the overall population.<br>''' +
+#              '''- :violet[Violet] indicates that the proportion of the population in medical deserts is lower than the overall population.''', unsafe_allow_html=True)
+#
+#     fig = plot_demographic_analysis(
+#         poverty_threshold=st.session_state.poverty_threshold,
+#         urban_distance_threshold=st.session_state.urban_distance_threshold,
+#         rural_distance_threshold=st.session_state.rural_distance_threshold,
+#         distance_label=facility.distance_label,
+#     )
+#
+#     fig.update_layout(
+#         margin=dict(t=0),
+#     )
+#
+#     st.plotly_chart(fig, use_container_width=True)
+#
+#     st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
+#                        'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
+#                        'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
+#
+#     st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
+#                        'Map boundaries are approximate.')
+
+
 if tab == 'More Analysis':
-    st.markdown('''<center><b>Racial disparities among medical deserts</b></center>''', unsafe_allow_html=True)
-
-    st.write('''This heatmap shows the difference between the proportion of the population in medical deserts and the overall population.<br>''' +
-             '''- :orange[Orange] indicates that the proportion of the population in medical deserts is higher than the overall population.<br>''' +
-             '''- :violet[Violet] indicates that the proportion of the population in medical deserts is lower than the overall population.''', unsafe_allow_html=True)
-
-    fig = plot_demographic_analysis(
-        poverty_threshold=st.session_state.poverty_threshold,
-        urban_distance_threshold=st.session_state.urban_distance_threshold,
-        rural_distance_threshold=st.session_state.rural_distance_threshold,
-        distance_label=facility.distance_label,
-    )
-
-    fig.update_layout(
-        margin=dict(t=0),
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.sidebar.caption('Created by Swati Gupta, [Jai Moondra](https://jaimoondra.github.io/), Mohit Singh.\n'
-                       'Based on our [paper](https://arxiv.org/abs/2211.14873) on fairness in facility location.\n'
-                       'Submit any feedback to [jmoondra3@gatech.edu](mailto:jmoondra3@gatech.edu).\n')
-
-    st.sidebar.caption('We assume straight-line distances, and the accuracy of our results depends on the accuracy of the underlying data. '
-                       'Map boundaries are approximate.')
-
+    run_analysis_tab()
