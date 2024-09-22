@@ -115,6 +115,7 @@ random.shuffle(interesting_states)
 small_states = ['Alaska', 'Delaware', 'Hawaii', 'Idaho', 'Maine', 'Montana',
                 'Nebraska', 'New Hampshire', 'New Mexico', 'North Dakota', 'Rhode Island',
                 'South Dakota', 'Vermont', 'West Virginia', 'Wyoming']
+mainland_states = [state_name for state_name in state_names if state_name not in ['Alaska', 'Hawaii']]
 
 
 # === Geographic ===
