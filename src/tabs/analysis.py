@@ -153,7 +153,7 @@ def plot_reduction_in_disparity(fig, distance_df, distance_df_new, column_1, col
             x=0.5,
             orientation='h',
         ),
-        height=20*len(states_with_disparity) + 30,
+        height=20*len(states_with_disparity) + 50,
     )
 
     config = dict(
