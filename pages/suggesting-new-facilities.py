@@ -159,7 +159,7 @@ st.markdown(
 tab = sac.tabs(
     items=['Facility Deserts', 'Opening New Facilities', 'Explanation', 'More Analysis'],
     index=1,
-    align='center',
+    align='start',
 )
 
 # Sidebar messages for the different tools
@@ -270,7 +270,7 @@ if tab == 'Facility Deserts':
             }
 
             # Display the map on the left column
-            st.plotly_chart(fig, use_container_width=True, config=config)
+            st.plotly_chart(fig, use_container_width=True, config=config, key='medical_deserts_map')
 
     with col2:
         # Display the demographic data in the right column
@@ -283,10 +283,10 @@ if tab == 'Facility Deserts':
         fig1, fig2 = plot_stacked_bar(demographics_all), plot_stacked_bar(demographics_deserts)
         with st.container(border=True):
             st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(census_df)) + '''</b> blockgroups</center>''', unsafe_allow_html=True)
-            st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False}, key='demographics_all')
 
             st.markdown('''<center><b>''' + str(len(desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
-            st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False}, key='demographics_deserts')
 
         # Message for racial/ethnic groups disproportionately affected by facility deserts
         for racial_label in racial_labels:
@@ -341,20 +341,20 @@ if tab == 'Facility Deserts':
         with col_rural:
             st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(rural_df)) + '''</b> rural blockgroups</center>''', unsafe_allow_html=True)
             fig_rural_overall = plot_stacked_bar(rural_overall_demographics)
-            st.plotly_chart(fig_rural_overall, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_rural_overall, use_container_width=True, config={'displayModeBar': False}, key='rural_overall')
 
             st.markdown('''<center><b>''' + str(len(rural_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
             fig_rural_deserts = plot_stacked_bar(rural_desert_demographics)
-            st.plotly_chart(fig_rural_deserts, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_rural_deserts, use_container_width=True, config={'displayModeBar': False}, key='rural_deserts')
 
         with col_urban:
             st.markdown('''<center>''' + State.name + ''' has <b>''' + str(len(urban_df)) + '''</b> urban blockgroups</center>''', unsafe_allow_html=True)
             fig_urban_overall = plot_stacked_bar(urban_overall_demographics)
-            st.plotly_chart(fig_urban_overall, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_urban_overall, use_container_width=True, config={'displayModeBar': False}, key='urban_overall')
 
             st.markdown('''<center><b>''' + str(len(urban_desert_df)) + '''</b> are ''' + facility.type + ''' deserts</center>''', unsafe_allow_html=True)
             fig_urban_deserts = plot_stacked_bar(urban_desert_demographics)
-            st.plotly_chart(fig_urban_deserts, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_urban_deserts, use_container_width=True, config={'displayModeBar': False}, key='urban_deserts')
 
 
 if tab == 'Opening New Facilities':
@@ -425,7 +425,7 @@ if tab == 'Opening New Facilities':
                                           marker_color='cyan', marker_symbol='diamond', p='combined',
                                           marker_line_color='black', marker_line_width=2.0)
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key='new_facilities_map')
 
     with col2:
         with st.container(border=True):
@@ -433,14 +433,14 @@ if tab == 'Opening New Facilities':
             original_medical_deserts = str(sum(original_demographic_data.values()))
             st.markdown('''<center>Original ''' + facility.type + ''' deserts (''' + original_medical_deserts + ''')</center>''', unsafe_allow_html=True)
             fig_original = plot_stacked_bar(original_demographic_data)
-            st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_original, use_container_width=True, config={'displayModeBar': False}, key='original_demographics')
 
             new_demographic_data = get_demographic_data(new_desert_df)
             new_medical_deserts = str(sum(new_demographic_data.values()))
             st.markdown('''<center>Remaining ''' + facility.type + ''' deserts (''' + new_medical_deserts + ''')</center>''', unsafe_allow_html=True)
             new_demographic_data['no_desert'] = sum(original_demographic_data.values()) - sum(new_demographic_data.values())
             fig_new = plot_stacked_bar(new_demographic_data)
-            st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_new, use_container_width=True, config={'displayModeBar': False}, key='new_demographics')
 
     with st.container(border=True):
         st.markdown('''<center><b>Distance (in miles) to closest ''' + facility.description[2:] + ''' in ''' + State.name + '''<br>At blockgroup level</b></center>''', unsafe_allow_html=True)
@@ -455,10 +455,10 @@ if tab == 'Opening New Facilities':
         )
 
         with col_urban:
-            st.plotly_chart(fig_urban, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_urban, use_container_width=True, config={'displayModeBar': False}, key='urban_radar')
 
         with col_rural:
-            st.plotly_chart(fig_rural, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_rural, use_container_width=True, config={'displayModeBar': False}, key='rural_radar')
 
         st.caption('**Figure**: Distances of various kinds of blockgroups in urban and rural areas of ' + State.name + ' to the nearest ' + facility.description[2:] + '.'
                                                                                                                                                                        ' Low insurance blockgroups are those with less than 80% of the population having health insurance.'
@@ -515,7 +515,7 @@ if tab == 'Opening New Facilities':
                         marker_symbol='triangle-down-open', marker_size=12, marker_color='black', marker_line_color='black', marker_line_width=1.5,
                     )
 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key='solutions_map')
 
         with col2:
             original_desert_df = compute_medical_deserts(census_df, st.session_state.poverty_threshold, st.session_state.urban_distance_threshold, st.session_state.rural_distance_threshold, old_distance_label)

@@ -251,7 +251,7 @@ def run_analysis_for_poverty(facility, col_left, col_right):
                             1.0,
                             color='salmon'
                         )
-                        st.plotly_chart(fig, use_container_width=True, config=config)
+                        st.plotly_chart(fig, use_container_width=True, config=config, key='rural_disparity')
 
                 if len(states_where_poor_people_travel_farther_urban) > 2:
                     col1, col2 = st.columns(2)
@@ -276,7 +276,7 @@ def run_analysis_for_poverty(facility, col_left, col_right):
                             0.5
                         )
 
-                        st.plotly_chart(fig, use_container_width=True, config=config)
+                        st.plotly_chart(fig, use_container_width=True, config=config, key='urban_disparity')
 
 
     col_left, col_right = st.columns([1, 3])
@@ -330,7 +330,7 @@ def run_analysis_for_poverty(facility, col_left, col_right):
                             color='salmon'
                         )
 
-                        st.plotly_chart(fig, use_container_width=True, config=config)
+                        st.plotly_chart(fig, use_container_width=True, config=config, key='rural_reduction')
 
                 if len(states_where_poor_people_travel_farther_urban) > 2:
                     col1, col2 = st.columns(2)
@@ -353,8 +353,7 @@ def run_analysis_for_poverty(facility, col_left, col_right):
                             k
                         )
 
-                        st.plotly_chart(fig, use_container_width=True, config=config)
-
+                        st.plotly_chart(fig, use_container_width=True, config=config, key='urban_reduction')
 
 
 def run_analysis_tab():
@@ -404,5 +403,5 @@ def run_analysis_tab():
                 margin=dict(t=5),
             )
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key='demographic_analysis')
 
