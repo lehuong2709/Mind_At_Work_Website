@@ -424,6 +424,7 @@ def plot_radar_chart(State, facility, k, poverty_threshold):
 
     distance_label_before = facility.distance_label
     distance_label_after = facility.distance_label + '_combined_k_' + str(k)
+    # distance_label_after = facility.distance_label + '_p_1_k_' + str(k)
 
     labels = ['''All''', '''Low<br>income''', '''Low<br>insurance''', '''Majority<br>racial<br>minority''', '''Majority<br>white''']
     urban_list_before = [

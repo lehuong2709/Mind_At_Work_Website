@@ -425,6 +425,8 @@ if tab == 'Opening New Facilities':
                                           marker_color='cyan', marker_symbol='diamond', p='combined',
                                           marker_line_color='black', marker_line_width=2.0)
 
+                # p='combined',
+
             st.plotly_chart(fig, use_container_width=True, key='new_facilities_map')
 
     with col2:
@@ -466,7 +468,7 @@ if tab == 'Opening New Facilities':
 
     with st.expander(label='How does this work?'):
         st.markdown('''
-            Under the hood, our proposed solution above is a combination of three distinct solutions, each of which suggests 
+            Under the hood, our proposed solution is a combination of three distinct solutions, each of which suggests 
              locations of up to 100 new facilities. These solutions optimize different aspects of fairness, and 
             are based on minimizing the $L_1$, $L_2$, and $L_\infty$ norms respectively of the distances of people in 
             various demographic groups from the nearest facility (see our [paper](https://arxiv.org/abs/2211.14873) for more details). You can compare the three solutions in the figure below.
@@ -476,7 +478,7 @@ if tab == 'Opening New Facilities':
 
         with col1:
             with st.container(border=True):
-                st.caption(f'**Figure**: Proposed locations for new facilities in the three solutions based on different optimization models.')
+                st.caption(f'**Figure**: Locations for proposed new facilities in the three solutions based on different optimization models.')
 
                 show_solutions = sac.checkbox(
                     items=['Solution 1', 'Solution 2', 'Solution 3'],
@@ -649,9 +651,9 @@ if tab == 'Explanation':
 
         with st.expander('Data sources', expanded=True):
             st.markdown("""
-                The data used in this project is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/) and
+                The data used in this project is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/), [AggData](https://www.aggdata.com/), and
                 [HIFLD Open](https://hifld-geoplatform.hub.arcgis.com/pages/hifld-open) database. \n                    
-                Data for [pharmacies](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::pharmacies-/about) is from 2010. \n
+                Data for pharmacies is from 2024. \n
                 Data for [urgent care centers](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::urgent-care-facilities/about) is from 2009. \n
                 Data for [hospitals](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::hospitals/about) is from 2023. \n
                 Data for [nursing homes](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::nursing-homes/about) is from 2017. \n
@@ -659,7 +661,9 @@ if tab == 'Explanation':
                 Data for [FDIC insured banks](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::fdic-insured-banks/about) is from 2019. \n
                 Data for [Child care centers](https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::child-care-centers/about) if from 2022. \n
                 [Census](https://data.census.gov/) data is from 2022. \n"""
-                        )
+            )
+
+    # https://hifld-geoplatform.hub.arcgis.com/datasets/geoplatform::pharmacies-/about
 
         with st.expander('Limitations', expanded=True):
             st.markdown("""
@@ -668,7 +672,7 @@ if tab == 'Explanation':
                  Many other factors affect access to facilities, for example, public transportation,
                 road networks, rural-urban divide, and so on. Data for some facilities is older than census data.\n
             """
-                        )
+            )
 
         with st.expander('License', expanded=True):
             st.write('Released under Creative Commons BY-NC license, 2024.')

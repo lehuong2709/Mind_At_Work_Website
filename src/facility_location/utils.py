@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from haversine import haversine, Unit
 import geopandas as gpd
+from src.geodesy import Point, PointSet, distance_between_point_and_point_set
 
 
 def generate_groups(census_dataframe, no_health_ins_threshold=25, two_health_ins_threshold=25, below_poverty_threshold=20):
@@ -83,21 +84,66 @@ def generate_points_and_distances(state_df, existing_distances_label):
     return points, urban_points, pairwise_distances, existing_distances
 
 
-def compute_minimum_distances(census_df, facilities, existing_distances_label, new_distances_label):
-    existing_distances = census_df[existing_distances_label]
+def compute_minimum_distances(census_df, facilities, existing_distances_label, new_distances_label, show_progress=True):
+    # existing_distances = census_df[existing_distances_label]
+    #
+    # facility_longitudes = [census_df.loc[facility]['Longitude'] for facility in facilities]
+    # facility_latitudes = [census_df.loc[facility]['Latitude'] for facility in facilities]
+    #
+    # distances = []
+    # for i in range(len(facility_longitudes)):
+    #     distances.append(census_df.apply(lambda x: haversine((x['Latitude'], x['Longitude']), (facility_latitudes[i], facility_longitudes[i]), unit=Unit.KILOMETERS), axis=1))
+    # distances = np.array(distances)
+    # distances = np.min(distances, axis=0)
+    # distances = np.minimum(distances, existing_distances)
+    # distances = np.round(distances, 3)
+    #
+    # census_df[new_distances_label] = distances
+    # return census_df
 
-    facility_longitudes = [census_df.loc[facility]['Longitude'] for facility in facilities]
-    facility_latitudes = [census_df.loc[facility]['Latitude'] for facility in facilities]
+    facility_longitudes = [census_df[census_df.GEOID == facility]['Longitude'].values[0] for facility in facilities]
+    facility_latitudes = [census_df[census_df.GEOID == facility]['Latitude'].values[0] for facility in facilities]
 
-    distances = []
+    facility_points = []
     for i in range(len(facility_longitudes)):
-        distances.append(census_df.apply(lambda x: haversine((x['Latitude'], x['Longitude']), (facility_latitudes[i], facility_longitudes[i]), unit=Unit.KILOMETERS), axis=1))
-    distances = np.array(distances)
-    distances = np.min(distances, axis=0)
-    distances = np.minimum(distances, existing_distances)
-    distances = np.round(distances, 3)
+        facility_points.append(Point(facility_longitudes[i], facility_latitudes[i], name=facilities[i]))
 
-    census_df[new_distances_label] = distances
+    for i in tqdm(range(len(census_df)), disable=not show_progress):
+        point = Point(census_df.iloc[i]['Longitude'], census_df.iloc[i]['Latitude'], name=census_df.iloc[i]['GEOID'])
+        min_distance, to_point = distance_between_point_and_point_set(point, PointSet(facility_points))
+        if min_distance < census_df.loc[i, existing_distances_label]:
+            census_df.loc[i, new_distances_label] = min_distance
+            census_df.loc[i, new_distances_label + '_ID'] = str(to_point.name())
+        else:
+            census_df.loc[i, new_distances_label] = census_df.loc[i, existing_distances_label]
+            census_df.loc[i, new_distances_label + '_ID'] = str(census_df.loc[i, existing_distances_label + '_ID'])
+
+    return census_df
+
+
+def compute_distances_to_new_facility(census_df, new_facility, existing_distances_label, new_distances_label, show_progress=True):
+    new_facility = census_df[census_df.GEOID == new_facility].iloc[0]
+    new_facility_longitude = new_facility['Longitude']
+    new_facility_latitude = new_facility['Latitude']
+
+    existing_distances = list(census_df[existing_distances_label])
+    longitudes = list(census_df['Longitude'])
+    latitudes = list(census_df['Latitude'])
+    new_distances = []
+
+    for i in tqdm(range(len(census_df)), disable= not show_progress):
+        existing_distance = existing_distances[i]
+        if abs(longitudes[i] - new_facility_longitude) < existing_distance/25 and abs(latitudes[i] - new_facility_latitude) < existing_distance/25:
+            distance = haversine((census_df.loc[i, 'Latitude'], census_df.loc[i, 'Longitude']), (new_facility_latitude, new_facility_longitude), unit=Unit.KILOMETERS)
+        else:
+            distance = np.inf
+
+        distance = min(distance, existing_distance)
+
+        new_distances.append(distance)
+
+    census_df[new_distances_label] = new_distances
+
     return census_df
 
 

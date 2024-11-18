@@ -47,12 +47,16 @@ class Facilities:
         except FileNotFoundError:
             raise FileNotFoundError('The file ' + filepath + ' does not exist.')
 
-        facilities['geometry'] = facilities['geometry'].apply(wkt.loads)
-        facilities = gpd.GeoDataFrame(facilities, geometry='geometry', crs=projection_wgs84)
-        facilities.dropna(subset=['geometry'], inplace=True)
-        facilities.drop_duplicates(inplace=True)
-        facilities['Longitude'] = facilities['geometry'].x
-        facilities['Latitude'] = facilities['geometry'].y
+        if 'geometry' in facilities.columns:
+            facilities['geometry'] = facilities['geometry'].apply(wkt.loads)
+            facilities = gpd.GeoDataFrame(facilities, geometry='geometry', crs=projection_wgs84)
+            facilities.dropna(subset=['geometry'], inplace=True)
+            facilities.drop_duplicates(inplace=True)
+            facilities['Longitude'] = facilities['geometry'].x
+            facilities['Latitude'] = facilities['geometry'].y
+        else:
+            facilities['geometry'] = facilities.apply(lambda row: Point(row['Longitude'], row['Latitude']), axis=1)
+            facilities = gpd.GeoDataFrame(facilities, geometry='geometry', crs=projection_wgs84)
 
         return facilities
 

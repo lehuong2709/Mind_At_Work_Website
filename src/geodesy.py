@@ -3,10 +3,11 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 import bisect
+import random
 
 
 class Point:
-    def __init__(self, longitude: float, latitude: float, precision: int = 3):
+    def __init__(self, longitude: float, latitude: float, name: str=None, precision: int=3):
         """
         Creates a new instance of the Point class.
 
@@ -25,6 +26,13 @@ class Point:
             raise ValueError("Latitude must be between -90 and 90")
         self._latitude = round(latitude, precision)
 
+        if name is None:
+            # Random string of 10 characters
+            name = ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=12))
+
+        self._name = name
+
+
     def __repr__(self):
         """
         Returns a string representation of the Point object.
@@ -32,13 +40,30 @@ class Point:
         Returns:
             str: String representation of the Point object.
         """
-        return f"Point ({self._longitude}, {self._latitude})"
+        return f"Point " + self._name + " ({self._longitude}, {self._latitude})"
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return False
+        return self._longitude == other.longitude() and self._latitude == other.latitude()
 
     def longitude(self):
         return self._longitude
 
     def latitude(self):
         return self._latitude
+
+    def name(self):
+        return self._name
+
+    def __hash__(self):
+        """
+        Returns a hash value for the Point object.
+
+        Returns:
+            int: Hash value of the Point object.
+        """
+        return hash((self._longitude, self._latitude))
 
 
 def distance_between_two_points(point1: Point, point2: Point):
@@ -79,17 +104,19 @@ class PointSet:
         """
         return f"Points ({self.points})"
 
-
     def __len__(self):
         return len(self.points)
 
     def list_of_longitudes_and_latitudes(self, sort_latitudes: bool=False):
         longitudes = self.list_of_longitudes()
         latitudes = self.list_of_latitudes()
+        names = [point.name() for point in self.points]
         if sort_latitudes:
-            longitudes, latitudes = zip(*sorted(zip(longitudes, latitudes), key=lambda pair: pair[1]))
+            longitudes, latitudes, names = zip(*sorted(zip(longitudes, latitudes, names), key=lambda pair: pair[1]))
 
-        return longitudes, latitudes
+        names = [str(name) for name in names]
+
+        return longitudes, latitudes, names
 
     def list_of_longitudes(self):
         return self._df['Longitude'].tolist()
@@ -124,7 +151,7 @@ def distance_between_point_and_point_set(point: Point, points: PointSet, startin
     if len(points) == 0:
         return np.inf
 
-    longitudes, latitudes = points.list_of_longitudes_and_latitudes(sort_latitudes=True)
+    longitudes, latitudes, names = points.list_of_longitudes_and_latitudes(sort_latitudes=True)
 
     # Initialize q_star and minimum_distance
     if starting_point is not None:
@@ -147,11 +174,11 @@ def distance_between_point_and_point_set(point: Point, points: PointSet, startin
     while improvement > 0:              # While improvement > 0
         improvement = 0                 # Set improvement to 0
         for i in range(i_low, i_high):  # For each point q in points[i_low:i_high]
-            q = Point(longitudes[i], latitudes[i])               # Set q to be the current point
+            q = Point(longitudes[i], latitudes[i], name=points.points[i].name())
 
             distance = distance_between_two_points(point, q)                    # Compute the distance between p and q
             if distance < minimum_distance:
-                q_star = q                                                      # Update q_star
+                q_star = q
                 improvement = minimum_distance - distance                       # Compute the improvement
                 minimum_distance = distance                                     # Update the minimum distance
                 # Update the latitude difference between q^* and p
@@ -178,6 +205,7 @@ def distances_from_point_set_to_point_set(points1: PointSet, points2: PointSet):
     :return: distances (in km) from each point in points1 to the closest point in points2, output as a dictionary
     """
     distances = {}
+    to_points = {}
     for point in points1.points:
-        distances[point], _ = distance_between_point_and_point_set(point, points2)
-    return distances
+        distances[point], to_points[point] = distance_between_point_and_point_set(point, points2)
+    return distances, to_points

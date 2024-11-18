@@ -5,3 +5,8 @@
 .archive/*
 
 .streamlit/secrets.toml
+
+data/usa/.archive/*
+data/usa/.archive
+
+.DS_Store

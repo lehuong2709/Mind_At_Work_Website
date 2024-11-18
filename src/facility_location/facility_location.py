@@ -4,7 +4,7 @@ import numpy as np
 
 
 def facility_location(points, urban_points, groups, pairwise_distances, existing_facilities, existing_distances, k, p=2,
-                      urban_weight=5):
+                      urban_weight=5, verbose=False, optimality_tol=None):
     """
     points: list of points
     pairwise_distances: dictionary of pairwise distances between points
@@ -56,6 +56,10 @@ def facility_location(points, urban_points, groups, pairwise_distances, existing
         for s in range(r):
             model.addConstr(Z[s] <= t)
 
+    if optimality_tol is not None:
+        model.setParam('OptimalityTol', optimality_tol)
+
+    model.setParam('OutputFlag', verbose)
     model.update()
     model.setObjective(t, GRB.MINIMIZE)
     model.optimize()
