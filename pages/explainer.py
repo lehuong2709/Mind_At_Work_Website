@@ -16,7 +16,7 @@ from src.usa.plot_utils import plot_state, plot_stacked_bar, plot_existing_facil
 from src.tabs.analysis import run_analysis_tab
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='Facility Deserts in USA', page_icon='🏥')
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='M@W Explaination', page_icon='🏥')
 
 
 def update_variable(variable_name):
