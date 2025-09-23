@@ -251,6 +251,92 @@ if tab == 'Prediction':
         "⚠️ Results are for awareness and learning only, not for diagnosis or clinical use."
     )
 
+    # --- Prediction tab content ---
+
+    from src.model_pipeline import load_catboost_model, run_pipeline
+
+    st.markdown(
+        "<h2 style='margin-top:0'>Predict metal health risk</h2>"
+        "<p style='color:#666'>Fill the fields below. The model estimates the probability of <b>Metal health condition</b> "
+        "based on your inputs.</p>",
+        unsafe_allow_html=True,
+    )
+
+    # Load CatBoost model (cached by load_catboost_model)
+    MODEL_CBM = "models/catboost_model.cbm"      # <- change if needed
+    MODEL_PKL = "models/catboost_model.pkl"      # <- fallback path (optional)
+
+    model = load_catboost_model(cbm_path=MODEL_CBM, pkl_path=MODEL_PKL)
+
+    if model is None:
+        st.warning(
+            "No model found. Place a CatBoost model at "
+            f"`{MODEL_CBM}` (preferred) or `{MODEL_PKL}` and reload."
+        )
+    else:
+        # Form UI — match feature names used in model_pipeline
+        with st.form("predict_form"):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                age = st.number_input("Age", min_value=16, max_value=80, value=30)
+                years_of_exp = st.slider("Years of Experience", 0, 45, 5)
+                hours = st.slider("Hours Worked Per Week", 10, 80, 40)
+                meetings = st.slider("Number of Virtual Meetings / week", 0, 50, 8)
+                iso = st.slider("Social Isolation Rating (1–5)", 1, 5, 3)
+
+            with col2:
+                sleep_quality = st.selectbox("Sleep Quality", ["Poor", "Average", "Good"])
+                physical_activity = st.selectbox("Physical Activity", ["None", "Weekly", "Daily"])
+                productivity_change = st.selectbox(
+                    "Productivity Change vs usual", ["Decrease", "No Change", "Increase"]
+                )
+                sat_remote = st.selectbox(
+                    "Satisfaction with Remote Work", ["Unsatisfied", "Neutral", "Satisfied"]
+                )
+                wlb = st.selectbox(
+                    "Work–Life Balance Rating", ["Poor", "Average", "Good", "Excellent"]
+                )
+
+            threshold = st.slider("Alert threshold for High stress", 0.10, 0.90, 0.52, 0.01)
+            submitted = st.form_submit_button("Predict")
+
+        if submitted:
+            # Build raw_input keys EXACTLY as in src/model_pipeline._MAPPINGS/_NUMERIC_PASSTHRU
+            raw_input = {
+                # categorical
+                "Sleep_Quality": sleep_quality,
+                "Physical_Activity": physical_activity,
+                "Productivity_Change": productivity_change,
+                "Satisfaction_with_Remote_Work": sat_remote,
+                "Work_Life_Balance_Rating": wlb,
+                # numeric passthrough
+                "Age": age,
+                "Years_of_Experience": years_of_exp,
+                "Hours_Worked_Per_Week": hours,
+                "Number_of_Virtual_Meetings": meetings,
+                "Social_Isolation_Rating": iso,
+            }
+
+            result = run_pipeline(model, raw_input, threshold=threshold)
+
+            st.markdown("---")
+            left, right = st.columns([1, 1])
+            with left:
+                st.metric("Probability of High stress", f"{result['proba_high']:.2%}")
+            with right:
+                st.metric("Predicted label",
+                        "High stress" if result["label"] == 1 else "Not high",
+                        help=f"Threshold: {threshold:.2f}")
+
+            with st.expander("Show model input (after encoding)"):
+                st.dataframe(result["input_df"])
+
+
+
+
+
+
 if tab == 'Explanation':
     st.sidebar.caption(
         "This section explains how the prediction models work, showing which factors "
