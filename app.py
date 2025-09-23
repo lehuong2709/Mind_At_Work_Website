@@ -16,11 +16,12 @@ from src.dashboard_insight import render_consequences_from_data
 from src.dashboard_insight import render_context_panel, render_progress_tracker
 
 from src.model_pipeline import (
-    load_catboost_model, load_feature_order, load_best_threshold, run_pipeline
-)
+    load_catboost_model, load_feature_order, load_best_threshold,
+    encode_user_input, predict_proba, predict_label)
+
+
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title='MIND@WORK', page_icon='🏥')
-
 
 
 # Remove extra padding from the top and bottom of the page
@@ -36,7 +37,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-########## Sidebar ##########
 
 # Create a tab to select the tool to use
 tab = sac.tabs(
@@ -45,7 +45,9 @@ tab = sac.tabs(
     align='start',
 )
 
-# Sidebar messages for the different tools
+# ---------------------------------------------------------------------
+# ---------About Project tab content ------------------------------------
+# ---------------------------------------------------------------------
 if tab == 'About Project':
     st.sidebar.caption(
         "Mind@Work is a prototype dashboard linking work conditions with employee mental health condition.\n"
@@ -233,94 +235,103 @@ if tab == 'About Project':
         st.divider()
         
 
+
+
 # ---------------------------------------------------------------------
 # ---------Prediction tab content (from model_pipeline.py) ------------
 # ---------------------------------------------------------------------
-
 if tab == 'Prediction':
     st.sidebar.caption(
         "This tool uses predictive models to forecast how different work conditions "
         "may affect employee overall mental well-being. "
         "⚠️ Results are for awareness and learning only, not for diagnosis or clinical use."
     )
+  #Display the name of the tool
+    st.markdown(
+    """
+    <h2 style="color:#0a3d62; font-size: 48px; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em;">
+        Metal health prediction tool
+    </h2>
+    """,
+    unsafe_allow_html=True
+    )
 
-    # Ensure models folder exists
-    os.makedirs("models", exist_ok=True)
-    MODEL_CBM = "models/catboost_model.cbm"
-    MODEL_PKL = "models/catboost_model.pkl"
+    st.markdown(
+        "<p style='color:#666'>Fill the fields below. The model estimates the probability of <b>Metal health condition</b> "
+        "based on your inputs.</p>",
+        unsafe_allow_html=True,
+    )
+  
 
-    model = load_catboost_model(cbm_path=MODEL_CBM, pkl_path=MODEL_PKL)
-
+    # --- Prediction tab content ---
+    model = load_catboost_model()
     if model is None:
-        st.warning(
-            "No model found. Place a CatBoost model at "
-            f"`{MODEL_CBM}` (preferred) or `{MODEL_PKL}` and reload."
-        )
+        st.warning("⚠️ No model found in `models/catboost`. Please add `model.cbm` or `model.pkl`.")
+    else:
+        feature_order = load_feature_order()
+        tuned_t = load_best_threshold(default=0.52)
 
-    with st.form("predict_form"):
-        col1, col2 = st.columns(2)
+        with st.form("predict_form"):
+            left, right = st.columns(2, gap="large")
 
-        with col1:
-            age = st.number_input("Age", min_value=16, max_value=80, value=30)
-            years_of_exp = st.slider("Years of Experience", 0, 45, 5)
-            hours = st.slider("Hours Worked Per Week", 10, 80, 40)
-            meetings = st.slider("Number of Virtual Meetings / week", 0, 50, 8)
-            iso = st.slider("Social Isolation Rating (1–5)", 1, 5, 3)
+            # LEFT: 5 categorical / manual inputs
+            with left:
+                age = st.number_input("Age", min_value=18, max_value=80, value=30, step=1)
+                stress = st.selectbox("Stress Level", ["Low", "Medium", "High"])
+                productivity = st.selectbox("Productivity Change", ["Decrease", "No Change", "Increase"])
+                activity = st.selectbox("Physical Activity", ["None", "Weekly", "Daily"])
+                sleep = st.selectbox("Sleep Quality", ["Poor", "Average", "Good"])
 
-        with col2:
-            sleep_quality = st.selectbox("Sleep Quality", ["Poor", "Average", "Good"])
-            physical_activity = st.selectbox("Physical Activity", ["None", "Weekly", "Daily"])
-            productivity_change = st.selectbox(
-                "Productivity Change vs usual", ["Decrease", "No Change", "Increase"]
+            # RIGHT: 5 sliders (numeric)
+            with right:
+                exp = st.slider("Years of Experience", 0, 40, 5)
+                hours = st.slider("Hours Worked Per Week", 10, 80, 40)
+                meetings = st.slider("Virtual Meetings / week", 0, 50, 5)
+                isolation = st.slider("Social Isolation Rating (1–5)", 1, 5, 3)
+                support = st.slider("Company Support for Remote Work (1–5)", 1, 5, 3)
+
+                submitted = st.form_submit_button("Predict", use_container_width=True)
+            
+
+        if submitted:
+            raw = {
+                "Age": age,
+                "Years_of_Experience": exp,
+                "Hours_Worked_Per_Week": hours,
+                "Number_of_Virtual_Meetings": meetings,
+                "Stress_Level": stress,                  # "Low"/"Medium"/"High"  -> mapped
+                "Productivity_Change": productivity,     # -> mapped
+                "Social_Isolation_Rating": isolation,    # numeric (1-5)
+                "Company_Support_for_Remote_Work": support,  # numeric (1-5)
+                "Physical_Activity": activity,           # -> mapped
+                "Sleep_Quality": sleep,                  # -> mapped
+            }
+
+            model = load_catboost_model()
+            if model is None:
+                st.warning("No model found in models/catboost/. Add model.cbm or model.pkl.")
+            else:
+                feature_order = load_feature_order()
+                threshold = load_best_threshold(0.52)
+
+                input_df = encode_user_input(raw, feature_order=feature_order)
+                proba = predict_proba(model, input_df)
+                label = predict_label(proba, threshold)
+
+                st.metric("Probability of condition", f"{proba:.2%}")
+                st.metric("Prediction", "In risk of having mental health problem" if label else "Not in risk",
+                        help=f"Threshold = {threshold:.2f}")
+                # 👉 Add explanation
+                st.markdown(
+                f"""
+                <div style="background-color:#f8f9fa; border-left: 4px solid #6c757d; padding: 12px; border-radius: 4px; margin-top: 12px;">
+                    <b>ℹ️ How to interpret this:</b><br>
+                    The probability <b>{proba:.2%}</b> means that, given the information you entered,
+                    the model estimates this individual is in risk of experiencing a 
+                    <b>mental health condition</b> (e.g., anxiety, burnout, or depression).<br><br>
+                """,
+                unsafe_allow_html=True
             )
-            sat_remote = st.selectbox(
-                "Satisfaction with Remote Work", ["Unsatisfied", "Neutral", "Satisfied"]
-            )
-            wlb = st.selectbox(
-                "Work–Life Balance Rating", ["Poor", "Average", "Good", "Excellent"]
-            )
-
-        threshold = st.slider("Alert threshold for High stress", 0.10, 0.90, 0.52, 0.01)
-
-        # Disable submit if model missing
-        submitted = st.form_submit_button(
-            "Predict",
-            disabled=(model is None),
-            help=None if model else "Upload a model to enable predictions."
-        )
-
-    if submitted:
-        raw_input = {
-            # categorical
-            "Sleep_Quality": sleep_quality,
-            "Physical_Activity": physical_activity,
-            "Productivity_Change": productivity_change,
-            "Satisfaction_with_Remote_Work": sat_remote,
-            "Work_Life_Balance_Rating": wlb,
-            # numeric passthrough
-            "Age": age,
-            "Years_of_Experience": years_of_exp,
-            "Hours_Worked_Per_Week": hours,
-            "Number_of_Virtual_Meetings": meetings,
-            "Social_Isolation_Rating": iso,
-        }
-
-        result = run_pipeline(model, raw_input, threshold=threshold)
-
-        st.markdown("---")
-        left, right = st.columns([1, 1])
-        with left:
-            st.metric("Probability of High stress", f"{result['proba_high']:.2%}")
-        with right:
-            st.metric(
-                "Predicted label",
-                "High stress" if result["label"] == 1 else "Not high",
-                help=f"Threshold: {threshold:.2f}"
-            )
-
-        with st.expander("Show model input (after encoding)"):
-            st.dataframe(result["input_df"])
-
 
 
 
