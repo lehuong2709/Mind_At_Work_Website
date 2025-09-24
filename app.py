@@ -334,7 +334,9 @@ if tab == 'Prediction':
             )
 
 
-
+#---------------------------------------------------------------------
+# ---------Explanation tab content ------------------------------------
+#---------------------------------------------------------------------
 if tab == 'Explanation':
     st.sidebar.caption(
         "This section explains how the prediction models work, showing which factors "
@@ -342,9 +344,32 @@ if tab == 'Explanation':
     )
     
 
-# Display the selected tab
+#---------------------------------------------------------------------
+# ---------More Analysis tab content ------------------------------------
+#---------------------------------------------------------------------
 if tab == 'More Analysis':
     st.sidebar.caption(
         "This section provides descriptive analysis with charts and summaries, "
         "highlighting patterns between work conditions and mental health."
     )
+
+    from src.analysis import render_more_analysis
+        
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_PATH = os.path.join(
+    APP_DIR,
+    "data",
+    "mind@work",
+    "mental heath dataset",  # <- your folder name, even with the space/typo
+    "Cleaned_remote_work.csv")
+
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_PATH = os.path.join(
+        APP_DIR,
+        "data",
+        "mind@work",
+        "mental heath dataset",  # even with the space/typo
+        "Cleaned_remote_work.csv"
+    )
+
+    render_more_analysis(data_path=DATA_PATH, target_col="Stress_Level")
