@@ -7,7 +7,6 @@ from PIL import Image
 
 from src.dashboard_insight import (
     render_mh_prevalence_donut,
-    render_consequences_from_data,
     render_consequences_mh_from_data
 )
     
