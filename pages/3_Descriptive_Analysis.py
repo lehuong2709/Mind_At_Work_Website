@@ -3,7 +3,7 @@ import streamlit as st
 from PIL import Image
 import base64
 import pathlib
-from src.analysis import render_more_analysis
+
 
 st.set_page_config(layout="wide", initial_sidebar_state="expanded",
                    page_title="Descriptive_MIND@WORK", page_icon="🏥")
@@ -98,21 +98,3 @@ st.markdown("""
 APP_DIR = Path(__file__).resolve().parents[1]       # folder where app.py lives
 DATA_PATH = APP_DIR / "data" / "mind@work" / "mental heath dataset" / "Cleaned_remote_work.csv"  # keep folder name as-is
 
-# ---- Optional: let user pick the outcome column ----
-target_col = st.sidebar.selectbox(
-    "Outcome column",
-    options=["Stress_Level", "Mental_Health_Condition"],
-    index=0,
-    help="Choose which column to treat as the outcome in the analysis."
-)
-
-# ---- Run analysis ----
-if not DATA_PATH.exists():
-    st.error(f"Data file not found: `{DATA_PATH}`")
-    st.stop()
-
-try:
-    render_more_analysis(data_path=str(DATA_PATH), target_col=target_col)
-except Exception as e:
-    st.error("Couldn't run the analysis. Please check the dataset and target column.")
-    st.exception(e)
