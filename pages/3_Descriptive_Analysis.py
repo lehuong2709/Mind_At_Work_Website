@@ -275,3 +275,30 @@ with right_co:
     st.caption("Boxes show the interquartile range (IQR), lines extend to 1.5×IQR, and dots are outliers.")
 
 
+# ---- CTA ----
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("""
+<h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
+    Interested in piloting Mind@Work?
+</h2>
+""", unsafe_allow_html=True)
+cta_col1, cta_col2 = st.columns([1, 3])
+with cta_col1:
+    try:
+        st.link_button("Get in touch", "mailto:team@mindatwork.example?subject=Mind@Work%20pilot")
+    except Exception:
+        st.markdown("[👉 Get in touch](mailto:team@mindatwork.example?subject=Mind@Work%20pilot)")
+with cta_col2:
+    st.markdown("We’re looking for organizations to co-develop metrics, validate insights, and shape ethical use guidelines.")
+
+st.markdown("<br><hr>", unsafe_allow_html=True)
+col1, col2 = st.columns([1, 1])
+col2.markdown("""
+<div style="text-align: right; font-size: 13px; color: gray;">
+    © 2025 Mind@Work Project. All rights reserved. <br>
+    Built by the Mind@Work project team <br>
+    in collaboration with Karolinska Institutet & Stockholm University.
+</div>
+""", unsafe_allow_html=True)

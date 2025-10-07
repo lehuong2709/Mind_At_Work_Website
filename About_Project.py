@@ -117,41 +117,88 @@ st.markdown("""
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# ---- PARTNERS MAP ----
-partners_df = pd.read_csv(COMPANY_FILE)
 
-left, right = st.columns([1, 2], gap="large")
-with left:
-    st.markdown("""
-    <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
-        Where we’ve collected data?
-    </h2>
-    """, unsafe_allow_html=True)
-    city = st.selectbox("Choose a city", options=sorted(partners_df["city"].unique()), index=0)
-    sel = partners_df[partners_df["city"] == city]
-    st.markdown(f"**Partners in {city}:**")
-    if sel.empty:
-        st.caption("No partners listed yet.")
-    else:
-        st.markdown("\n".join(f"- {row.company}" for row in sel.itertuples()))
+col1, col2, col3 = st.columns(3)
 
-with right:
-    view_state = pdk.ViewState(latitude=62.0, longitude=15.0, zoom=4.5, pitch=0)
-    layer = pdk.Layer(
-        "ScatterplotLayer",
-        data=partners_df,
-        get_position='[lon, lat]',
-        get_fill_color=[31, 119, 180, 200],
-        get_line_color=[0, 0, 0],
-        line_width_min_pixels=1,
-        pickable=True,
-        radius_min_pixels=6,
-    )
-    deck = pdk.Deck(layers=[layer], initial_view_state=view_state,
-                    tooltip={"text": "{company}\n{city}"}, map_style="light")
-    st.pydeck_chart(deck, use_container_width=True, height=600)
+with col1:
+    with st.expander("📌 About the Project"):
+        st.markdown("""
+        **Mind@Work** is a cutting-edge research initiative running from **Sept 3 to Oct 22, 2025**, funded by Sweden’s Public Health Agency.
+        
+        - 🎯 **Objective**: Enhance workplace well-being via remote work data  
+        - 📊 **Methodology**: Descriptive, predictive & prescriptive analytics  
+        - 📁 **Dataset**: Synthetic mental health data (Kaggle)  
+        - 🛠️ **Tech Stack**: Python, Streamlit, Scikit-learn, SHAP, Pandas  
+        """)
 
-st.markdown("<br>", unsafe_allow_html=True)
+with col2:
+    with st.expander("👥 Who’s Involved"):
+        st.markdown("""
+        - 🧑‍🏫 Internal: Academic supervisors & mentors  
+        - 🏛️ External: Public Health Agency, Insurers  
+        - 👩‍💼 Team: Isha, Harish, Patricija, Karin, Le  
+        - 🔄 Roles: Analysts, developers, testers, PM rotation  
+        """)
+
+with col3:
+    with st.expander("🎯 Project Goals"):
+        st.markdown("""
+        - Analyze how work setups affect well-being  
+        - Predict mental health risks early  
+        - Ensure explainable AI for transparency  
+        - Deliver actionable insights to stakeholders  
+        - Provide HR recommendations  
+        """)
+
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    with st.expander("💼 Project Scope"):
+        st.markdown("""
+        ✅ In Scope: Data analysis, EDA, prediction, dashboards  
+        ❌ Out of Scope: Real user data, clinical diagnosis, production AI  
+        """)
+
+with col5:
+    with st.expander("💸 Budget & Resources"):
+        st.markdown("""
+        - Budget: 154,913 SEK  
+        - Funded by Public Health Agency   
+        - Team: 3 devs, 2 testers, rotating PM  
+        """)
+
+with col6:
+    with st.expander("📅 Timeline"):
+        st.markdown("""
+        | Phase                  | Dates            |  
+        |------------------------|------------------|  
+        | Setup & Requirements   | Sept 3 – Sept 12 |  
+        | EDA & Development      | Sept 12 – Sept 21|  
+        | Prototype & Testing    | Sept 21 – Sept 29|  
+        | Refinement & Writing   | Oct 8 – Oct 13   |  
+        | Report Delivery        | Oct 13 – Oct 22  |  
+        """)
+
+col7, col8 = st.columns(2)
+
+with col7:
+    with st.expander("⚠️ Risks & Mitigations"):
+        st.markdown("""
+        | Risk                    | Mitigation                      |
+        |-------------------------|--------------------------------|
+        | Data quality issues      | Backup datasets + preprocessing|
+        | Time constraints        | Weekly reviews + buffer period |
+        | Model performance       | Try multiple models + tuning   |
+        | Streamlit bugs          | Early MVP + regular testing    |
+        | Team workload/illness   | Role rotation + open communication |
+        """)
+
+with col8:
+    with st.expander("🌟 Why This Matters"):
+        st.markdown("""
+        Mental health challenges affect **15% of the workforce worldwide**, leading to over **12 billion lost workdays** annually.
+        Through insightful data analysis, **Mind@Work** aims to help organizations foster supportive, productive, and mentally healthy workplaces.
+        """)
 
 # ---- WHY / EVIDENCE ----
 st.markdown("""
