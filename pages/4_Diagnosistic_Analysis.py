@@ -97,7 +97,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Page meta ──────────────────────────────────────────────────────────────────
-st.sidebar.caption("Explore relationships, compare groups, and try simple clustering.")
+st.sidebar.caption("Explore relationships, compare groups to understand reasons behind")
 st.markdown("""
 <h1 style="font-size: 48px; text-align: center; margin: 0; line-height: 1.0;">
     <span style="color: #31487A;">Workplace Insights Explorer</span>
@@ -350,9 +350,37 @@ import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind, mannwhitneyu
 
 st.markdown("""
-    <h2 style="color:#31487A; font-size: 28px; font-weight: 700; margin: 1em 0 .5em 0;">
-        Group Comparison Lab
-    </h2>
+<style>
+.help-icon {
+    display: inline-block;
+    color: #6c757d;
+    font-size: 18px;
+    margin-left: 6px;
+    cursor: help;
+    position: relative;
+}
+.help-icon:hover::after {
+    content: "Compare two groups on any numeric feature. Select a categorical variable (e.g. Work_Location), define Group A and Group B, then choose a numeric metric (e.g. Stress Level or Hours Worked). The lab runs a t-test or Mann–Whitney U test to show if differences are statistically significant.";
+    position: absolute;
+    background-color: #f0f2f6;
+    color: #000;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    width: 330px;
+    top: 25px;
+    left: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+</style>
+
+<h2 style="color:#31487A; font-size: 28px; font-weight: 700; margin: 1em 0 .5em 0;">
+    Group Comparison Lab
+    <span class="help-icon" title="Click for help">ℹ️</span>
+</h2>
 """, unsafe_allow_html=True)
 
 # ---- column discovery ----
@@ -406,8 +434,8 @@ else:
             test_label = f"U = {u:.0f}, p = {p:.4f}"
 
         # ---- plot ----
-        sns.set_theme(style="whitegrid", font_scale=1.05)
-        fig, ax = plt.subplots(figsize=(7.8, 5.0))
+        sns.set_theme(style="whitegrid", font_scale=0.85)  # smaller font for compactness
+        fig, ax = plt.subplots(figsize=(4.8, 3.0))   
         palette = sns.color_palette("Blues", 3)
 
         # violin & box
@@ -436,7 +464,16 @@ else:
         means = sub[sub[cat_var].isin([g1, g2])].groupby(cat_var)[metric].mean()
         ax.scatter([0,1], means[[g1, g2]].values, s=85, c="white", edgecolors="#1f3b6d", zorder=5)
 
-        ax.set_title(f"{metric} — {g1} vs {g2} ({cat_var})", fontsize=13, weight="bold", pad=8)
+        # --- Prettify variable names ---
+        pretty_metric = metric.replace("_", " ").title()
+        pretty_cat = cat_var.replace("_", " ").title()
+
+        # --- Add smaller but readable title ---
+        ax.set_title(
+            f"{pretty_metric}\n{g1} vs {g2} ({pretty_cat})",
+            fontsize=9.5, weight="semibold", pad=4, color="#1f2937"
+        )
+        
         ax.set_xlabel(cat_var); ax.set_ylabel(metric)
         sns.despine(ax=ax)
         fig.tight_layout()
