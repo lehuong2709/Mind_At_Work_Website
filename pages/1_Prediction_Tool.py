@@ -118,23 +118,63 @@ st.markdown(
 )
 
 # --- Form ---
+
 with st.form("predict_form", clear_on_submit=False):
     left, right = st.columns(2, gap="large")
 
     with left:
-        age = st.number_input("Age", 18, 80, 30, 1)
-        stress = st.selectbox("Stress Level", ["Low", "Medium", "High"])
-        productivity = st.selectbox("Productivity Change", ["Decrease", "No Change", "Increase"])
-        activity = st.selectbox("Physical Activity", ["None", "Weekly", "Daily"])
-        sleep = st.selectbox("Sleep Quality", ["Poor", "Average", "Good"])
+        age = st.number_input(
+            "Age",
+            18, 80, 30, 1,
+            help="Your current age in years. Used to estimate how age may influence mental health."
+        )
+        stress = st.selectbox(
+            "Stress Level",
+            ["Low", "Medium", "High"],
+            help="Self-assessed level of stress."
+        )
+        productivity = st.selectbox(
+            "Productivity Change",
+            ["Decrease", "No Change", "Increase"],
+            help="How your productivity changed compared to last month."
+        )
+        activity = st.selectbox(
+            "Physical Activity",
+            ["None", "Weekly", "Daily"],
+            help="Frequency of physical exercise or movement during the week."
+        )
+        sleep = st.selectbox(
+            "Sleep Quality",
+            ["Poor", "Average", "Good"],
+            help="Overall quality of your sleep in recent weeks."
+        )
 
     with right:
-        exp = st.slider("Years of Experience", 0, 40, 5)
-        hours = st.slider("Hours Worked Per Week", 10, 80, 40)
-        meetings = st.slider("Virtual Meetings / week", 0, 50, 5)
-        isolation = st.slider("Social Isolation Rating (1–5)", 1, 5, 3)
-        support = st.slider("Company Support for Remote Work (1–5)", 1, 5, 3)
-    
+        exp = st.slider(
+            "Years of Experience",
+            0, 40, 5,
+            help="Total years of professional experience in your career."
+        )
+        hours = st.slider(
+            "Hours Worked Per Week",
+            10, 80, 40,
+            help="Average number of working hours per week."
+        )
+        meetings = st.slider(
+            "Virtual Meetings / week",
+            0, 50, 5,
+            help="Number of online meetings you typically attend each week."
+        )
+        isolation = st.slider(
+            "Social Isolation Rating (1–5)",
+            1, 5, 3,
+            help="How isolated you feel socially (1 = not at all, 5 = very)."
+        )
+        support = st.slider(
+            "Company Support for Remote Work (1–5)",
+            1, 5, 3,
+            help="How well your company supports remote employees (1 = poor, 5 = excellent)."
+        )
 
     # ✅ Checkbox
     consent = st.checkbox(
