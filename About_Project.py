@@ -112,95 +112,207 @@ st.markdown("""
     Mind@<span style="color:#8FB3E2;">Work</span>
 </h1>
 <h3 style="font-size: 18px; text-align: center; margin-top: 0;">
-    A prototype dashboard for workplace mental health
+    A data website for workplace mental health
 </h3>""", unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
 
+
+#--------------------Introduction about Project-------------------------
+#-----------------------------------------------------------------------
+st.markdown("""
+<style>
+.how-container {
+    background-color:#e7f2ff;
+    padding: 50px 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.how-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #1c1c1c;
+}
+
+.step-card {
+    background-color:#e7f2ff;
+    border-radius: 12px;
+    padding: 25px 18px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+.step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+.step-icon {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+.step-title {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #2B70E0;
+}
+.step-text {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.5;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
+    How do we work?
+</h2>
+""", unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    with st.expander("📌 About the Project"):
-        st.markdown("""
-        **Mind@Work** is a cutting-edge research initiative running from **Sept 3 to Oct 22, 2025**, funded by Sweden’s Public Health Agency.
-        
-        - 🎯 **Objective**: Enhance workplace well-being via remote work data  
-        - 📊 **Methodology**: Descriptive, predictive & prescriptive analytics  
-        - 📁 **Dataset**: Synthetic mental health data (Kaggle)  
-        - 🛠️ **Tech Stack**: Python, Streamlit, Scikit-learn, SHAP, Pandas  
-        """)
+    st.markdown("""
+    <div class="step-card">
+        <div class="step-icon">🧠</div>
+        <div class="step-title">Collect</div>
+        <div class="step-text">
+            We gather anonymous information from professionals about their work routines, stress levels, and lifestyle habits.  
+            All inputs remain confidential and are used exclusively for well-being analysis.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    with st.expander("👥 Who’s Involved"):
-        st.markdown("""
-        - 🧑‍🏫 Internal: Academic supervisors & mentors  
-        - 🏛️ External: Public Health Agency, Insurers  
-        - 👩‍💼 Team: Isha, Harish, Patricija, Karin, Le  
-        - 🔄 Roles: Analysts, developers, testers, PM rotation  
-        """)
+    st.markdown("""
+    <div class="step-card">
+        <div class="step-icon">📊</div>
+        <div class="step-title">Analyze</div>
+        <div class="step-text">
+            Our models use explainable AI to detect early signs of mental strain and identify which work conditions
+            may contribute to stress or lower satisfaction. Insights are transparent and evidence-based.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    with st.expander("🎯 Project Goals"):
-        st.markdown("""
-        - Analyze how work setups affect well-being  
-        - Predict mental health risks early  
-        - Ensure explainable AI for transparency  
-        - Deliver actionable insights to stakeholders  
-        - Provide HR recommendations  
-        """)
+    st.markdown("""
+    <div class="step-card">
+        <div class="step-icon">💬</div>
+        <div class="step-title">Recommend</div>
+        <div class="step-text">
+            Results are summarized into actionable suggestions — from improving sleep and workload balance 
+            to enhancing social support and HR policies. The aim: healthier, more resilient workplaces.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-col4, col5, col6 = st.columns(3)
+st.markdown('</div>', unsafe_allow_html=True)
 
-with col4:
-    with st.expander("💼 Project Scope"):
-        st.markdown("""
-        ✅ In Scope: Data analysis, EDA, prediction, dashboards  
-        ❌ Out of Scope: Real user data, clinical diagnosis, production AI  
-        """)
+st.markdown("""
+<style>
+.info-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-top: 25px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.info-item {
+    font-size: 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.info-label {
+    font-weight: 600;
+    color: #1c1c1c;
+}
+@media (max-width: 768px) {
+    .info-bar { flex-direction: column; align-items: flex-start; }
+}
+</style>
 
-with col5:
-    with st.expander("💸 Budget & Resources"):
-        st.markdown("""
-        - Budget: 154,913 SEK  
-        - Funded by Public Health Agency   
-        - Team: 3 devs, 2 testers, rotating PM  
-        """)
+<div class="info-bar">
+  <div class="info-item"><span class="info-label">Funding:</span> Sweden’s Public Health Agency</div>
+  <div class="info-item"><span class="info-label">Duration:</span> Sept 3 – Oct 22, 2025</div>
+  <div class="info-item"><span class="info-label">About our Team:</span> 3 Devs · 2 Testers · PM</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col6:
-    with st.expander("📅 Timeline"):
-        st.markdown("""
-        | Phase                  | Dates            |  
-        |------------------------|------------------|  
-        | Setup & Requirements   | Sept 3 – Sept 12 |  
-        | EDA & Development      | Sept 12 – Sept 21|  
-        | Prototype & Testing    | Sept 21 – Sept 29|  
-        | Refinement & Writing   | Oct 8 – Oct 13   |  
-        | Report Delivery        | Oct 13 – Oct 22  |  
-        """)
 
-col7, col8 = st.columns(2)
+st.markdown("""
+<style>
+.notice-box {
+    background-color: white;
+    border-left: 5px solid #2B70E0;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-top: 25px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.notice-title {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 6px;
+    color: #1c2a55;
+}
+.notice-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #24335a;
+}
+.feedback-button {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #2B70E0;
+    color: white !important;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+.feedback-button:hover {
+    background-color: #1f58b5;
+}
+</style>
 
-with col7:
-    with st.expander("⚠️ Risks & Mitigations"):
-        st.markdown("""
-        | Risk                    | Mitigation                      |
-        |-------------------------|--------------------------------|
-        | Data quality issues      | Backup datasets + preprocessing|
-        | Time constraints        | Weekly reviews + buffer period |
-        | Model performance       | Try multiple models + tuning   |
-        | Streamlit bugs          | Early MVP + regular testing    |
-        | Team workload/illness   | Role rotation + open communication |
-        """)
+<div class="notice-box">
+    <div class="notice-title">🔧 Early Development Phase</div>
+    <div class="notice-text">
+    <b>Mind@Work v1.0 (October 2025)</b> is our first public release.  
+    The model is still learning — results may not yet be fully optimized for every profile.  
+    We’re continuously improving accuracy and fairness as more data becomes available.  
+    Thank you for your trust and collaboration in shaping a better, more reliable tool.
+    </div>
+    <a href="mailto:info@explorestas.pl?subject=Mind@Work%20Feedback" class="feedback-button">
+        💬 Share feedback or data
+    </a>
+</div>
+""", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-with col8:
-    with st.expander("🌟 Why This Matters"):
-        st.markdown("""
-        Mental health challenges affect **15% of the workforce worldwide**, leading to over **12 billion lost workdays** annually.
-        Through insightful data analysis, **Mind@Work** aims to help organizations foster supportive, productive, and mentally healthy workplaces.
-        """)
+
 
 # ---- WHY / EVIDENCE ----
+
+    
 st.markdown("""
 <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
     Why workplace mental health matters
@@ -213,24 +325,32 @@ According to the World Health Organization, **depression and anxiety** cause an 
 Our data suggests **more than 70% employee** report having mental health problems, which linked to their work environment.
 """)
 
+left, right = st.columns(2)
+with left:
+    st.markdown("#### Mental Health Conditions in workplaces")
+    render_mh_prevalence_donut(
+        data_path=str(REMOTE_WORK_FILE),
+        condition_col="Mental_Health_Condition",
+        # If you’re in the dark-blue site theme, set bg_color="#192338"
+    )
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-st.markdown("#### Mental Health Conditions in workplaces")
-render_mh_prevalence_donut(
-    data_path=str(REMOTE_WORK_FILE),
-    condition_col="Mental_Health_Condition",
-    # If you’re in the dark-blue site theme, set bg_color="#192338"
-)
+with right: 
+    st.markdown("#### How outcomes differ when mental health condition is present")
+    render_consequences_mh_from_data(
+        data_path=str(REMOTE_WORK_FILE),
+        condition_col="Mental_Health_Condition",
+        max_features=5
+    )
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-st.markdown("#### How outcomes differ when mental health condition is present")
-render_consequences_mh_from_data(
-    data_path=str(REMOTE_WORK_FILE),
-    condition_col="Mental_Health_Condition",
-    max_features=5
-)
+# Caption explaining interpretation
+st.caption(
+        "This chart compares employees with and without mental-health problems. Bars show which work factors are higher or lower among those reporting anxiety, burnout, or depression. "
+        "Positive values mean that this factor tends to be higher among employees with mental-health difficulties, while negative values mean it’s lower."
+    )
 
-st.markdown("<br><br>", unsafe_allow_html=True)
 
 # ---- VALUE PROPOSITION ----
 st.markdown("""
@@ -246,7 +366,10 @@ st.caption("Mind@Work is a research prototype intended for awareness and plannin
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# ---- CTA ----
+
+
+
+# ---- Footer ----
 st.markdown("""
 <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
     Interested in piloting Mind@Work?

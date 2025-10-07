@@ -203,8 +203,4 @@ def render_consequences_mh_from_data(
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Caption explaining interpretation
-    st.caption(
-        "This chart compares employees with and without mental-health problems. Bars show which work factors are higher or lower among those reporting anxiety, burnout, or depression. "
-        "Positive values mean that this factor tends to be higher among employees with mental-health difficulties, while negative values mean it’s lower."
-    )
+    

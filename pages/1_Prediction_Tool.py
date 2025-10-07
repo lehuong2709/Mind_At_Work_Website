@@ -281,6 +281,14 @@ if submitted:
 
 
 # ---- CTA ----
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+
 st.markdown("""
 <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
     Interested in piloting Mind@Work?
