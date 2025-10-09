@@ -175,7 +175,7 @@ In future projects, we would like to explore:
 
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run About_Project.py
 
 ## Structure explaination
 MIND_AT_WORK_WEBSITE/
