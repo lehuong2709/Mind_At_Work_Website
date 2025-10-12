@@ -43,10 +43,10 @@
 > Visit [Data Tab]
 
 #### 3. Create and activate a virtual environment (Mac)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run About_Project.py
+* python3 -m venv .venv
+* source .venv/bin/activate
+* pip install -r requirements.txt
+* streamlit run About_Project.py
 
 
 
@@ -77,14 +77,14 @@ Feature scaling and correlation checks
 ## **🧠 Model Development**
 
 #### Random Forest (Baseline)
-Train/test split: 80/20
-Metrics: Accuracy, F1-score
-GridSearchCV for tuning
-Accuracy: ~0.80 | F1: ~0.83
-CatBoost (Final)
-Handles categorical data natively
-SHAP for explainability
-Accuracy: ~0.84 | F1: ~0.86
+- Train/test split: 80/20
+- Metrics: Accuracy, F1-score
+- GridSearchCV for tuning
+- Accuracy: ~0.80 | F1: ~0.83
+- CatBoost (Final)
+- Handles categorical data natively
+- SHAP for explainability
+- Accuracy: ~0.84 | F1: ~0.86
 
 
 
