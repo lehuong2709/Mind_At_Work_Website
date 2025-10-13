@@ -102,7 +102,8 @@ st.markdown("""
 </h3>""", unsafe_allow_html=True)
  
 
-# --- Load model once ---
+# --- Load model once ----------
+#-------------------------------
 model = load_catboost_model()
 if model is None:
     st.warning("⚠️ No model found in `models/catboost`. Please add `model.cbm` or `model.pkl`.")
@@ -117,7 +118,79 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+# --- Form CSS for primary button ---
+#-----------------------------------
+# This is a more specific selector to override Streamlit's default button styles
+st.markdown("""
+<style>
+/* Stronger selector for Streamlit forms */
+div.stButton > button[kind="primary"] {
+    background-color: #2563EB;          /* soft blue */
+    color: white;
+    font-weight: 500;
+    border: 1px solid #1E40AF;
+    border-radius: 8px;
+    padding: 0.45em 1.4em;
+    font-size: 15px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+}
+div.stButton > button[kind="primary"]:hover {
+    background-color: #1E40AF;
+    border-color: #1E3A8A;
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);
+    transform: translateY(-1px);
+}
+div.stButton > button[kind="primary"]:active {
+    background-color: #1E3A8A;
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # --- Form ---
+st.markdown("""
+<style>
+/* ---- Universal style for Submit button ---- */
+div.stButton > button,
+.stForm button {
+    background-color: #31487A !important;      /* your brand deep blue */
+    color: #FFFFFF !important;                 /* white text */
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.6em 1.6em !important;
+    font-size: 15px !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 3px 8px rgba(49,72,122,0.25);
+    transition: all 0.25s ease-in-out;
+}
+
+/* 🔥 Force all inner text elements to white (covers span, div, p) */
+div.stButton > button * ,
+.stForm button * {
+    color: #FFFFFF !important;
+}
+
+/* ---- Hover + Active Effects ---- */
+div.stButton > button:hover,
+.stForm button:hover {
+    background-color: #233464 !important;
+    box-shadow: 0 5px 12px rgba(35,52,100,0.35);
+    transform: translateY(-1px);
+}
+div.stButton > button:active,
+.stForm button:active {
+    background-color: #1c2b58 !important;
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(28,43,88,0.3);
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 with st.form("predict_form", clear_on_submit=False):
     left, right = st.columns(2, gap="large")
@@ -181,8 +254,8 @@ with st.form("predict_form", clear_on_submit=False):
         "I consent to entering my personal information and understand how it will be used."
     )
 
-    # ✅ The *only* submit button
-    submitted = st.form_submit_button("🔍 Predict Mental Health Condition")
+    # ✅ The submit button
+    submitted = st.form_submit_button("Submit for Screening", type="primary")
 
 st.markdown("### Decision Threshold")
 mode = st.radio(
@@ -214,73 +287,118 @@ elif mode.strip() == "Set custom threshold":
 
 # --- Inference ---
 if submitted:
+    # --- consent gate ---
     if not consent:
         st.error("Please read and acknowledge the consent above to enable prediction.")
         st.stop()
+
+    # --- build raw inputs exactly as your model expects ---
+    raw = {
+        "Age": age,
+        "Years_of_Experience": exp,
+        "Hours_Worked_Per_Week": hours,
+        "Number_of_Virtual_Meetings": meetings,
+        "Stress_Level": stress,
+        "Productivity_Change": productivity,
+        "Social_Isolation_Rating": isolation,
+        "Company_Support_for_Remote_Work": support,
+        "Physical_Activity": activity,
+        "Sleep_Quality": sleep,
+    }
+
+    # --- preprocess + predict ---
+    df_one = encode_user_input(raw, feature_order=feature_order)   # your function
+    proba  = predict_proba(model, df_one)                          # float in [0,1]
+    label  = predict_label(proba, threshold)                       # 0/1
+
+    # --- persist for the next page ---
+    st.session_state.has_screening = True
+    st.session_state.input_raw     = raw            # nice for display
+    st.session_state.input_df      = df_one         # for SHAP/explanations
+    st.session_state.proba         = float(proba)
+    st.session_state.label         = int(label)
+    st.session_state.threshold     = float(threshold)
+
+    # --- quick metrics ---
+    c1, c2, _ = st.columns(3)
+    c1.metric("Prediction confidence score", f"{proba:.2%}")
+    c2.metric("Threshold", f"{threshold:.2f}")
+
+    # --- interpretation + recommendations ---
+    st.markdown(
+        f"""
+        <div style="background-color:#f8f9fa; border-left: 4px solid #6c757d;
+                    padding: 12px; border-radius: 6px; margin: 12px 0;">
+            <b>ℹ️ How to interpret:</b><br>
+            With a decision threshold of <b>{threshold:.2f}</b>, a probability of <b>{proba:.2%}</b>
+            is classified as <b>{'likely to have a mental health condition' if label == 1 else 'unlikely to have a mental health condition'}.</b><br>
+            Lower thresholds increase sensitivity (catch more true positives); higher thresholds do the opposite.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if label == 1:
+        st.error("⚠️ Likely to have a mental health condition.")
+        st.markdown("""
+        ### Recommendations
+        - Consider improving your sleep routine.
+        - Try stress-reduction techniques such as meditation, yoga, or deep breathing.
+        - Seek support from a mental-health professional or counselor.
+        - Remember: this tool is a **screening aid**, not a diagnostic tool.
+        """)
     else:
-        raw = {
-            "Age": age,
-            "Years_of_Experience": exp,
-            "Hours_Worked_Per_Week": hours,
-            "Number_of_Virtual_Meetings": meetings,
-            "Stress_Level": stress,
-            "Productivity_Change": productivity,
-            "Social_Isolation_Rating": isolation,
-            "Company_Support_for_Remote_Work": support,
-            "Physical_Activity": activity,
-            "Sleep_Quality": sleep,
-        }
-        df = encode_user_input(raw, feature_order=feature_order)
-        proba = predict_proba(model, df)
-        label = predict_label(proba, threshold)
+        st.success("✅ Unlikely to have a mental health condition.")
+        st.markdown("""
+        ### Recommendations
+        - Maintain your healthy habits: regular exercise, good sleep, balanced diet.
+        - Keep monitoring your wellbeing and reach out for support if you feel overwhelmed.
+        - Remember: this tool is a **screening aid** and cannot replace professional advice.
+        """)
 
-        st.session_state.input_df = df
-        st.session_state.proba = proba
-        st.session_state.label = label
-        st.session_state.threshold = float(threshold)
-
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Prediction confidence score", f"{proba:.2%}")
-        c2.metric("Threshold", f"{threshold:.2f}")
-
-            # --- Result message and recommendations ---
-        if label == 1:
-            st.error("⚠️ Likely to have a mental health condition.")
-            st.markdown(
-            f"""
-            <div style="background-color:#f8f9fa; border-left: 4px solid #6c757d;
-                        padding: 12px; border-radius: 4px; margin-top: 12px;">
-                <b>ℹ️ How to interpret:</b><br>
-                With a decision threshold of <b>{threshold:.2f}</b>, a probability of <b>{proba:.2%}</b>
-                is classified as <b>{"likely to have a mental health condition." if label else "unlikely to have a mental health condition."}</b>.<br>
-                Lower thresholds increase sensitivity (catch more people with mental health problem);
-                higher thresholds do the opposite.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-            st.markdown("<br><br>", unsafe_allow_html=True)
-            st.markdown("""
-                ### Recommendations
-                - Consider improving your sleep routine.  
-                - Try stress-reduction techniques such as meditation, yoga, or deep breathing.  
-                - Seek support from a mental-health professional or counselor.  
-                - Remember: this tool is a **screening aid** and **not a diagnostic tool**.  
-                Always consult a qualified healthcare provider for diagnosis and treatment.
-            """)
-            
-            
-        else:
-            st.success("✅ Unlikely to have a mental health condition.")
-            st.markdown("""
-                ### Recommendations
-                - Maintain your healthy habits: regular exercise, good sleep, balanced diet.  
-                - Keep monitoring your wellbeing and reach out for support if you feel overwhelmed.  
-                - Remember: this tool is a **screening aid** and cannot replace professional advice.
-            """)
+    # --- Next button (manual navigation to explanation page) ---
+    # divider + short lead text
+    st.markdown("<hr style='margin:16px 0 8px 0;'>", unsafe_allow_html=True)
+    st.markdown("If you'd like to understand how your result was made, click below.")
 
 
-# ---- CTA ----
+    # 2) Wrap + render the page link (no emoji icon)
+    # ✅ Scoped highlight styling for this one link
+    st.markdown("""
+    <style>
+    #next-pill a[data-testid="stPageLink"]{
+    display:inline-block;
+    background:#31487A;               /* brand blue */
+    color:#FFFFFF !important;          /* white text */
+    padding:8px 14px;
+    border-radius:12px;                /* pill shape */
+    font-weight:600;
+    font-size:15px;
+    text-decoration:none !important;
+    transition:background .2s ease, transform .2s ease;
+    line-height:1.2;
+    }
+    #next-pill a[data-testid="stPageLink"]:hover{
+    background:#233464;                /* slightly darker on hover */
+    transform:translateY(-1px);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div id="next-pill">', unsafe_allow_html=True)
+    st.page_link(
+        "pages/2_Understand_the_Screening.py",
+        label="Next – Understand the Screening",
+        use_container_width=False,
+    )
+    st.markdown('</div>', unsafe_allow_html=True)  
+    
+
+
+
+
+
+# ---- CTA  Footer ----
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -312,3 +430,6 @@ col2.markdown("""
     in collaboration with Karolinska Institutet & Stockholm University.
 </div>
 """, unsafe_allow_html=True)
+
+
+

@@ -195,7 +195,7 @@ with col2:
         <div class="step-icon">📊</div>
         <div class="step-title">Analyze</div>
         <div class="step-text">
-            Our models use explainable AI to detect early signs of mental strain and identify which work conditions
+            Our models use artificial intelligence to detect early signs of mental strain and identify which work conditions
             may contribute to stress or lower satisfaction. Insights are transparent and evidence-based.
         </div>
     </div>
@@ -360,7 +360,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 c1, c2, c3 = st.columns(3)
 c1.markdown("**Work conditions + outcomes**  \nLinks workload, control, support, and culture with mental health.")
-c2.markdown("**ML + XAI**  \nUses machine learning with explainable outputs so leaders can see *why* risks appear.")
+c2.markdown("**Artificial Intelligence and Explainability**  \nUses machine learning with explainable outputs so leaders can see *why* risks appear.")
 c3.markdown("**Decision support**  \nHighlights at-risk groups and actionable levers.")
 st.caption("Mind@Work is a research prototype intended for awareness and planning, **not** clinical use.")
 
@@ -368,8 +368,79 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 
 
 
+# ---- HOW TO USE -----------------------------------------------
+#---------------------------------------------------------------
+st.markdown("""
+    <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
+        How to Use Mind@Work?
+    </h2>
+    """, unsafe_allow_html=True)
+st.write("Mind@Work helps you explore how work conditions relate to employees’ mental well-being. Each section has a clear purpose:")
+    
+st.markdown("""
+<style>
+/* make expander headers larger and on-brand */
+.streamlit-expanderHeader {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1e3a8a !important; /* deep blue */
+}
+.block-container .expander-content p {
+  margin: 0 0 .5rem 0;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# ---- Footer ----
+# ---- Four dropdowns in a neat 2×2 grid (stacks on small screens) ----
+left1, right1 = st.columns(2)
+left2, right2 = st.columns(2)
+
+with left1:
+    with st.expander("🩺 Mental Health Screening", expanded=False):
+        st.markdown("""
+        Answer simple questions about your work and lifestyle.  
+        The system uses artificial intelligence to give a wellbeing result and highlight key factors.
+        """)
+
+with right1:
+    with st.expander("🧠 Understand the Screening", expanded=False):
+        st.markdown("""
+        Learn how the artificial intelligence made its decision.  
+        See which answers influenced your result and why.
+        """)
+
+with left2:
+    with st.expander("📊 Overview & Trends", expanded=False):
+        st.markdown("""
+        Discover overall patterns in wellbeing, stress, and work habits.  
+        You can filter by job type, hours, or satisfaction levels.
+        """)
+
+with right2:
+    with st.expander("🔍 Deep Dive Insights", expanded=False):
+        st.markdown("""
+        Explore relationships — for example, how sleep or workload connect with stress or happiness.  
+        Helps find what truly matters.
+        """)
+
+# ---- Tip (unchanged content) ----
+st.markdown("""
+<div style="
+    text-align:center; margin-top: 16px; font-size: 15px; color:#374151;
+    background: linear-gradient(90deg, #f8fbff 0%, #edf5ff 100%);
+    padding: 12px 18px; border-radius: 10px; border: 1px solid #d9e3f5;">
+💡 <b>Tip:</b> Start with <b>Overview & Trends</b>, then explore <b>Deep Dive Insights</b>,
+try your own situation in <b>Mental Health Screening</b>, and finally check
+<b>Understand the Screening</b> to see how the system thinks.
+</div>
+""", unsafe_allow_html=True)
+
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+
+
+# ---- Footer --------------------------------------------------
 st.markdown("""
 <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
     Interested in piloting Mind@Work?
