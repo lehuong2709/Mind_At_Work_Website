@@ -2,13 +2,13 @@
 
 ### **👥 Team Members**
 
-| Name | GitHub Handle | Contribution |
-| ----- | ----- | ----- |
-| Patricija | @ | Usability Test, Feedback and Fixed Model |
-| Isha | @ | Led Feature Engineering and Model Evaluation |
-| Le| @ | Built and Optimized Streamlit Dashboard|
-| Karin | @ | Explore EDA|
-| Harish | @ | Built and Optimized Models and Dashboard |
+| Name  | Contribution |
+| -----  | ----- |
+| Patricija  | Usability Test, Feedback and Fixed Model |
+| Isha  | Led Feature Engineering and Model Evaluation |
+| Le| Built and Optimized Streamlit Dashboard|
+| Karin | Explore EDA|
+| Harish  | Built and Optimized Models and Dashboard |
 
 ---
 
@@ -40,11 +40,11 @@
 
 #### 2. Download Datasets Through Kaggle
    
-> Visit [Data Tab]
+> Visit: https://www.kaggle.com/datasets/waqi786/remote-work-and-mental-health
 
-#### 3. Create and activate a virtual environment (Mac)
-* python3 -m venv .venv
-* source .venv/bin/activate
+#### 3. Create and activate a virtual environment and run website
+* python3 -m venv .venv or (py -m venv .venv)
+* source .venv/bin/activate or (.\.venv\Scripts\activate.bat)
 * pip install -r requirements.txt
 * streamlit run About_Project.py
 
