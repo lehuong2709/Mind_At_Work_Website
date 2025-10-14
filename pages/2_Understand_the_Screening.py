@@ -125,7 +125,7 @@ if "input_df" in st.session_state:
     # -------- Waterfall (stacked bars on raw model scale) --------
     st.markdown("""
     <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
-        Your interactive SHAP Waterfall Plot
+        Factors Behind the Score with SHAP chart
     </h2>
     """, unsafe_allow_html=True)
 
@@ -171,7 +171,7 @@ if "input_df" in st.session_state:
 
     # --- Plain-language explainer ---
     st.markdown("""
-    <div style="font-size:15px; color:#555; line-height:1.6;">
+    <div style="font-size:16px; color:#555; line-height:1.6;">
       <h5 style="color:#31487A;">💡 How to understand the SHAP chart?</h5>
       This diagram shows <b>which factors most influenced your stress prediction.</b>
       <ul>
@@ -187,7 +187,7 @@ if "input_df" in st.session_state:
     # -------- Global feature importance --------
     st.markdown("""
     <h2 style="color:#31487A; font-size: 32px; font-weight: 700; margin: 1em 0 .5em 0;">
-        Feature Importance
+        What Matters Most?
     </h2>
     """, unsafe_allow_html=True)
     try:
@@ -198,7 +198,7 @@ if "input_df" in st.session_state:
 
         fig2 = go.Figure(go.Bar(x=importances, y=y_labels, orientation="h"))
         fig2.update_layout(
-            title="Global Feature Importance",
+            title="Overall Factor Importance in the Mind@Work Screening Tool",
             xaxis_title="Importance Score",
             yaxis=dict(autorange="reversed"),
             height=400,
@@ -209,9 +209,9 @@ if "input_df" in st.session_state:
         st.info(f"Feature importance unavailable: {e}")
 
     st.markdown("""
-    <div style="font-size:15px; color:#555; line-height:1.6;">
-      <h5 style="color:#31487A;">💡 How to read the Feature Importance chart?</h5>
-      This chart shows <b>which factors matter most overall</b> across many people (a global view).
+    <div style="font-size:16px; color:#555; line-height:1.6;">
+      <h5 style="color:#31487A;">💡 How to read the Factor Importance chart?</h5>
+      This chart shows <b>which factors matter most overall</b> across many people.
       <ul>
         <li>Each bar is a factor used by the model.</li>
         <li>The <b>longer</b> the bar, the <b>more influence</b> it usually has on predictions.</li>

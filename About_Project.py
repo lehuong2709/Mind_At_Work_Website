@@ -101,8 +101,7 @@ st.markdown(f"""
 
 
 with st.sidebar:
-    st.caption("Mind@Work is a prototype dashboard linking work conditions with employee mental health condition.\n"
-               "⚠️ Insights only, no diagnosis or clinical use.")
+    st.caption("Mind@Work is a prototype dashboard linking work conditions with employee mental health condition.\n")
 
 
 # ---- Website title ----
@@ -180,8 +179,8 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown("""
     <div class="step-card">
-        <div class="step-icon">🧠</div>
-        <div class="step-title">Collect</div>
+        <div class="step-icon">🗂️</div>
+        <div class="step-title">Data</div>
         <div class="step-text">
             We gather anonymous information from professionals about their work routines, stress levels, and lifestyle habits.  
             All inputs remain confidential and are used exclusively for well-being analysis.
@@ -249,8 +248,8 @@ st.markdown("""
 
 <div class="info-bar">
   <div class="info-item"><span class="info-label">Funding:</span> Sweden’s Public Health Agency</div>
-  <div class="info-item"><span class="info-label">Duration:</span> Sept 3 – Oct 22, 2025</div>
-  <div class="info-item"><span class="info-label">About our Team:</span> 3 Devs · 2 Testers · PM</div>
+  <div class="info-item"><span class="info-label">Version:</span> Mind@Work v1.0 - Oct 19, 2025</div>
+  <div class="info-item"><span class="info-label">About our Team:</span> 3 Developers · 2 Testers · 1 Project Manager</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -297,7 +296,7 @@ st.markdown("""
     <div class="notice-title">🔧 Early Development Phase</div>
     <div class="notice-text">
     <b>Mind@Work v1.0 (October 2025)</b> is our first public release.  
-    The model is still learning — results may not yet be fully optimized for every profile.  
+    The model is still learning - results may not yet be fully optimized for every profile.  
     We’re continuously improving accuracy and fairness as more data becomes available.  
     Thank you for your trust and collaboration in shaping a better, more reliable tool.
     </div>
@@ -324,6 +323,7 @@ According to the World Health Organization, **depression and anxiety** cause an 
 **12 billion lost workdays each year**, costing the global economy nearly **$1 trillion USD annually [1]**.
 Our data suggests **more than 70% employee** report having mental health problems, which linked to their work environment.
 """)
+st.caption ("[1] World Health Organization. (2024). Mental Health at Work. https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work")
 
 left, right = st.columns(2)
 with left:
@@ -347,9 +347,10 @@ with right:
 
 # Caption explaining interpretation
 st.caption(
-        "This chart compares employees with and without mental-health problems. Bars show which work factors are higher or lower among those reporting anxiety, burnout, or depression. "
-        "Positive values mean that this factor tends to be higher among employees with mental-health difficulties, while negative values mean it’s lower."
-    )
+    "About 3 out of 4 people report a mental-health problem in this sample.<br>"
+    "Those with a problem tend to work a bit more hours, have slightly less experience, fewer virtual meetings, and are a little younger on average.<br> "
+    "Bars show which work factors are higher or lower among those reporting mental problem."
+    , unsafe_allow_html=True)
 
 
 # ---- VALUE PROPOSITION ----

@@ -95,9 +95,11 @@ def plot_pvalue_heatmap(res, alpha=0.05):
         if p_val < alpha:
             t.set_fontweight("bold")
             t.set_fontsize(13)
+            t.set_color("#e63946")
         else:
             t.set_fontweight("normal")
             t.set_fontsize(11)
+            t.set_color("black")
 
     plt.tight_layout()
     plt.show()
@@ -286,12 +288,10 @@ def plot_single_pvalue_heatmap(res, p_col="Kruskal_p", alpha=0.05, title=None):
             is_sig = val < alpha
             ax.text(j + 0.5, i + 0.5, f"{val:.3f}",
                     ha="center", va="center",
-                    fontsize=10 if is_sig else 8.5,
+                    fontsize=13 if is_sig else 8.5,
                     fontweight="bold" if is_sig else "normal",
-                    color="black")
-
-    ax.set_title(title or f"{p_col.replace('_',' ').title()} Heatmap (Categorical × Numeric)",
-                 fontsize=13, weight="bold", pad=12)
+                    color="red" if is_sig else "black")
+            
     ax.set_xlabel("Numeric Variables", fontsize=11)
     ax.set_ylabel("Categorical Variables", fontsize=11)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")

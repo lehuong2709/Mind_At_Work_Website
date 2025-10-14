@@ -124,7 +124,7 @@ with left:
     # ---- Run your analysis silently ----
     # 1) compute the p-values
     res = scan_categorical_relationships(
-        df.drop(columns=["Gender", "Industry", "Region", "Sleep_Quality"], errors="ignore"),
+        df.drop(columns=["Gender", "Industry", "Region", "Sleep_Quality", "Physical_Activity"], errors="ignore"),
         alpha=0.05
     )
 
@@ -170,7 +170,8 @@ with left:
                     continue
                 if p_val < alpha:
                     t.set_fontweight("bold")
-                    t.set_fontsize(10.5)  # subtle bump
+                    t.set_fontsize(13)
+                    t.set_color("#e63946")  # subtle bump
                 else:
                     t.set_fontweight("normal")
                     t.set_fontsize(9)
@@ -190,16 +191,14 @@ with right:
         <h3 style="color:#31487A; font-size: 20px; font-weight: 600; margin-top: 0;">
             About this analysis
         </h3>
-        <p style="font-size: 14px; color: #333;">
-            This section explores relationships between categorical variables in the dataset using Chi-squared tests.
-            Each cell in the heatmap shows the p-value for the association between two categorical factors.
+        <p style="font-size: 16px; color: #333;">
+            When you see red-highlighted values in the chart, it means there’s a strong connection between those two factors.
         </p>
-        <p style="font-size: 14px; color: #333;">
-            A low p-value (typically &lt; 0.05) indicates a statistically significant relationship, suggesting that the two factors are not independent.
-            Significant p-values are highlighted in bold and slightly larger font for easy identification.
+        <p style="font-size: 16px; color: #333;">
+            For example, if "Work Location" and "Mental Health Access" show red value, it suggests that where you work (remote, hybrid, onsite) is linked to whether you have access to mental health resources.
         </p>
-        <p style="font-size: 14px; color: #333;">
-            Use this analysis to identify interesting connections between workplace factors, mental health indicators.
+        <p style="font-size: 16px; color: #333;">
+            Simply look for red boxes to spot the most important relationships.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -236,21 +235,25 @@ with col1:
     st.markdown('<div class="figtitle">Satisfaction by Work Location</div>', unsafe_allow_html=True)
     fig1 = plot_satisfaction_by_work_location(df)
     st.pyplot(fig1, use_container_width=True)
-    st.caption(
-        '<div class="caption-box">'
-        '<p style="font-size:15px;">This chart shows how satisfaction levels vary by work location '
-        '(Remote, Hybrid, Onsite). Onsite workers show the highest share of “Satisfied”, while Remote workers report fewer “Satisfied”.</p>'
-        '</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Onsite workers show the highest share of “Satisfied”, while Remote workers report fewer “Satisfied”.</br>
+                    This chart shows how satisfaction levels vary by work location (Remote, Hybrid, Onsite).
+                </div>
+                """, unsafe_allow_html=True)
 
 with col2:
     st.markdown('<div class="figtitle">Stress & Productivity by MH Access</div>', unsafe_allow_html=True)
     fig2 = plot_stress_productivity_by_access(df)
     st.pyplot(fig2, use_container_width=True)
-    st.caption(
-        '<div class="caption-box">'
-        '<p style="font-size:15px;">This chart shows how stress levels and productivity vary based on '
-        'access to mental health resources. Employees with access report lower stress and higher productivity.</p>'
-        '</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Employees with access report lower stress and higher productivity.</br>
+                    This chart shows how stress levels and productivity vary based on access to mental health resources.
+                </div>
+                """, unsafe_allow_html=True)
     
 
 #----------------------------------
@@ -264,16 +267,14 @@ with col_1:
         <h3 style="color:#31487A; font-size: 20px; font-weight: 600; margin-top: 0;">
             About this analysis
         </h3>
-        <p style="font-size: 14px; color: #333;">
-            This section examines relationships between categorical and numeric variables using the Kruskal–Wallis test.
-            Each cell in the heatmap displays the p-value for the association between a categorical factor and a numeric measure.
+        <p style="font-size: 16px; color: #333;">
+            When you see red-highlighted values in the chart, it means there’s a strong connection between those two factors.
         </p>
-        <p style="font-size: 14px; color: #333;">
-            A low p-value (typically &lt; 0.05) indicates a statistically significant relationship, suggesting that the numeric variable differs across categories of the factor.
-            Significant p-values are highlighted in bold and slightly larger font for easy identification.
+        <p style="font-size: 16px; color: #333;">
+            For example, if "Work Location" and "Number of Virtual Meeting" show red value, it suggests that where you work (remote, hybrid, onsite) is linked to your number of meeting per week.
         </p>
-        <p style="font-size: 14px; color: #333;">
-            Use this analysis to uncover important connections between workplace factors and key numeric outcomes like stress, productivity, and satisfaction.
+        <p style="font-size: 16px; color: #333;">
+            Simply look for red boxes to spot the most important relationships.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -286,7 +287,7 @@ with col_2:
 
     cols_to_drop = [
         "Industry", "Job_Role", "Region",
-        "Sleep_Quality", "Physical_Activity"
+        "Sleep_Quality", "Physical_Activity", "Productivity_Change", "Stress_Level", "Company_Support_for_Remote_Work"
     ]
     df = df.drop(columns=[c for c in cols_to_drop if c in df.columns])
 
@@ -304,7 +305,7 @@ with col_2:
     else:
         st.info("No valid categorical–numeric pairs found after dropping selected features.")
 
-#---------------------------------------- IGNORE ----------------------------------
+#---------------------------------------- Meeting and work location ----------------------------------
 # ------------------------------------------------------------------
 st.markdown("<br><br>", unsafe_allow_html=True)
 left, right = st.columns([1, 1])
@@ -317,12 +318,12 @@ with left:
 
     fig = plot_meetings_by_work_location(df)
     st.pyplot(fig, use_container_width=True)
-
-    st.caption(
-        "This plot shows how the number of virtual meetings per week "
-        "varies by work location. The white box highlights median and IQR, "
-        "while blue dots represent group means."
-    )
+    st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Remote workers have slightly more meetings on average than Hybrid and Onsite.</br>
+                    White box is typical range (median inside). Blue circle is average. Dots are people..
+                """, unsafe_allow_html=True)
 
 with right:
     st.markdown("""
@@ -333,12 +334,15 @@ with right:
 
     fig = plot_isolation_vs_balance(df)
     st.pyplot(fig, use_container_width=True)
+    st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                Each line compares the average social isolation and work–life balance ratings for a given work location. </br>
+                Shorter lines suggest a better balance between isolation and work–life perception.</br>
+                Average ratings are very similar across locations, Hybrid is slightly highest, Remote slightly lowest.
+            
+                """, unsafe_allow_html=True)
 
-    st.caption(
-        "Each line compares the average social isolation and work–life balance ratings "
-        "for a given work location. Shorter lines suggest a better balance between "
-        "isolation and work–life perception."
-    )
 
 #-------------------------
 # ========= Group Comparison Lab (pick any two groups) =========
@@ -349,37 +353,27 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind, mannwhitneyu
 
-st.markdown("""
+st.markdown(r"""
 <style>
-.help-icon {
-    display: inline-block;
-    color: #6c757d;
-    font-size: 18px;
-    margin-left: 6px;
-    cursor: help;
-    position: relative;
+.help-icon{
+  display:inline-block; color:#6c757d; font-size:18px; margin-left:6px;
+  cursor:help; position:relative;
 }
-.help-icon:hover::after {
-    content: "Compare two groups on any numeric feature. Select a categorical variable (e.g. Work_Location), define Group A and Group B, then choose a numeric metric (e.g. Stress Level or Hours Worked). The lab runs a t-test or Mann–Whitney U test to show if differences are statistically significant.";
-    position: absolute;
-    background-color: #f0f2f6;
-    color: #000;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-size: 13px;
-    line-height: 1.4;
-    width: 330px;
-    top: 25px;
-    left: 0;
-    z-index: 100;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+.help-icon:hover::after{
+  content: "Compare two groups on a number — e.g., do hybrid or remote workers have more online meetings?\A"
+           "Pick what to compare; the chart shows if a difference is real or just chance.\A"
+           "Each dot is one person’s answer.";
+  position:absolute; top:26px; left:0; z-index:1000;
+  display:block;
+  background:#f0f2f6; color:#000; border:1px solid #ccc; border-radius:6px;
+  padding:8px 10px; font-size:13px; line-height:1.4; width:330px;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+  white-space:pre-line;   /* make \A become line breaks */
 }
 </style>
 
-<h2 style="color:#31487A; font-size: 28px; font-weight: 700; margin: 1em 0 .5em 0;">
-    Group Comparison Lab
-    <span class="help-icon" title="Click for help">ℹ️</span>
+<h2 style="color:#31487A;font-size:28px;font-weight:700;margin:1em 0 .5em 0;">
+  Group Difference Tester <span class="help-icon">ℹ️</span>
 </h2>
 """, unsafe_allow_html=True)
 
@@ -390,7 +384,7 @@ num_cols = df.select_dtypes(include=np.number).columns.tolist()
 if not cat_cols or not num_cols:
     st.info("Need at least one categorical and one numeric column in the dataset.")
 else:
-    with st.expander("Pick variables", expanded=True):
+    with st.expander("Pick factors", expanded=True):
         cat_var = st.selectbox("Categorical feature", cat_cols, index=cat_cols.index("Work_Location") if "Work_Location" in cat_cols else 0)
         # levels after dropna
         levels = df[cat_var].dropna().unique().tolist()
@@ -414,7 +408,7 @@ else:
     b = sub.loc[sub[cat_var] == g2, metric].astype(float).values
 
     if len(a) < 3 or len(b) < 3:
-        st.warning("Not enough data in one of the groups (need ≥3 observations each).")
+        st.warning("Not enough data in one of the groups (need ≥3 instances data each).")
     else:
         # ---- stats ----
         if test_choice.startswith("t-test"):
@@ -483,7 +477,7 @@ else:
         st.caption(
             f"**{test_choice}** → {test_label}.  {eff_label}.  "
             f"n₁ = {len(a)}, n₂ = {len(b)}.  "
-            f"Lower p-values indicate stronger evidence of a difference."
+            f"Lower values indicate stronger evidence of a difference."
         )
 
 

@@ -263,10 +263,9 @@ mode = st.radio(
     ["Use default threshold", "Set custom threshold"],
     index=0,
     help=(
-            "This controls how strict the tool is.\n\n"
-            "- Default: recommended setting.\n"
-            "- Custom: move the slider yourself.\n\n"
-            "Lower = more people shown 'at risk', Higher = fewer people shown 'at risk'."
+            "The threshold sets when the system flags possible mental health concerns.\n\n"
+            "For example, if you choose 0.52, anyone scoring above 0.52 will be flagged.\n\n"
+            "A lower number means more people get flagged, while a higher number means fewer do.\n\n"
         ),
     )
 # --- make sure it's a clean branch ---
@@ -339,22 +338,43 @@ if submitted:
     )
 
     if label == 1:
-        st.error("⚠️ Likely to have a mental health condition.")
+        st.error("**Likely to have a mental health condition.**", icon="⚠️")
         st.markdown("""
-        ### Recommendations
-        - Consider improving your sleep routine.
-        - Try stress-reduction techniques such as meditation, yoga, or deep breathing.
-        - Seek support from a mental-health professional or counselor.
-        - Remember: this tool is a **screening aid**, not a diagnostic tool.
-        """)
+            <div style="
+                border: 2px solid #f28b82;
+                background-color: #ffecec;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 18px;
+            ">
+            <h4>💡 Recommendations</h4>
+            <ul>
+                <li>Improve your sleep routine.</li>
+                <li>Try relaxation techniques: meditation, yoga, or deep breathing.</li>
+                <li>Seek support from a mental health professional or counselor.</li>
+                <li>Remember: this tool is a <b>screening aid</b>, not a diagnostic tool.</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
     else:
-        st.success("✅ Unlikely to have a mental health condition.")
+        st.success("**Unlikely to have a mental health condition.**", icon="✅")
         st.markdown("""
-        ### Recommendations
-        - Maintain your healthy habits: regular exercise, good sleep, balanced diet.
-        - Keep monitoring your wellbeing and reach out for support if you feel overwhelmed.
-        - Remember: this tool is a **screening aid** and cannot replace professional advice.
-        """)
+            <div style="
+                border: 2px solid #81c995;
+                background-color: #e6f4ea;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 18px;
+            ">
+            <h4>💡 Recommendations</h4>
+            <ul>
+                <li>Maintain healthy habits: regular exercise, good sleep, and balanced diet.</li>
+                <li>Keep monitoring your wellbeing and reach out for support if needed.</li>
+                <li>Remember: this tool is a <b>screening aid</b> and cannot replace professional advice.</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
     # --- Next button (manual navigation to explanation page) ---
     # divider + short lead text
@@ -366,41 +386,50 @@ if submitted:
     # ✅ Scoped highlight styling for this one link
     st.markdown("""
     <style>
-    #next-pill a[data-testid="stPageLink"]{
-    display:inline-block;
-    background:#31487A;               /* brand blue */
-    color:#FFFFFF !important;          /* white text */
-    padding:8px 14px;
-    border-radius:12px;                /* pill shape */
-    font-weight:600;
-    font-size:15px;
-    text-decoration:none !important;
-    transition:background .2s ease, transform .2s ease;
-    line-height:1.2;
+    /* Make Streamlit page link look like a blue rounded button */
+    div[data-testid="stPageLink"] a {
+        display: inline-block;
+        background: #D9E1F1;
+        color: white !important;
+        padding: 10px 22px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 16px;
+        text-decoration: none;
+        text-align: center;
+        box-shadow: 0 3px 8px rgba(30, 136, 229, 0.25);
+        transition: background 0.2s ease, transform 0.1s ease;
     }
-    #next-pill a[data-testid="stPageLink"]:hover{
-    background:#233464;                /* slightly darker on hover */
-    transform:translateY(-1px);
+
+    /* Hover + click effects */
+    div[data-testid="stPageLink"] a:hover {
+        background: #1565c0;
+    }
+
+    div[data-testid="stPageLink"] a:active {
+        transform: translateY(1px);
+    }
+
+    /* Optional: center the button on page */
+    div[data-testid="stPageLink"] {
+        text-align: center;
+        margin-top: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div id="next-pill">', unsafe_allow_html=True)
+    # --- Real functional Streamlit link ---
     st.page_link(
         "pages/2_Understand_the_Screening.py",
-        label="Next – Understand the Screening",
+        label="Next → Understand the Screening",
         use_container_width=False,
     )
-    st.markdown('</div>', unsafe_allow_html=True)  
-    
 
 
 
 
 
 # ---- CTA  Footer ----
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)

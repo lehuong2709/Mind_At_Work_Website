@@ -110,6 +110,8 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 # ---- Two-column layout for next charts ----
 left_col, right_col = st.columns([2, 1])   # ratio 2:1 → 2/3 vs 1/3 width
 
+# --- AGE DISTRIBUTION (2/3 of width) ---
+#---------------------------------------------------------
 with left_col:
     # Custom title (HTML)
     st.markdown("""
@@ -121,12 +123,14 @@ with left_col:
     try:
         fig = plot_age_distribution(DATA_PATH)
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("""
-        💡 **Insight:**  
-        Most participants are between **26–55 years old**, with a relatively balanced gender distribution across age groups.  
-        Younger (18–25) and older (56–65) segments are smaller but still diverse, indicating that engagement spans multiple life stages.  
-        Hover over bars to explore detailed counts by gender within each age range.
-        """)
+        st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Most participants are 26–55 with a similar gender mix across ages. <br>
+                    Fewer are 18–25 and 56–65, but all ages are represented. <br>
+                    Hover over bars to explore detailed counts by gender within each age range. 
+                </div>
+                """, unsafe_allow_html=True)
     except FileNotFoundError:
         st.error(f"Data file not found at: {DATA_PATH}")
     except ValueError as e:
@@ -144,7 +148,7 @@ with right_col:
         Mental Health Issues
     </h4>
     <h5 style="font-size: 22px; margin-top: 0;">
-        <b>3,804</b> <span style="color:#8FB3E2;">(76.1%)</span>
+        <b>3,804 people</b> <span style="color:#8FB3E2;">(76.1%)</span>
     </h5>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -153,7 +157,7 @@ with right_col:
         Not Satisfied with Work
     </h4>
     <h5 style="font-size: 22px; margin-top: 0;">
-        <b>1,677</b> <span style="color:#8FB3E2;">(33.5%)</span>
+        <b>1,677 people</b> <span style="color:#8FB3E2;">(33.5%)</span>
     </h5>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -162,7 +166,7 @@ with right_col:
         Social Isolation
     </h4>
     <h5 style="font-size: 22px; margin-top: 0;">
-        <b>1,989</b> <span style="color:#8FB3E2;">(39.8%)</span>
+        <b>1,989 people</b> <span style="color:#8FB3E2;">(39.8%)</span>
     </h5>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -179,10 +183,12 @@ with left:
     try:
         fig_stress = plot_stress_distribution(DATA_PATH)
         st.plotly_chart(fig_stress, use_container_width=True)
-        st.caption("""
-        💡 **Insight:**  
-        More than 70% of remote workers report experiencing stress.
-        """)
+        st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    More than 70% of remote workers report experiencing stress. 
+                </div>
+                """, unsafe_allow_html=True)
     except Exception as e:
         st.error(str(e))
 with right:
@@ -195,10 +201,12 @@ with right:
     try:
         fig_sleep = plot_sleep_by_work_location(DATA_PATH)
         st.plotly_chart(fig_sleep, use_container_width=True)
-        st.caption("""
-        💡 **Insight:**  
-        Sleep quality appears fairly balanced across work locations — remote, onsite, and hybrid employees report similar proportions of poor, average, and good sleep.
-        """)
+        st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Sleep quality appears fairly balanced across work locations — remote, onsite, and hybrid employees report similar proportions of poor, average, and good sleep. 
+                </div>
+                """, unsafe_allow_html=True)
     except Exception as e:
         st.error(str(e))
 
@@ -212,12 +220,13 @@ st.markdown("""
         """, unsafe_allow_html=True)
 fig_heat = plot_mh_heatmap(DATA_PATH)
 st.plotly_chart(fig_heat, use_container_width=True, key="mh_heatmap")
-
-st.caption("""
-    💡 **Insight:**  
-    Darker red cells indicate groups with higher prevalence of mental-health conditions.  
-    Employees working longer hours and attending more virtual meetings tend to report more issues.
-    """)
+st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Employees working longer hours and attending more virtual meetings tend to report more issues.</br>
+                    Darker red cells indicate groups with higher prevalence of mental-health conditions.
+                </div>
+                """, unsafe_allow_html=True)
 
 
 
@@ -240,10 +249,13 @@ with left_co:
     try:
         fig_exp_sat = experience_bar_line_satisfaction(df, focus_level=focus_level)
         st.plotly_chart(fig_exp_sat, use_container_width=True, key="exp_sat_chart")
-        st.caption("💡 Satisfaction levels remain relatively consistent across experience groups, ranging around 30–35%."
-        "Employees with over 21 years of experience show the highest satisfaction, while mid-career (6–10 years) participants are slightly less satisfied."
-        )
-        st.caption("Blue bars show the number of participants per experience range, while the dark line shows the percentage of those with the selected satisfaction level.")
+        st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Employees with over 21 years of experience show the highest satisfaction, while mid-career (6–10 years) participants are slightly less satisfied.</br>
+                    Blue bars show the number of participants per experience range, while the dark line shows the percentage of those with the selected satisfaction level.
+                </div>
+                """, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error generating chart: {e}")
 
@@ -271,8 +283,13 @@ with right_co:
 # --- Show chart ---
     fig = boxplot_explorer(df, value_col=value_col, filters=filters)
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("Select different features from the dropdown to explore their relationship with stress levels.")
-    st.caption("Boxes show the interquartile range (IQR), lines extend to 1.5×IQR, and dots are outliers.")
+    st.markdown("""
+        <div style="font-size:16px; color:#111; line-height:1.6;">
+            💡 <b>Insight:</b></br>
+                    Select a feature from the dropdown to see how its values are spread across participants.</br>
+                    The box shows the typical range, lines show variation, and dots mark unusual values. 
+                </div>
+                """, unsafe_allow_html=True)
 
 
 # ---- CTA ----
