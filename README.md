@@ -36,7 +36,7 @@
 ## **👩🏽‍💻 Setup & Execution**
 #### 1. Retrieve our Code by Cloning this Repository or Downloading the Notebooks
 
-  > To Clone the Repo Run `https://github.com/lehuong2709/Mind_At_Work_Website`
+  > To Clone the Repo Run ``
 
 #### 2. Download Datasets Through Kaggle
    
@@ -91,7 +91,7 @@ Feature scaling and correlation checks
 <a id="impact-narrative"></a>  
 ## **🖼️ Impact Narrative**
 
-The top five features of our RF Model for predicting Output 
+The top ten features of our RF Model for predicting Output 
 
 | Top Feature                | Impact |
 |----------------------------|-------------|
