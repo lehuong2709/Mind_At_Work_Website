@@ -195,7 +195,7 @@ with col2:
         <div class="step-title">Analyze</div>
         <div class="step-text">
             Our models use artificial intelligence to detect early signs of mental strain and identify which work conditions
-            may contribute to stress or lower satisfaction. Insights are transparent and evidence-based.
+            may contribute to mental health problems. Insights are transparent and evidence-based.
         </div>
     </div>
     """, unsafe_allow_html=True)
