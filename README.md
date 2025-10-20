@@ -26,7 +26,7 @@
 <a id="project-highlights"></a>
 ## **🎯 Project Highlights**
 * Predict mental health outcomes of employees using structured datasets.
-* Built multiple models (Random Forest, CatBoost, Neural Network).
+* Built multiple models (Random Forest, CatBoost).
 * Integrated Explainable AI (XAI) to show feature importance.
 * Developed an interactive Streamlit dashboard for live predictions and insights.
 
@@ -34,6 +34,7 @@
 
 <a id="setup-execution"></a>  
 ## **👩🏽‍💻 Setup & Execution**
+
 #### 1. Retrieve our Code by Cloning this Repository or Downloading the Notebooks
 
   > To Clone the Repo Run ``
